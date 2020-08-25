@@ -41,13 +41,13 @@
   font-size: 20px;
   font-weight: bold;
   margin-top: 20px;
-  margin-bottom: 5px;
+  margin-bottom: 0px;
 }
 
 .user-page .user-details .details .activity {
   display: flex;
   align-items: center;
-  margin-bottom: 10px;
+  margin-bottom: 0px;
 }
 
 .user-page .user-details .details .activity .status {
@@ -99,11 +99,11 @@
   background-color: #001220;
   margin-top: 50px;
   cursor: pointer;
-  transition: all .25s ease;
+  transition: all 0.25s ease;
 }
 
 .user-page .user-details .send-tip-btn img {
-  height: 25px;
+  height: 35px;
   margin-right: 10px;
 }
 
@@ -114,14 +114,14 @@
 .user-page .tabs-holder {
   display: flex;
   align-items: center;
-  margin-bottom: 30px;
+  margin-bottom: 15px;
 }
 
 .user-page .tabs-holder .tab {
   font-size: 25px;
   margin-right: 20px;
   cursor: pointer;
-  transition: all .25s ease;
+  transition: all 0.25s ease;
 }
 
 .user-page .tabs-holder .tab.active,

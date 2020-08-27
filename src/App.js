@@ -1,20 +1,15 @@
 import React from "react";
-import { withRouter, Switch, Redirect, Route } from "react-router-dom";
-import { useSelector, useDispatch } from "react-redux";
+import { withRouter, Redirect, Route, Switch } from "react-router-dom";
 import "./styles/App.css";
-import bannerbg from "./images/banner-bg.jpg";
-import av1 from "./images/av1.jpg";
-import av2 from "./images/av2.jpg";
-import av3 from "./images/av3.jpg";
-import av4 from "./images/av4.jpg";
-import shockLogo from "./images/shock-logo.png";
 import UserPage from "./pages/User";
 
 function App() {
   return (
     <div className="App">
-      <Route exact path="/user/:userId" component={UserPage} />
-      <Redirect to="/user/demo" />
+      <Switch>
+        <Route path="/user/:userId" component={UserPage} />
+        <Redirect to="/user/eORdYM1KJadT0NQPWHVPutFpOwyI42bfeofpZ1BcBKQ.rP_ELV6YC-JNsKvCsVfafSwFXTL_yRnL8kvUIz2Rdnw" />
+      </Switch>
     </div>
   );
 }

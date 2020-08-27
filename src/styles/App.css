@@ -6,133 +6,6 @@
   overflow: auto;
 }
 
-.user-page {
-  width: 90%;
-  max-width: 1200px;
-}
-
-.user-page .top-banner {
-  height: 300px;
-  width: 100%;
-  background-size: cover;
-  background-position: center;
-}
-
-.user-page .user-details {
-  display: flex;
-  align-items: flex-start;
-  margin-bottom: 80px;
-}
-
-.user-page .user-details .main-av {
-  min-height: 220px;
-  min-width: 220px;
-  border-radius: 220px;
-  margin: -70px 30px 0;
-  background-position: center;
-  background-size: cover;
-}
-
-.user-page .user-details .details {
-  width: calc(100% - 490px);
-}
-
-.user-page .user-details .details .username {
-  font-size: 20px;
-  font-weight: bold;
-  margin-top: 20px;
-  margin-bottom: 0px;
-}
-
-.user-page .user-details .details .activity {
-  display: flex;
-  align-items: center;
-  margin-bottom: 0px;
-}
-
-.user-page .user-details .details .activity .status {
-  font-size: 20px;
-  color: #01a33d;
-  margin-right: 15px;
-}
-
-.user-page .user-details .details .activity .date {
-  font-size: 14px;
-}
-
-.user-page .user-details .details .desc p.title {
-  font-size: 18px;
-  font-weight: bold;
-}
-
-.user-page .user-details .details .followers {
-  display: flex;
-  align-items: center;
-  font-size: 14px;
-  margin-top: 20px;
-}
-
-.user-page .user-details .details .followers .av-heads {
-  display: flex;
-  margin-right: 10px;
-}
-
-.user-page .user-details .details .followers .av-heads .av {
-  height: 40px;
-  width: 40px;
-  border-radius: 40px;
-  background-size: cover;
-  background-position: center;
-  margin-left: -15px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
-  border: 1px solid #000;
-}
-
-.user-page .user-details .send-tip-btn {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 12px 35px;
-  font-size: 18px;
-  border-radius: 5px;
-  border: 1px solid #f2a900;
-  background-color: #001220;
-  margin-top: 50px;
-  cursor: pointer;
-  transition: all 0.25s ease;
-}
-
-.user-page .user-details .send-tip-btn img {
-  height: 35px;
-  margin-right: 10px;
-}
-
-.user-page .user-details .send-tip-btn:hover {
-  background-color: #00182b;
-}
-
-.user-page .tabs-holder {
-  display: flex;
-  align-items: center;
-  margin-bottom: 15px;
-}
-
-.user-page .tabs-holder .tab {
-  font-size: 25px;
-  margin-right: 20px;
-  cursor: pointer;
-  transition: all 0.25s ease;
-}
-
-.user-page .tabs-holder .tab.active,
-.user-page .tabs-holder .tab:hover {
-  color: #4080b2;
-}
-
-.user-page .posts-holder {
-  margin-bottom: 80px;
-}
-
 .user-page .posts-holder .post {
   width: 100%;
   padding: 30px;
@@ -186,4 +59,8 @@
   justify-content: flex-end;
   align-items: center;
   padding: 15px 0;
+}
+
+.torrent-video {
+  width: 100%;
 }

@@ -1,14 +1,73 @@
-import React from "react";
-import { withRouter, Switch, Redirect, Route } from "react-router-dom";
+import React, { useEffect, useState, useCallback } from "react";
 import { useSelector, useDispatch } from "react-redux";
+import WebTorrent from "webtorrent";
+import { useParams } from "react-router-dom";
+import {
+  getUserWall,
+  getWallTotalPages,
+  resetUserWall,
+  getUserProfile
+} from "../../actions/UserActions";
+import Post from "../../components/Post";
+
+// Assets
 import bannerbg from "../../images/banner-bg.jpg";
 import av1 from "../../images/av1.jpg";
 import av2 from "../../images/av2.jpg";
 import av3 from "../../images/av3.jpg";
-import av4 from "../../images/av4.jpg";
 import shockLogo from "../../images/lightning-logo.svg";
+import "./css/index.css";
+
+const webTorrentClient = new WebTorrent();
 
 const UserPage = () => {
+  const dispatch = useDispatch();
+  const params = useParams();
+  const wall = useSelector(({ user }) => user.wall);
+  const profile = useSelector(({ user }) => user.profile);
+  const [loading, setLoading] = useState(true);
+
+  const publicKey = params.userId;
+
+  const fetchUserData = useCallback(async () => {
+    dispatch(resetUserWall());
+    const user = await dispatch(getUserProfile(publicKey));
+    console.log(user);
+  }, [dispatch, publicKey]);
+
+  const fetchUserWall = async (tries = 0) => {
+    if (tries > 3) {
+      return;
+    }
+    try {
+      dispatch(resetUserWall());
+      const totalPages = await dispatch(getWallTotalPages(publicKey));
+      console.log("Total Pages:", totalPages);
+      if (totalPages > 0) {
+        const posts = await dispatch(getUserWall(publicKey));
+        console.log("Posts:", JSON.stringify(posts));
+        if (!posts || JSON.stringify(posts).length <= 1) {
+          return setTimeout(() => fetchUserWall(tries + 1), 500);
+        }
+      }
+
+      if (totalPages === 0) {
+        return setTimeout(() => fetchUserWall(tries + 1), 500);
+      }
+      setLoading(false);
+    } catch (err) {
+      console.error(err);
+      setTimeout(() => fetchUserWall(tries + 1), 500);
+    }
+  };
+
+  useEffect(() => {
+    fetchUserData();
+    fetchUserWall();
+  }, [fetchUserData]);
+
+  const username = profile.displayName ?? profile.alias;
+
   return (
     <div className="App">
       <div className="user-page">
@@ -19,26 +78,24 @@ const UserPage = () => {
         <div className="user-details">
           <div
             className="main-av"
-            style={{ backgroundImage: `url(${av1})` }}
+            style={{ backgroundImage: `url(${profile.avatar ?? av1})` }}
           ></div>
 
           <div className="details">
-            <p className="username">USERNAME HERE</p>
+            <p className="username">{username}</p>
 
             <div className="activity">
               <p className="status">Active Recently</p>
-              <p className="date">11:00AM - 11:00PM</p>
             </div>
 
-            <div className="desc">
-              <p className="title">Title here</p>
-              <p>
-                Lorem, ipsum dolor sit amet consectetur adipisicing elit. Facere
-                reprehenderit.
-              </p>
-            </div>
+            {profile.bio ? (
+              <div className="desc">
+                <p className="title">Bio</p>
+                <p>{profile.bio}</p>
+              </div>
+            ) : null}
 
-            <div className="followers">
+            {/* <div className="followers">
               <div className="av-heads">
                 <div
                   className="av"
@@ -50,7 +107,7 @@ const UserPage = () => {
                 ></div>
               </div>
               <p>Followed by username, username, and 4 others you know</p>
-            </div>
+            </div> */}
           </div>
 
           <div className="send-tip-btn">
@@ -64,40 +121,17 @@ const UserPage = () => {
           <p className="tab">Services</p>
         </div>
         <div className="posts-holder">
-          <div className="post">
-            <div className="head">
-              <div className="user">
-                <div
-                  className="av"
-                  style={{ backgroundImage: `url(${av1})` }}
-                ></div>
-                <div className="details">
-                  <p>Username Here</p>
-                  <p>3 hours ago</p>
-                </div>
-              </div>
-            </div>
-
-            <div className="content">
-              <p>
-                Lorem ipsum dolor sit amet, consectetur adipisicing elit.
-                Possimus cumque quo vel itaque consequuntur necessitatibus
-                temporibus maxime officia quasi? Sequi sit maiores rem quaerat
-                doloribus accusamus eum in consequatur amet? Lorem ipsum dolor
-                sit amet consectetur adipisicing elit. Vero qui dolores ullam
-                autem alias inventore nobis, consequatur vel, dignissimos nulla
-                enim quidem beatae porro harum culpa libero. Veniam, labore
-                officia.
-              </p>
-
-              <img src={av4} alt="" />
-            </div>
-
-            <div className="actions">
-              <img src="" alt="" />
-              <i class="fas fa-external-link-alt"></i>
-            </div>
-          </div>
+          {wall.posts.map(post => {
+            return (
+              <Post
+                timestamp={post.date}
+                contentItems={post.contentItems}
+                username={username}
+                webTorrentClient={webTorrentClient}
+                key={post.id}
+              />
+            );
+          })}
         </div>
       </div>
     </div>

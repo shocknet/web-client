@@ -8,7 +8,7 @@ function App() {
     <div className="App">
       <Switch>
         <Route path="/user/:userId" component={UserPage} />
-        <Redirect to="/user/eORdYM1KJadT0NQPWHVPutFpOwyI42bfeofpZ1BcBKQ.rP_ELV6YC-JNsKvCsVfafSwFXTL_yRnL8kvUIz2Rdnw" />
+        <Redirect to="/user/qsgziGQS99sPUxV1CRwwRckn9cG6cJ3prbDsrbL7qko.oRbCaVKwJFQURWrS1pFhkfAzrkEvkQgBRIUz9uoWtrg" />
       </Switch>
     </div>
   );

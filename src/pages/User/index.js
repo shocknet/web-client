@@ -221,7 +221,7 @@ const UserPage = () => {
               <div className="tip-modal-content">
                 <p className="tip-modal-instructions">
                   We've successfully generated an invoice for you to tip, please
-                  scan the QR Code below using the ShockWallet app to pay it!
+                  scan the QR Code below using a Lightning wallet to pay it!
                 </p>
                 <QRCode
                   className="tip-modal-qr-code"
@@ -235,8 +235,7 @@ const UserPage = () => {
               <div className="tip-modal-content">
                 <p className="tip-modal-instructions">
                   Please specify the amount of sats you'd like to tip this user
-                  with below and we'll generate an invoice for you to scan using
-                  the ShockWallet app!
+                  with below and we'll generate an invoice for you to scan.
                 </p>
                 <input
                   className="tip-modal-input"

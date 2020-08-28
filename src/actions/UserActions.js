@@ -79,10 +79,10 @@ export const getWallTotalPages = publicKey => async dispatch => {
 
   dispatch({
     type: ACTIONS.LOAD_USER_WALL_TOTAL_PAGES,
-    data: totalPages - 1
+    data: totalPages
   });
 
-  return totalPages - 1;
+  return totalPages;
 };
 
 export const getUserWall = (publicKey, page = 0) => async dispatch => {
@@ -93,6 +93,8 @@ export const getUserWall = (publicKey, page = 0) => async dispatch => {
       path: gunPostsKey,
       gunPointer
     });
+    console.log("Posts:", rawPosts);
+    console.log("Page:", page);
     const filteredRawPosts = Object.entries(rawPosts ?? {}).filter(
       _filterGunProps
     );

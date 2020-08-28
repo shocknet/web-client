@@ -49,7 +49,7 @@ const UserPage = () => {
       console.log(user);
       setUserLoading(false);
       // Load user avatar in the background
-      await getUserAvatar(publicKey);
+      await dispatch(getUserAvatar(publicKey));
     } catch (err) {
       console.error(err);
       setUserLoading(false);
@@ -114,7 +114,11 @@ const UserPage = () => {
       <div className="user-details">
         <div
           className="main-av"
-          style={{ backgroundImage: `url(${profile.avatar ?? av1})` }}
+          style={{
+            backgroundImage: `url(${
+              `data:image/png;base64,${profile.avatar}` ?? av1
+            })`
+          }}
         ></div>
 
         <div className="details">

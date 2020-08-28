@@ -3,7 +3,9 @@ import { ACTIONS } from "../actions/UserActions";
 const INITIAL_STATE = {
   wall: {
     posts: [],
-    page: -1, // Helpful for determining whether or not the wall was loaded at all
+    // Specifying -1 is helpful for determining whether or not
+    // the wall was loaded at all
+    page: -1,
     totalPages: 0
   },
   profile: {}
@@ -38,6 +40,16 @@ const user = (state = INITIAL_STATE, action) => {
       return {
         ...state,
         profile: data
+      };
+    }
+    case ACTIONS.LOAD_USER_AVATAR: {
+      const { data } = action;
+      return {
+        ...state,
+        profile: {
+          ...state.profile,
+          avatar: data
+        }
       };
     }
     case ACTIONS.RESET_USER_WALL: {

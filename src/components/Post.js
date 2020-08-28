@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect } from "react";
 import moment from "moment";
 import av1 from "../images/av1.jpg";
 

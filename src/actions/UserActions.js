@@ -5,19 +5,30 @@ export const ACTIONS = {
   LOAD_USER_WALL_TOTAL_PAGES: "wall/loadTotalPages",
   RESET_USER_WALL: "wall/reset",
   RESET_USER_DATA: "user/reset",
-  LOAD_USER_DATA: "user/load"
+  LOAD_USER_DATA: "user/load",
+  LOAD_USER_AVATAR: "avatar/load"
 };
 
 const _filterGunProps = ([key, item]) => item && key !== "_" && key !== "#";
 
+export const getUserAvatar = publicKey => async dispatch => {
+  const gunUser = Gun.user(publicKey);
+  const avatar = await fetchPath({
+    path: "Profile/avatar",
+    gunPointer: gunUser
+  });
+
+  dispatch({
+    type: ACTIONS.LOAD_USER_AVATAR,
+    data: avatar
+  });
+
+  return avatar;
+};
+
 export const getUserProfile = publicKey => async dispatch => {
   const gunUser = Gun.user(publicKey);
-  const [avatar, bio, displayName, alias, lastSeen] = await Promise.all([
-    fetchPath({
-      path: "Profile/avatar",
-      gunPointer: gunUser,
-      retryLimit: 2
-    }),
+  const [bio, displayName, alias, lastSeen] = await Promise.all([
     fetchPath({
       path: "bio",
       gunPointer: gunUser
@@ -37,7 +48,6 @@ export const getUserProfile = publicKey => async dispatch => {
   ]);
 
   const user = {
-    avatar,
     bio,
     displayName,
     alias,

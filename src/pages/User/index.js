@@ -6,6 +6,7 @@ import {
   getUserWall,
   getWallTotalPages,
   resetUserWall,
+  resetUserData,
   getUserProfile
 } from "../../actions/UserActions";
 import Post from "../../components/Post";
@@ -17,6 +18,7 @@ import av2 from "../../images/av2.jpg";
 import av3 from "../../images/av3.jpg";
 import shockLogo from "../../images/lightning-logo.svg";
 import "./css/index.css";
+import InfiniteScroll from "react-infinite-scroller";
 
 const webTorrentClient = new WebTorrent();
 
@@ -25,45 +27,58 @@ const UserPage = () => {
   const params = useParams();
   const wall = useSelector(({ user }) => user.wall);
   const profile = useSelector(({ user }) => user.profile);
-  const [loading, setLoading] = useState(true);
+  const [userLoading, setUserLoading] = useState(true);
+  const [wallLoading, setWallLoading] = useState(true);
 
   const publicKey = params.userId;
 
   const fetchUserData = useCallback(async () => {
-    dispatch(resetUserWall());
-    const user = await dispatch(getUserProfile(publicKey));
-    console.log(user);
-  }, [dispatch, publicKey]);
-
-  const fetchUserWall = async (tries = 0) => {
-    if (tries > 3) {
-      return;
-    }
     try {
-      dispatch(resetUserWall());
-      const totalPages = await dispatch(getWallTotalPages(publicKey));
-      console.log("Total Pages:", totalPages);
-      if (totalPages > 0) {
-        const posts = await dispatch(getUserWall(publicKey));
-        console.log("Posts:", JSON.stringify(posts));
-        if (!posts || JSON.stringify(posts).length <= 1) {
-          return setTimeout(() => fetchUserWall(tries + 1), 500);
-        }
-      }
-
-      if (totalPages === 0) {
-        return setTimeout(() => fetchUserWall(tries + 1), 500);
-      }
-      setLoading(false);
+      setUserLoading(true);
+      dispatch(resetUserData());
+      const user = await dispatch(getUserProfile(publicKey));
+      console.log(user);
+      setUserLoading(false);
     } catch (err) {
       console.error(err);
-      setTimeout(() => fetchUserWall(tries + 1), 500);
+      setUserLoading(false);
+    }
+  }, [dispatch, publicKey]);
+
+  const fetchUserWallPages = async () => {
+    try {
+      console.log("Setting Loading status to:", true);
+      setWallLoading(true);
+      dispatch(resetUserWall());
+      const totalPages = await dispatch(getWallTotalPages(publicKey));
+      if (totalPages > 0) {
+        await dispatch(getUserWall(publicKey));
+      }
+      console.log("Setting Loading status to:", false);
+      setWallLoading(false);
+    } catch (err) {
+      console.error(err);
+      console.log("Setting Loading status to:", false);
+      setWallLoading(false);
+    }
+  };
+
+  const loadMorePosts = async page => {
+    try {
+      console.log("Setting Loading status to (loadMorePosts):", true);
+      setWallLoading(true);
+      await dispatch(getUserWall(publicKey, page));
+      console.log("Setting Loading status to (loadMorePosts):", false);
+      setWallLoading(false);
+    } catch (error) {
+      console.log("Setting Loading status to (loadMorePosts):", false);
+      setWallLoading(false);
     }
   };
 
   useEffect(() => {
     fetchUserData();
-    fetchUserWall();
+    fetchUserWallPages();
   }, [fetchUserData]);
 
   const username = profile.displayName ?? profile.alias;
@@ -120,19 +135,41 @@ const UserPage = () => {
           <p className="tab active">Feed</p>
           <p className="tab">Services</p>
         </div>
-        <div className="posts-holder">
-          {wall.posts.map(post => {
-            return (
-              <Post
-                timestamp={post.date}
-                contentItems={post.contentItems}
-                username={username}
-                webTorrentClient={webTorrentClient}
-                key={post.id}
-              />
-            );
-          })}
-        </div>
+        <InfiniteScroll
+          initialLoad={false}
+          pageStart={0}
+          hasMore={wall.page < wall.totalPages && !wallLoading}
+          loadMore={loadMorePosts}
+          useWindow={true}
+        >
+          <div className="posts-holder">
+            {wall.posts.map(post => {
+              return (
+                <Post
+                  timestamp={post.date}
+                  contentItems={post.contentItems}
+                  username={username}
+                  webTorrentClient={webTorrentClient}
+                  key={post.id}
+                />
+              );
+            })}
+          </div>
+        </InfiniteScroll>
+        {wallLoading ? (
+          <div className="loading-wall">
+            <div className="loading-wall-icon">
+              <span class="loading-circle loading-circle-1"></span>
+              <span class="loading-circle loading-circle-2"></span>
+              <span class="loading-circle loading-circle-3"></span>
+              <span class="loading-circle loading-circle-4"></span>
+              <span class="loading-circle loading-circle-5"></span>
+            </div>
+            <div className="loading-wall-text">
+              Loading {wall.page >= 0 ? "More" : "Wall"} Posts...
+            </div>
+          </div>
+        ) : null}
       </div>
     </div>
   );

@@ -3,7 +3,7 @@ import { ACTIONS } from "../actions/UserActions";
 const INITIAL_STATE = {
   wall: {
     posts: [],
-    page: 0,
+    page: -1, // Helpful for determining whether or not the wall was loaded at all
     totalPages: 0
   },
   profile: {}
@@ -17,12 +17,14 @@ const user = (state = INITIAL_STATE, action) => {
         ...state,
         wall: {
           ...state.wall,
-          posts: [...state.wall.posts, ...data]
+          posts: [...state.wall.posts, ...data.posts],
+          page: data.page
         }
       };
     }
     case ACTIONS.LOAD_USER_WALL_TOTAL_PAGES: {
       const { data } = action;
+      console.log("Total pages:", data);
       return {
         ...state,
         wall: {

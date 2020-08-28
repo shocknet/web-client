@@ -69,109 +69,110 @@ export const getWallTotalPages = publicKey => async dispatch => {
 
   dispatch({
     type: ACTIONS.LOAD_USER_WALL_TOTAL_PAGES,
-    data: totalPages
+    data: totalPages - 1
   });
 
-  return totalPages;
+  return totalPages - 1;
 };
 
-export const getUserWall = (publicKey, page = 1) => dispatch =>
-  new Promise(async (resolve, reject) => {
-    try {
-      const gunPointer = Gun.user(publicKey);
-      const gunPostsKey = `wall/pages/${page - 1}/posts`;
-      const rawPosts = await fetchPath({
-        path: gunPostsKey,
-        gunPointer
-      });
-      const filteredRawPosts = Object.entries(rawPosts ?? {}).filter(
-        _filterGunProps
-      );
-      const fetchedPosts = await Promise.all(
-        filteredRawPosts.map(async ([id], key) => {
-          const wallPost = await fetchPath({
-            path: `${gunPostsKey}/${id}`,
-            gunPointer
-          });
-          const contentItemsKey = `${gunPostsKey}/${id}/contentItems`;
-          const contentItems = await fetchPath({
-            path: contentItemsKey,
-            gunPointer
-          });
-          const filteredContentItems = Object.entries(contentItems).filter(
-            _filterGunProps
-          );
-          const fetchedContentItems = await Promise.all(
-            filteredContentItems.map(async ([id]) => {
-              const type = await fetchPath({
-                path: `${contentItemsKey}/${id}/type`,
+export const getUserWall = (publicKey, page = 0) => async dispatch => {
+  try {
+    const gunPointer = Gun.user(publicKey);
+    const gunPostsKey = `wall/pages/${page}/posts`;
+    const rawPosts = await fetchPath({
+      path: gunPostsKey,
+      gunPointer
+    });
+    const filteredRawPosts = Object.entries(rawPosts ?? {}).filter(
+      _filterGunProps
+    );
+    const fetchedPosts = await Promise.all(
+      filteredRawPosts.map(async ([id], key) => {
+        const wallPost = await fetchPath({
+          path: `${gunPostsKey}/${id}`,
+          gunPointer
+        });
+        const contentItemsKey = `${gunPostsKey}/${id}/contentItems`;
+        const contentItems = await fetchPath({
+          path: contentItemsKey,
+          gunPointer
+        });
+        const filteredContentItems = Object.entries(contentItems).filter(
+          _filterGunProps
+        );
+        const fetchedContentItems = await Promise.all(
+          filteredContentItems.map(async ([id]) => {
+            const type = await fetchPath({
+              path: `${contentItemsKey}/${id}/type`,
+              gunPointer
+            });
+
+            if (type === "text/paragraph") {
+              const text = await fetchPath({
+                path: `${contentItemsKey}/${id}/text`,
                 gunPointer
               });
-
-              if (type === "text/paragraph") {
-                const text = await fetchPath({
-                  path: `${contentItemsKey}/${id}/text`,
-                  gunPointer
-                });
-                return {
-                  text,
-                  type
-                };
-              }
-
-              if (type === "image/embedded") {
-                const [magnetURI, width, height] = await Promise.all([
-                  fetchPath({
-                    path: `${contentItemsKey}/${id}/magnetURI`,
-                    gunPointer
-                  }),
-                  fetchPath({
-                    path: `${contentItemsKey}/${id}/width`,
-                    gunPointer
-                  }),
-                  fetchPath({
-                    path: `${contentItemsKey}/${id}/height`,
-                    gunPointer
-                  })
-                ]);
-                return {
-                  magnetURI,
-                  width,
-                  height,
-                  type
-                };
-              }
-
               return {
-                text: "Unsupported media type",
+                text,
                 type
               };
-            })
-          );
-          const date = await fetchPath({
-            path: `${gunPostsKey}/${id}/date`,
-            gunPointer
-          });
+            }
 
-          return {
-            ...(wallPost ?? {}),
-            id,
-            date,
-            contentItems: fetchedContentItems ?? []
-          };
-        })
-      );
+            if (type === "image/embedded") {
+              const [magnetURI, width, height] = await Promise.all([
+                fetchPath({
+                  path: `${contentItemsKey}/${id}/magnetURI`,
+                  gunPointer
+                }),
+                fetchPath({
+                  path: `${contentItemsKey}/${id}/width`,
+                  gunPointer
+                }),
+                fetchPath({
+                  path: `${contentItemsKey}/${id}/height`,
+                  gunPointer
+                })
+              ]);
+              return {
+                magnetURI,
+                width,
+                height,
+                type
+              };
+            }
 
-      dispatch({
-        type: ACTIONS.LOAD_USER_WALL,
-        data: fetchedPosts
-      });
+            return {
+              text: "Unsupported media type",
+              type
+            };
+          })
+        );
+        const date = await fetchPath({
+          path: `${gunPostsKey}/${id}/date`,
+          gunPointer
+        });
 
-      return fetchedPosts;
-    } catch (err) {
-      console.error(err);
-    }
-  });
+        return {
+          ...(wallPost ?? {}),
+          id,
+          date,
+          contentItems: fetchedContentItems ?? []
+        };
+      })
+    );
+
+    console.log(`User wall page #${page}`, fetchedPosts);
+
+    dispatch({
+      type: ACTIONS.LOAD_USER_WALL,
+      data: { posts: fetchedPosts, page: page }
+    });
+
+    return fetchedPosts;
+  } catch (err) {
+    console.error(err);
+  }
+};
 
 export const resetUserWall = () => dispatch => {
   dispatch({

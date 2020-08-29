@@ -200,3 +200,7 @@ export const authUser = (alias, pass) =>
 
 // Magic number provided from GunDB docs
 export const DEFAULT_ONCE_WAIT_MS = 99;
+
+export const $$_SHOCKWALLET__ENCRYPTED__ = "$$_SHOCKWALLET__ENCRYPTED__";
+
+export const $$__SHOCKWALLET__MSG__ = "$$__SHOCKWALLET__MSG__";

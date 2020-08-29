@@ -1,5 +1,12 @@
 import SEA from "gun/sea";
-import { Gun, fetchPath, setPath, authUser } from "../utils/Gun";
+import {
+  Gun,
+  fetchPath,
+  setPath,
+  authUser,
+  $$__SHOCKWALLET__MSG__,
+  $$_SHOCKWALLET__ENCRYPTED__
+} from "../utils/Gun";
 
 export const ACTIONS = {
   LOAD_PAYMENT_REQUEST: "paymentRequest/load"
@@ -27,10 +34,15 @@ export const payUser = (
 
   console.log("Order Address:", orderAddress);
 
+  const [encryptedAmount, encryptedMemo] = await Promise.all([
+    SEA.encrypt($$__SHOCKWALLET__MSG__ + amount.toString(), secret),
+    SEA.encrypt($$__SHOCKWALLET__MSG__ + "Tipped user!", secret)
+  ]);
+
   const order = {
-    amount: await SEA.encrypt(amount.toString(), secret),
+    amount: $$_SHOCKWALLET__ENCRYPTED__ + encryptedAmount,
     from: me.sea.pub,
-    memo: await SEA.encrypt("Tipped user!", secret),
+    memo: $$_SHOCKWALLET__ENCRYPTED__ + encryptedMemo,
     timestamp: Date.now()
   };
 
@@ -52,8 +64,13 @@ export const payUser = (
     method: "on"
   });
 
+  console.log("Encrypted Order:", encryptedOrder.response?.toString());
+
   const decryptedOrder = {
-    response: await SEA.decrypt(encryptedOrder.response, secret),
+    response: await SEA.decrypt(
+      encryptedOrder.response.replace($$_SHOCKWALLET__ENCRYPTED__, ""),
+      secret
+    ),
     type: encryptedOrder.type
   };
 
@@ -63,14 +80,14 @@ export const payUser = (
     throw {
       field: "order",
       message: "An error has occurred while retrieving the order",
-      data: decryptedOrder.response
+      data: decryptedOrder.response.replace($$_SHOCKWALLET__ENCRYPTED__, "")
     };
   }
 
   dispatch({
     type: ACTIONS.LOAD_PAYMENT_REQUEST,
-    data: decryptedOrder.response
+    data: decryptedOrder.response.replace($$_SHOCKWALLET__ENCRYPTED__, "")
   });
 
-  return decryptedOrder.response;
+  return decryptedOrder.response.replace($$_SHOCKWALLET__ENCRYPTED__, "");
 };

@@ -175,9 +175,11 @@ export const getUserWall = (publicKey, page = 0) => async dispatch => {
 
     console.log(`User wall page #${page}`, fetchedPosts);
 
+    const sortedPosts = fetchedPosts?.sort((a, b) => b.date - a.date);
+
     dispatch({
       type: ACTIONS.LOAD_USER_WALL,
-      data: { posts: fetchedPosts, page: page }
+      data: { posts: sortedPosts, page: page }
     });
 
     return fetchedPosts;

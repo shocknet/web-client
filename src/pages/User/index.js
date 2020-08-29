@@ -124,7 +124,7 @@ const UserPage = () => {
           className="main-av"
           style={{
             backgroundImage: `url(${
-              `data:image/png;base64,${profile.avatar}` ?? av1
+              profile.avatar ? `data:image/png;base64,${profile.avatar}` : av1
             })`
           }}
         ></div>
@@ -182,6 +182,7 @@ const UserPage = () => {
                 timestamp={post.date}
                 contentItems={post.contentItems}
                 username={username}
+                avatar={profile.avatar ?? av1}
                 webTorrentClient={webTorrentClient}
                 key={post.id}
               />

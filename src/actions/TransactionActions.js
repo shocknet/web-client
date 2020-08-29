@@ -9,7 +9,8 @@ import {
 } from "../utils/Gun";
 
 export const ACTIONS = {
-  LOAD_PAYMENT_REQUEST: "paymentRequest/load"
+  LOAD_PAYMENT_REQUEST: "paymentRequest/load",
+  RESET_PAYMENT_REQUEST: "paymentRequest/reset"
 };
 
 export const payUser = (
@@ -90,4 +91,10 @@ export const payUser = (
   });
 
   return decryptedOrder.response.replace($$_SHOCKWALLET__ENCRYPTED__, "");
+};
+
+export const resetPaymentRequest = () => dispatch => {
+  dispatch({
+    type: ACTIONS.RESET_PAYMENT_REQUEST
+  });
 };

@@ -20,7 +20,7 @@ import av1 from "../../images/av1.jpg";
 import shockLogo from "../../images/lightning-logo.svg";
 import "./css/index.css";
 import { generateGunPair } from "../../actions/AuthActions";
-import { payUser } from "../../actions/TransactionActions";
+import { payUser, resetPaymentRequest } from "../../actions/TransactionActions";
 
 const webTorrentClient = new WebTorrent();
 
@@ -94,6 +94,14 @@ const UserPage = () => {
       setTipLoading(false);
     } catch (err) {
       console.error(err);
+    }
+  };
+
+  const closeTipModal = () => {
+    setTipModalOpen(false);
+    if (paymentRequest) {
+      dispatch(resetPaymentRequest());
+      setTipLoading(false);
     }
   };
 
@@ -197,10 +205,7 @@ const UserPage = () => {
       ) : null}
       {tipModalOpen ? (
         <div className="tip-modal-container">
-          <div
-            className="tip-modal-overlay"
-            onClick={() => setTipModalOpen(false)}
-          ></div>
+          <div className="tip-modal-overlay" onClick={closeTipModal}></div>
           <div className="tip-modal">
             {tipLoading ? (
               <div className="tip-modal-loading">

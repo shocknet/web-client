@@ -13,6 +13,12 @@ const transaction = (state = INITIAL_STATE, action) => {
         paymentRequest: data
       };
     }
+    case ACTIONS.RESET_PAYMENT_REQUEST: {
+      return {
+        ...state,
+        paymentRequest: null
+      };
+    }
     default:
       return state;
   }

@@ -130,7 +130,7 @@ export const getUserWall = (publicKey, page = 0) => async dispatch => {
               };
             }
 
-            if (type === "image/embedded") {
+            if (type === "video/embedded") {
               const [magnetURI, width, height] = await Promise.all([
                 fetchPath({
                   path: `${contentItemsKey}/${id}/magnetURI`,

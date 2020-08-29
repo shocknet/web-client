@@ -17,7 +17,7 @@ const Post = ({
           const file = torrent.files.find(file => file.name.endsWith(".mp4"));
           //file.appendTo('body') // append the file to the DOM
 
-          file.renderTo(`video#${key}-torrent-video`, {
+          file.renderTo(`video#torrent-video-${key}`, {
             autoplay: true,
             muted: true
           });
@@ -44,7 +44,7 @@ const Post = ({
     if (item.type === "video/embedded") {
       return (
         <video
-          id={`${key}-torrent-video`}
+          id={`torrent-video-${key}`}
           key={key}
           className="torrent-video"
           autoPlay={true}

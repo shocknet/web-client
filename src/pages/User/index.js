@@ -163,7 +163,7 @@ const UserPage = () => {
       <InfiniteScroll
         initialLoad={false}
         pageStart={0}
-        hasMore={wall.page < wall.totalPages && !wallLoading}
+        hasMore={wall.page < wall.totalPages - 1 && !wallLoading}
         loadMore={loadMorePosts}
         useWindow={true}
       >

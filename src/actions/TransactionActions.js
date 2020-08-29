@@ -75,11 +75,13 @@ export const payUser = (
     encryptedOrder.response?.toString()
   );
 
+  const decryptedResponse = await SEA.decrypt(
+    encryptedOrder.response.replace($$_SHOCKWALLET__ENCRYPTED__, ""),
+    secret
+  );
+
   const decryptedOrder = {
-    response: await SEA.decrypt(
-      encryptedOrder.response.replace($$_SHOCKWALLET__ENCRYPTED__, ""),
-      secret
-    ),
+    response: decryptedResponse?.replace?.($$__SHOCKWALLET__MSG__, ""),
     type: encryptedOrder.type
   };
 

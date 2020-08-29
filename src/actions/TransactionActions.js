@@ -59,13 +59,21 @@ export const payUser = (
 
   console.log("New Order ID:", newOrderId, `orderToResponse/${newOrderId}`);
 
-  const encryptedOrder = await fetchPath({
+  await fetchPath({
     path: `orderToResponse/${newOrderId}`,
     gunPointer: Gun.user(recipientPublicKey),
     method: "on"
   });
+  const encryptedOrder = await fetchPath({
+    path: `orderToResponse/${newOrderId}`,
+    gunPointer: Gun.user(recipientPublicKey)
+  });
 
-  console.log("Encrypted Order:", encryptedOrder.response?.toString());
+  console.log(
+    "Encrypted Order:",
+    encryptedOrder.response,
+    encryptedOrder.response?.toString()
+  );
 
   const decryptedOrder = {
     response: await SEA.decrypt(

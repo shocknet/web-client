@@ -182,7 +182,11 @@ const UserPage = () => {
                 timestamp={post.date}
                 contentItems={post.contentItems}
                 username={username}
-                avatar={profile.avatar ?? av1}
+                avatar={
+                  profile.avatar
+                    ? `data:image/png;base64,${profile.avatar}`
+                    : av1
+                }
                 webTorrentClient={webTorrentClient}
                 key={post.id}
               />

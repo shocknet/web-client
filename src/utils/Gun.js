@@ -1,7 +1,6 @@
 import GunDB from "gun/gun";
 import "gun/sea";
 import "gun/lib/load";
-import user from "../reducers/UserReducer";
 
 const safeParse = data => {
   try {

@@ -67,9 +67,7 @@ const Post = ({
           <div
             className="av"
             style={{
-              backgroundImage: `url(${
-                avatar ? `data:image/png;base64,${avatar}` : av1
-              })`
+              backgroundImage: `url(${avatar})`
             }}
           ></div>
           <div className="details">

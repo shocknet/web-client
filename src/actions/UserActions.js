@@ -154,9 +154,9 @@ export const getUserWall = (publicKey, page = 0) => async dispatch => {
             }
 
             if (type === "image/embedded") {
-              const [data, width, height] = await Promise.all([
+              const [magnetURI, width, height] = await Promise.all([
                 fetchPath({
-                  path: `${contentItemsKey}/${id}/data`,
+                  path: `${contentItemsKey}/${id}/magnetURI`,
                   gunPointer
                 }),
                 fetchPath({
@@ -169,7 +169,7 @@ export const getUserWall = (publicKey, page = 0) => async dispatch => {
                 })
               ]);
               return {
-                data,
+                magnetURI,
                 width,
                 height,
                 type

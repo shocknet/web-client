@@ -9,7 +9,7 @@ const Post = ({
   username,
   webTorrentClient
 }) => {
-  const attachVideo = () => {
+  const attachMedia = () => {
     Object.entries(contentItems)
       .filter(([key, item]) => item.type === "video/embedded")
       .map(([key, video]) => {
@@ -21,6 +21,18 @@ const Post = ({
             autoplay: true,
             muted: true
           });
+        });
+      });
+
+    Object.entries(contentItems)
+      .filter(([key, item]) => item.type === "image/embedded")
+      .map(([key, image]) => {
+        webTorrentClient.add(image.magnetURI, torrent => {
+          const file = torrent.files.find(
+            file => file.name.endsWith(".jpg") || file.name.endsWith(".png")
+          );
+
+          file.renderTo(`img#torrent-image-${key}`);
         });
       });
   };
@@ -40,9 +52,14 @@ const Post = ({
     if (item.type === "image/embedded") {
       return (
         <img
+          id={`torrent-image-${key}`}
           key={key}
-          src={`data:image/png;base64,${item.data}`}
-          style={{ width: item.width, height: item.height }}
+          style={{
+            width: "100%",
+            maxWidth: 800,
+            maxHeight: 800,
+            objectFit: "contain"
+          }}
         />
       );
     }
@@ -63,7 +80,7 @@ const Post = ({
   };
 
   useEffect(() => {
-    attachVideo();
+    attachMedia();
   }, [contentItems.length]);
 
   return (

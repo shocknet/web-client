@@ -153,6 +153,29 @@ export const getUserWall = (publicKey, page = 0) => async dispatch => {
               };
             }
 
+            if (type === "image/embedded") {
+              const [data, width, height] = await Promise.all([
+                fetchPath({
+                  path: `${contentItemsKey}/${id}/data`,
+                  gunPointer
+                }),
+                fetchPath({
+                  path: `${contentItemsKey}/${id}/width`,
+                  gunPointer
+                }),
+                fetchPath({
+                  path: `${contentItemsKey}/${id}/height`,
+                  gunPointer
+                })
+              ]);
+              return {
+                data,
+                width,
+                height,
+                type
+              };
+            }
+
             return {
               text: "Unsupported media type",
               type

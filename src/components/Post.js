@@ -38,7 +38,13 @@ const Post = ({
     }
 
     if (item.type === "image/embedded") {
-      return <img key={key} src={item.text} />;
+      return (
+        <img
+          key={key}
+          src={`data:image/png;base64,${item.data}`}
+          style={{ width: item.width, height: item.height }}
+        />
+      );
     }
 
     if (item.type === "video/embedded") {

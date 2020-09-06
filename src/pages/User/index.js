@@ -240,9 +240,9 @@ const UserPage = () => {
                 <QRCode
                   className="tip-modal-qr-code"
                   value={paymentRequest}
-                  size={250}
-                  bgColor="#2a384a"
-                  fgColor="#4080b2"
+                  size={190}
+                  bgColor="#1b2129"
+                  fgColor="#4db1ff"
                 />
               </div>
             ) : (

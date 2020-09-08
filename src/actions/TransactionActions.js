@@ -59,18 +59,11 @@ export const payUser = (
 
   console.log("New Order ID:", newOrderId, `orderToResponse/${newOrderId}`);
 
-  await Promise.all([
-    fetchPath({
-      path: `orderToResponse/${newOrderId}/response`,
-      gunPointer: Gun.user(recipientPublicKey),
-      method: "on"
-    }),
-    fetchPath({
-      path: `orderToResponse/${newOrderId}/type`,
-      gunPointer: Gun.user(recipientPublicKey),
-      method: "on"
-    })
-  ]);
+  await fetchPath({
+    path: `orderToResponse/${newOrderId}`,
+    gunPointer: Gun.user(recipientPublicKey),
+    method: "on"
+  });
   const encryptedOrder = await fetchPath({
     path: `orderToResponse/${newOrderId}`,
     gunPointer: Gun.user(recipientPublicKey)

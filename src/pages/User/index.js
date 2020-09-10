@@ -188,6 +188,7 @@ const UserPage = () => {
                     : av1
                 }
                 webTorrentClient={webTorrentClient}
+                id={post.id}
                 key={post.id}
               />
             );

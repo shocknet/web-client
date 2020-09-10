@@ -3,6 +3,7 @@ import moment from "moment";
 import av1 from "../images/av1.jpg";
 
 const Post = ({
+  id,
   timestamp,
   avatar,
   contentItems = {},
@@ -17,7 +18,7 @@ const Post = ({
           const file = torrent.files.find(file => file.name.endsWith(".mp4"));
           //file.appendTo('body') // append the file to the DOM
 
-          file.renderTo(`video#torrent-video-${key}`, {
+          file.renderTo(`video#torrent-video-${id}-${key}`, {
             autoplay: true,
             muted: true
           });
@@ -32,7 +33,7 @@ const Post = ({
             file => file.name.endsWith(".jpg") || file.name.endsWith(".png")
           );
 
-          file.renderTo(`img#torrent-image-${key}`);
+          file.renderTo(`img#torrent-image-${id}-${key}`);
         });
       });
   };
@@ -52,7 +53,7 @@ const Post = ({
     if (item.type === "image/embedded") {
       return (
         <img
-          id={`torrent-image-${key}`}
+          id={`torrent-image-${id}-${key}`}
           key={key}
           style={{
             width: "100%",
@@ -67,7 +68,7 @@ const Post = ({
     if (item.type === "video/embedded") {
       return (
         <video
-          id={`torrent-video-${key}`}
+          id={`torrent-video-${id}-${key}`}
           key={key}
           className="torrent-video"
           autoPlay={true}

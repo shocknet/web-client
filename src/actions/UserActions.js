@@ -1,4 +1,4 @@
-import { Gun, DEFAULT_ONCE_WAIT_MS, fetchPath } from "../utils/Gun";
+import { Gun, fetchPath } from "../utils/Gun";
 
 export const ACTIONS = {
   LOAD_USER_WALL: "wall/load",
@@ -42,7 +42,7 @@ export const getUserProfile = publicKey => async dispatch => {
       gunPointer: gunUser
     }),
     fetchPath({
-      path: "Profile/lastSeenApp",
+      path: "Profile/lastSeenNode",
       gunPointer: gunUser
     })
   ]);

@@ -4,6 +4,7 @@ import WebTorrent from "webtorrent";
 import { useParams } from "react-router-dom";
 import InfiniteScroll from "react-infinite-scroller";
 import QRCode from "react-qr-code";
+import Moment from "moment";
 import {
   getUserWall,
   getWallTotalPages,
@@ -12,6 +13,8 @@ import {
   getUserProfile,
   getUserAvatar
 } from "../../actions/UserActions";
+import { generateGunPair } from "../../actions/AuthActions";
+import { payUser, resetPaymentRequest } from "../../actions/TransactionActions";
 import Post from "../../components/Post";
 
 // Assets
@@ -19,8 +22,6 @@ import bannerbg from "../../images/banner-bg.jpg";
 import av1 from "../../images/av1.jpg";
 import shockLogo from "../../images/lightning-logo.svg";
 import "./css/index.css";
-import { generateGunPair } from "../../actions/AuthActions";
-import { payUser, resetPaymentRequest } from "../../actions/TransactionActions";
 
 const webTorrentClient = new WebTorrent();
 
@@ -33,6 +34,7 @@ const UserPage = () => {
   const paymentRequest = useSelector(
     ({ transaction }) => transaction.paymentRequest
   );
+  // Reserved for future use @eslint-disable-next-line no-undef
   const [userLoading, setUserLoading] = useState(true);
   const [wallLoading, setWallLoading] = useState(true);
   const [tipModalOpen, setTipModalOpen] = useState(false);
@@ -113,6 +115,12 @@ const UserPage = () => {
 
   const username = profile.displayName ?? profile.alias;
 
+  console.log(profile.lastSeen);
+  const onlineThreshold = Moment.utc().subtract(10, "minutes");
+  const isOnline = profile.lastSeen
+    ? Moment.utc(profile.lastSeen).isSameOrAfter(onlineThreshold)
+    : false;
+
   return (
     <div className="user-page">
       <div
@@ -133,7 +141,9 @@ const UserPage = () => {
           <p className="username">{username}</p>
 
           <div className="activity">
-            <p className="status">Active Recently</p>
+            <p className="status" style={{ color: !isOnline ? "#888" : null }}>
+              {isOnline ? "Active Recently" : "Offline"}
+            </p>
           </div>
 
           {profile.bio ? (

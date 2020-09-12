@@ -12,7 +12,13 @@ const safeParse = data => {
 
 const peersConfig = safeParse(process.env.PEERS);
 
+<<<<<<< HEAD
 const peers = peersConfig ? peersConfig : ["http://gun.shock.network:8765/gun","http://gun2.shock.network:8765/gun"];
+=======
+const peers = peersConfig
+  ? peersConfig
+  : ["http://gun.shock.network:8765/gun", "http://gun2.shock.network:8765/gun"];
+>>>>>>> master
 
 const wait = ms =>
   new Promise((resolve, reject) => {
@@ -23,13 +29,13 @@ const wait = ms =>
 
 const _randomString = length => {
   let randomString = "";
-  const randomchar = function () {
+  const randomChar = function () {
     const n = Math.floor(Math.random() * 62);
     if (n < 10) return n; //1-10
     if (n < 36) return String.fromCharCode(n + 55); //A-Z
     return String.fromCharCode(n + 61); //a-z
   };
-  while (randomString.length < length) randomString += randomchar();
+  while (randomString.length < length) randomString += randomChar();
   return randomString;
 };
 

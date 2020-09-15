@@ -28,7 +28,13 @@ export const getUserAvatar = publicKey => async dispatch => {
 
 export const getUserProfile = publicKey => async dispatch => {
   const gunUser = Gun.user(publicKey);
-  const [bio, displayName, alias, lastSeen] = await Promise.all([
+  const [
+    bio,
+    displayName,
+    alias,
+    lastSeenApp,
+    lastSeenNode
+  ] = await Promise.all([
     fetchPath({
       path: "bio",
       gunPointer: gunUser
@@ -42,6 +48,10 @@ export const getUserProfile = publicKey => async dispatch => {
       gunPointer: gunUser
     }),
     fetchPath({
+      path: "Profile/lastSeenApp",
+      gunPointer: gunUser
+    }),
+    fetchPath({
       path: "Profile/lastSeenNode",
       gunPointer: gunUser
     })
@@ -51,7 +61,8 @@ export const getUserProfile = publicKey => async dispatch => {
     bio,
     displayName,
     alias,
-    lastSeen
+    lastSeenNode,
+    lastSeenApp
   };
 
   console.log("User:", user);

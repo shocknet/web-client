@@ -117,8 +117,11 @@ const UserPage = () => {
 
   console.log(profile.lastSeen);
   const onlineThreshold = Moment.utc().subtract(10, "minutes");
-  const isOnline = profile.lastSeen
-    ? Moment.utc(profile.lastSeen).isSameOrAfter(onlineThreshold)
+  const isOnlineNode = profile.lastSeenNode
+    ? Moment.utc(profile.lastSeenNode).isSameOrAfter(onlineThreshold)
+    : false;
+  const isOnlineApp = profile.lastSeenApp
+    ? Moment.utc(profile.lastSeenApp).isSameOrAfter(onlineThreshold)
     : false;
 
   return (
@@ -141,8 +144,25 @@ const UserPage = () => {
           <p className="username">{username}</p>
 
           <div className="activity">
-            <p className="status" style={{ color: !isOnline ? "#888" : null }}>
-              {isOnline ? "Active Recently" : "Offline"}
+            <p
+              className="status"
+              style={
+                !isOnlineApp
+                  ? {
+                      color: isOnlineApp
+                        ? "#01a33d"
+                        : isOnlineNode
+                        ? "#f2a900"
+                        : "#888"
+                    }
+                  : {}
+              }
+            >
+              {isOnlineApp
+                ? "Active Recently"
+                : isOnlineNode
+                ? "Node Online"
+                : "Node Offline"}
             </p>
           </div>
 

@@ -380,7 +380,7 @@ const UserPage = () => {
             )}
             {!paymentRequest ? (
               <div className="tip-modal-footer">
-                <div className="tip-modal-submit" onClick={tipUser}>
+                <div className="tip-modal-submit" onClick={() => tipUser()}>
                   SEND TIP
                 </div>
               </div>

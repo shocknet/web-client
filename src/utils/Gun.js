@@ -12,7 +12,9 @@ const safeParse = data => {
 
 const peersConfig = safeParse(process.env.PEERS);
 
-const peers = peersConfig ? peersConfig : ["http://gun.shock.network:8765/gun","http://gun2.shock.network:8765/gun"];
+const peers = peersConfig
+  ? peersConfig
+  : ["http://gun.shock.network:8765/gun", "http://gun2.shock.network:8765/gun"];
 
 const wait = ms =>
   new Promise((resolve, reject) => {
@@ -69,6 +71,9 @@ const _isIncompleteGunResponse = data => {
   return data === null || data === undefined;
 };
 
+const parseGunPath = ({ path, gunPointer }) =>
+  path.split("/").reduce((gun, path) => gun.get(path), gunPointer);
+
 export const Gun = GunDB(peers);
 
 export const fetchPath = ({
@@ -90,9 +95,7 @@ export const fetchPath = ({
     if (_retryCount > 0) {
       console.log("Retrying event:", path, `${_retryCount}/${retryLimit}`);
     }
-    const GunContext = path
-      .split("/")
-      .reduce((gun, path) => gun.get(path), gunPointer);
+    const GunContext = parseGunPath({ path, gunPointer });
     GunContext[method](async event => {
       console.log(path + " Response:", event);
       if (retryCondition && retryCondition(event)) {
@@ -144,9 +147,7 @@ export const wrap = callback => event => {
 
 export const putPath = ({ path = "", data = {}, gunPointer = Gun }) =>
   new Promise((resolve, reject) => {
-    const GunContext = path
-      .split("/")
-      .reduce((gun, path) => gun.get(path), gunPointer);
+    const GunContext = parseGunPath({ path, gunPointer });
     GunContext.put(
       data,
       wrap((event, err) => {
@@ -162,14 +163,20 @@ export const putPath = ({ path = "", data = {}, gunPointer = Gun }) =>
 
 export const setPath = ({ path = "", data = {}, gunPointer = Gun }) =>
   new Promise((resolve, reject) => {
-    const GunContext = path
-      .split("/")
-      .reduce((gun, path) => gun.get(path), gunPointer);
+    const GunContext = parseGunPath({ path, gunPointer });
     const response = GunContext.set(data, event => {
       console.log(data);
       resolve(response);
     });
   });
+
+export const listenPath = ({ path = "", gunPointer = Gun, callback }) => {
+  const GunContext = parseGunPath({ path, gunPointer });
+  return GunContext.on(event => {
+    console.log("Listen Path:", event);
+    callback(event);
+  });
+};
 
 export const createRandomGunUser = () =>
   new Promise((resolve, reject) => {
@@ -196,6 +203,8 @@ export const authUser = (alias, pass) =>
       resolve(user);
     });
   });
+
+export const gunUser = publicKey => Gun.user(publicKey);
 
 // Magic number provided from GunDB docs
 export const DEFAULT_ONCE_WAIT_MS = 99;

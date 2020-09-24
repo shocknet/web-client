@@ -13,18 +13,18 @@ export const ACTIONS = {
   RESET_PAYMENT_REQUEST: "paymentRequest/reset"
 };
 
-export const payUser = (
+export const payUser = ({
   senderPair,
   recipientPublicKey,
-  amount
-) => async dispatch => {
+  amount,
+  metadata
+}) => async dispatch => {
   const me = await authUser(senderPair.alias, senderPair.pass);
   const recipientUser = Gun.user(recipientPublicKey);
   const recipientUserEPub = await fetchPath({
     path: "epub",
     gunPointer: recipientUser
   });
-  console.log("Recipient EPub:");
 
   const secret = await SEA.secret(recipientUserEPub, me.sea);
 
@@ -44,7 +44,8 @@ export const payUser = (
     amount: $$_SHOCKWALLET__ENCRYPTED__ + encryptedAmount,
     from: me.sea.pub,
     memo: $$_SHOCKWALLET__ENCRYPTED__ + encryptedMemo,
-    timestamp: Date.now()
+    timestamp: Date.now(),
+    metadata
   };
 
   console.log("Order:", order);

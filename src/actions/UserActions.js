@@ -6,7 +6,8 @@ export const ACTIONS = {
   RESET_USER_WALL: "wall/reset",
   RESET_USER_DATA: "user/reset",
   LOAD_USER_DATA: "user/load",
-  LOAD_USER_AVATAR: "avatar/load"
+  LOAD_USER_AVATAR: "avatar/load",
+  UPDATE_USER_PROFILE: "user/update"
 };
 
 const _filterGunProps = ([key, item]) => item && key !== "_" && key !== "#";
@@ -19,8 +20,8 @@ export const getUserAvatar = publicKey => async dispatch => {
   });
 
   dispatch({
-    type: ACTIONS.LOAD_USER_AVATAR,
-    data: avatar
+    type: ACTIONS.UPDATE_USER_PROFILE,
+    data: { avatar }
   });
 
   return avatar;
@@ -202,7 +203,8 @@ export const getUserWall = (publicKey, page = 0) => async dispatch => {
           ...(wallPost ?? {}),
           id,
           date,
-          contentItems: fetchedContentItems ?? []
+          contentItems: fetchedContentItems ?? [],
+          page
         };
       })
     );
@@ -220,6 +222,13 @@ export const getUserWall = (publicKey, page = 0) => async dispatch => {
   } catch (err) {
     console.error(err);
   }
+};
+
+export const updateUserProfile = data => dispatch => {
+  dispatch({
+    type: ACTIONS.UPDATE_USER_PROFILE,
+    data
+  });
 };
 
 export const resetUserWall = () => dispatch => {

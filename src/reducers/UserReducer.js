@@ -52,6 +52,16 @@ const user = (state = INITIAL_STATE, action) => {
         }
       };
     }
+    case ACTIONS.UPDATE_USER_PROFILE: {
+      const { data } = action;
+      return {
+        ...state,
+        profile: {
+          ...state.profile,
+          ...data
+        }
+      };
+    }
     case ACTIONS.RESET_USER_WALL: {
       return { ...state, wall: INITIAL_STATE.wall };
     }

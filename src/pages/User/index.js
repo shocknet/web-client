@@ -11,7 +11,8 @@ import {
   resetUserWall,
   resetUserData,
   getUserProfile,
-  getUserAvatar
+  getUserAvatar,
+  updateUserProfile
 } from "../../actions/UserActions";
 import { generateGunPair } from "../../actions/AuthActions";
 import { payUser, resetPaymentRequest } from "../../actions/TransactionActions";
@@ -22,8 +23,11 @@ import bannerbg from "../../images/banner-bg.jpg";
 import av1 from "../../images/av1.jpg";
 import shockLogo from "../../images/lightning-logo.svg";
 import "./css/index.css";
+import { listenPath, gunUser } from "../../utils/Gun";
 
 const webTorrentClient = new WebTorrent();
+
+const ONLINE_INTERVAL = 1 * 30 * 1000;
 
 const UserPage = () => {
   const dispatch = useDispatch();
@@ -40,6 +44,10 @@ const UserPage = () => {
   const [tipModalOpen, setTipModalOpen] = useState(false);
   const [tipLoading, setTipLoading] = useState(false);
   const [tipAmount, setTipAmount] = useState(0);
+  const [isOnlineApp, setIsOnlineApp] = useState(false);
+  const [isOnlineNode, setIsOnlineNode] = useState(false);
+
+  const [onlineCheckTimer, setOnlineCheckTimer] = useState(null);
 
   const publicKey = params.userId;
 
@@ -58,7 +66,7 @@ const UserPage = () => {
     }
   }, [dispatch, publicKey]);
 
-  const fetchUserWallPages = async () => {
+  const fetchUserWallPages = useCallback(async () => {
     try {
       console.log("Setting Loading status to:", true);
       setWallLoading(true);
@@ -74,55 +82,135 @@ const UserPage = () => {
       console.log("Setting Loading status to:", false);
       setWallLoading(false);
     }
-  };
+  }, [dispatch, publicKey]);
 
-  const loadMorePosts = async page => {
-    try {
-      console.log("Setting Loading status to (loadMorePosts):", true);
-      setWallLoading(true);
-      await dispatch(getUserWall(publicKey, page));
-      console.log("Setting Loading status to (loadMorePosts):", false);
-      setWallLoading(false);
-    } catch (error) {
-      console.log("Setting Loading status to (loadMorePosts):", false);
-      setWallLoading(false);
-    }
-  };
+  const loadMorePosts = useCallback(
+    async page => {
+      try {
+        console.log("Setting Loading status to (loadMorePosts):", true);
+        setWallLoading(true);
+        await dispatch(getUserWall(publicKey, page));
+        console.log("Setting Loading status to (loadMorePosts):", false);
+        setWallLoading(false);
+      } catch (error) {
+        console.log("Setting Loading status to (loadMorePosts):", false);
+        setWallLoading(false);
+      }
+    },
+    [dispatch, publicKey]
+  );
 
-  const tipUser = async () => {
-    try {
-      setTipLoading(true);
-      await dispatch(payUser(me, publicKey, tipAmount));
-      setTipLoading(false);
-    } catch (err) {
-      console.error(err);
-    }
-  };
+  const tipUser = useCallback(
+    async (metadata = { paymentType: "user" }) => {
+      try {
+        setTipLoading(true);
+        await dispatch(
+          payUser({
+            senderPair: me,
+            recipientPublicKey: publicKey,
+            amount: tipAmount,
+            metadata
+          })
+        );
+        setTipLoading(false);
+      } catch (err) {
+        console.error(err);
+      }
+    },
+    [dispatch, me, publicKey, tipAmount]
+  );
 
-  const closeTipModal = () => {
+  const closeTipModal = useCallback(() => {
     setTipModalOpen(false);
     if (paymentRequest) {
       dispatch(resetPaymentRequest());
       setTipLoading(false);
     }
-  };
+  }, [dispatch, paymentRequest]);
 
   useEffect(() => {
     fetchUserData();
     fetchUserWallPages();
     dispatch(generateGunPair());
+
+    // Subscribe for updates
+    const lastSeenAppListener = listenPath({
+      path: "Profile/lastSeenApp",
+      gunPointer: gunUser(publicKey),
+      callback: event => {
+        dispatch(updateUserProfile({ lastSeenApp: event }));
+      }
+    });
+
+    const lastSeenNodeListener = listenPath({
+      path: "Profile/lastSeenNode",
+      gunPointer: gunUser(publicKey),
+      callback: event => {
+        dispatch(updateUserProfile({ lastSeenNode: event }));
+      }
+    });
+
+    const displayNameListener = listenPath({
+      path: "Profile/displayName",
+      gunPointer: gunUser(publicKey),
+      callback: event => {
+        dispatch(updateUserProfile({ displayName: event }));
+      }
+    });
+
+    const bioListener = listenPath({
+      path: "bio",
+      gunPointer: gunUser(publicKey),
+      callback: event => {
+        dispatch(updateUserProfile({ bio: event }));
+      }
+    });
+
+    return () => {
+      lastSeenAppListener.off();
+      lastSeenNodeListener.off();
+      displayNameListener.off();
+      bioListener.off();
+    };
   }, [fetchUserData]);
 
-  const username = profile.displayName ?? profile.alias;
+  useEffect(() => {
+    if (onlineCheckTimer) {
+      clearTimeout(onlineCheckTimer);
+    }
 
-  console.log(profile.lastSeen);
-  const onlineThreshold = Moment.utc().subtract(10, "minutes");
-  const isOnlineNode = profile.lastSeenNode
-    ? Moment.utc(profile.lastSeenNode).isSameOrAfter(onlineThreshold)
-    : false;
-  const isOnlineApp = profile.lastSeenApp
-    ? Moment.utc(profile.lastSeenApp).isSameOrAfter(onlineThreshold)
-    : false;
+    const timer = setTimeout(() => {
+      const onlineThreshold = Moment.utc().subtract(ONLINE_INTERVAL, "ms");
+      const isOnlineNode = profile.lastSeenNode
+        ? Moment.utc(profile.lastSeenNode).isSameOrAfter(onlineThreshold)
+        : false;
+      const isOnlineApp = profile.lastSeenApp
+        ? Moment.utc(profile.lastSeenApp).isSameOrAfter(onlineThreshold)
+        : false;
+
+      setIsOnlineNode(isOnlineNode);
+      setIsOnlineApp(isOnlineApp);
+    }, ONLINE_INTERVAL);
+
+    setOnlineCheckTimer(timer);
+
+    return () => clearTimeout(onlineCheckTimer);
+  }, [profile]);
+
+  useEffect(() => {
+    const onlineThreshold = Moment.utc().subtract(1, "minutes");
+    const isOnlineNode = profile?.lastSeenNode
+      ? Moment.utc(profile?.lastSeenNode).isSameOrAfter(onlineThreshold)
+      : false;
+    const isOnlineApp = profile?.lastSeenApp
+      ? Moment.utc(profile?.lastSeenApp).isSameOrAfter(onlineThreshold)
+      : false;
+
+    setIsOnlineNode(isOnlineNode);
+    setIsOnlineApp(isOnlineApp);
+  }, [profile]);
+
+  const username = profile.displayName ?? profile.alias;
 
   return (
     <div className="user-page">
@@ -212,6 +300,7 @@ const UserPage = () => {
                 timestamp={post.date}
                 contentItems={post.contentItems}
                 username={username}
+                tipUser={tipUser}
                 avatar={
                   profile.avatar
                     ? `data:image/png;base64,${profile.avatar}`

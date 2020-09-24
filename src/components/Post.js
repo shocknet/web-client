@@ -22,6 +22,7 @@ const Post = ({
   id,
   timestamp,
   avatar,
+  page,
   contentItems = {},
   username,
   webTorrentClient

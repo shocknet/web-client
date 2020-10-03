@@ -115,7 +115,7 @@ const Post = ({
             data-torrent={`${id}-${key}`}
             key={key}
           />
-          {tipValue >= 0 ? (
+          {tipValue > 0 ? (
             <div className="ribbon-container">
               <p className="ribbon-title">Total Tips</p>
               <p className="ribbon-value">{tipValue} Sats</p>
@@ -148,7 +148,7 @@ const Post = ({
               autoPlay={playState}
             />
           </div>
-          {tipValue >= 0 ? (
+          {tipValue > 0 ? (
             <div className="ribbon-container">
               <p className="ribbon-title">Total Tips</p>
               <p className="ribbon-value">{tipValue} Sats</p>

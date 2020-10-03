@@ -1,10 +1,11 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback, Suspense } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import WebTorrent from "webtorrent";
 import { useParams } from "react-router-dom";
 import InfiniteScroll from "react-infinite-scroller";
 import QRCode from "react-qr-code";
 import Moment from "moment";
+
 import {
   getUserWall,
   getWallTotalPages,
@@ -16,7 +17,8 @@ import {
 } from "../../actions/UserActions";
 import { generateGunPair } from "../../actions/AuthActions";
 import { payUser, resetPaymentRequest } from "../../actions/TransactionActions";
-import Post from "../../components/Post";
+
+import Loader from "../../components/Loader";
 
 // Assets
 import bannerbg from "../../images/banner-bg.jpg";
@@ -24,6 +26,8 @@ import av1 from "../../images/av1.jpg";
 import shockLogo from "../../images/lightning-logo.svg";
 import "./css/index.css";
 import { listenPath, gunUser } from "../../utils/Gun";
+
+const Post = React.lazy(() => import("../../components/Post"));
 
 const webTorrentClient = new WebTorrent();
 
@@ -48,6 +52,7 @@ const UserPage = () => {
   const [isOnlineNode, setIsOnlineNode] = useState(false);
 
   const [onlineCheckTimer, setOnlineCheckTimer] = useState(null);
+  const [tipMetadata, setTipMetadata] = useState({ targetType: "user" });
 
   const publicKey = params.userId;
 
@@ -73,7 +78,7 @@ const UserPage = () => {
       dispatch(resetUserWall());
       const totalPages = await dispatch(getWallTotalPages(publicKey));
       if (totalPages > 0) {
-        await dispatch(getUserWall(publicKey));
+        const posts = await dispatch(getUserWall(publicKey));
       }
       console.log("Setting Loading status to:", false);
       setWallLoading(false);
@@ -89,8 +94,8 @@ const UserPage = () => {
       try {
         console.log("Setting Loading status to (loadMorePosts):", true);
         setWallLoading(true);
-        await dispatch(getUserWall(publicKey, page));
-        console.log("Setting Loading status to (loadMorePosts):", false);
+        const posts = await dispatch(getUserWall(publicKey, page));
+        console.log("Setting Loading status to (loadMorePosts):", false, posts);
         setWallLoading(false);
       } catch (error) {
         console.log("Setting Loading status to (loadMorePosts):", false);
@@ -100,28 +105,31 @@ const UserPage = () => {
     [dispatch, publicKey]
   );
 
-  const tipUser = useCallback(
-    async (metadata = { paymentType: "user" }) => {
-      try {
-        setTipLoading(true);
-        await dispatch(
-          payUser({
-            senderPair: me,
-            recipientPublicKey: publicKey,
-            amount: tipAmount,
-            metadata
-          })
-        );
-        setTipLoading(false);
-      } catch (err) {
-        console.error(err);
-      }
-    },
-    [dispatch, me, publicKey, tipAmount]
-  );
+  const sendTip = useCallback(async () => {
+    try {
+      setTipLoading(true);
+      await dispatch(
+        payUser({
+          senderPair: me,
+          recipientPublicKey: publicKey,
+          amount: tipAmount,
+          metadata: tipMetadata
+        })
+      );
+      setTipLoading(false);
+    } catch (err) {
+      console.error(err);
+    }
+  }, [dispatch, me, publicKey, tipAmount, tipMetadata]);
+
+  const openTipModal = (metadata = { targetType: "user" }) => {
+    setTipMetadata(metadata);
+    setTipModalOpen(true);
+  };
 
   const closeTipModal = useCallback(() => {
     setTipModalOpen(false);
+    setTipMetadata({});
     if (paymentRequest) {
       dispatch(resetPaymentRequest());
       setTipLoading(false);
@@ -276,7 +284,17 @@ const UserPage = () => {
             </div> */}
         </div>
 
-        <div className="send-tip-btn" onClick={() => setTipModalOpen(true)}>
+        <div
+          className="send-tip-btn"
+          onClick={() => (isOnlineNode ? setTipModalOpen(true) : null)}
+          style={{
+            opacity: isOnlineNode ? 1 : 0.5,
+            cursor: isOnlineNode ? "pointer" : "default"
+          }}
+          data-tip={
+            !isOnlineNode ? "You can only tip users with online nodes" : null
+          }
+        >
           <img src={shockLogo} alt="Bitcoin Lightning" />
           <p>Send Tip</p>
         </div>
@@ -296,37 +314,39 @@ const UserPage = () => {
         <div className="posts-holder">
           {wall.posts.map(post => {
             return (
-              <Post
-                timestamp={post.date}
-                contentItems={post.contentItems}
-                username={username}
-                tipUser={tipUser}
-                avatar={
-                  profile.avatar
-                    ? `data:image/png;base64,${profile.avatar}`
-                    : av1
+              <Suspense
+                fallback={
+                  <div className="post-loading">
+                    <Loader text="Loading Post..." />
+                  </div>
                 }
-                webTorrentClient={webTorrentClient}
-                id={post.id}
-                key={post.id}
-              />
+              >
+                <Post
+                  timestamp={post.date}
+                  contentItems={post.contentItems}
+                  username={username}
+                  avatar={
+                    profile.avatar
+                      ? `data:image/png;base64,${profile.avatar}`
+                      : av1
+                  }
+                  publicKey={publicKey}
+                  openTipModal={openTipModal}
+                  webTorrentClient={webTorrentClient}
+                  page={post.page}
+                  id={post.id}
+                  key={post.id}
+                  tipValue={post.tipValue ?? 0}
+                  tipCounter={post.tipCounter ?? 0}
+                  isOnlineNode={isOnlineNode}
+                />
+              </Suspense>
             );
           })}
         </div>
       </InfiniteScroll>
       {wallLoading ? (
-        <div className="loading-wall">
-          <div className="loading-wall-icon">
-            <span class="loading-circle loading-circle-1"></span>
-            <span class="loading-circle loading-circle-2"></span>
-            <span class="loading-circle loading-circle-3"></span>
-            <span class="loading-circle loading-circle-4"></span>
-            <span class="loading-circle loading-circle-5"></span>
-          </div>
-          <div className="loading-wall-text">
-            Loading {wall.page >= 0 ? "More" : "Wall"} Posts...
-          </div>
-        </div>
+        <Loader text={`Loading ${wall.page >= 0 ? "More" : "Wall"} Posts...`} />
       ) : null}
       {tipModalOpen ? (
         <div className="tip-modal-container">
@@ -334,18 +354,7 @@ const UserPage = () => {
           <div className="tip-modal">
             {tipLoading ? (
               <div className="tip-modal-loading">
-                <div className="loading-wall">
-                  <div className="loading-wall-icon">
-                    <span class="loading-circle loading-circle-1"></span>
-                    <span class="loading-circle loading-circle-2"></span>
-                    <span class="loading-circle loading-circle-3"></span>
-                    <span class="loading-circle loading-circle-4"></span>
-                    <span class="loading-circle loading-circle-5"></span>
-                  </div>
-                  <div className="loading-wall-text">
-                    Submitting Tip Request...
-                  </div>
-                </div>
+                <Loader text="Submitting Tip Request..." />
               </div>
             ) : null}
             <div className="tip-modal-head">
@@ -380,7 +389,7 @@ const UserPage = () => {
             )}
             {!paymentRequest ? (
               <div className="tip-modal-footer">
-                <div className="tip-modal-submit" onClick={() => tipUser()}>
+                <div className="tip-modal-submit" onClick={() => sendTip()}>
                   SEND TIP
                 </div>
               </div>

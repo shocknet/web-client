@@ -1,7 +1,13 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useCallback, useState } from "react";
 import moment from "moment";
+import Tooltip from "react-tooltip";
+import { useDispatch } from "react-redux";
+import { updateWallPost } from "../actions/UserActions";
 import { getCachedFile, renderCachedFile, saveFile } from "../utils/Cache";
-import { useState } from "react";
+import lightning from "../images/lightning-logo.svg";
+import "./css/Post.css";
+import { listenPath, gunUser } from "../utils/Gun";
+import Counter from "./Counter";
 
 const supportedFileTypes = {
   "video/embedded": {
@@ -24,10 +30,18 @@ const Post = ({
   timestamp,
   avatar,
   page,
+  tipCounter,
+  tipValue,
+  publicKey,
+  openTipModal,
   contentItems = {},
   username,
-  webTorrentClient
+  webTorrentClient,
+  isOnlineNode
 }) => {
+  const dispatch = useDispatch();
+  const [playState, setPlayState] = useState(false);
+  const [test, setTest] = useState(0);
   const attachMedia = () => {
     Object.entries(contentItems)
       .filter(([key, item]) => supportedFileTypes[item.type])
@@ -78,6 +92,13 @@ const Post = ({
       });
   };
 
+  const playVideo = () => {
+    setPlayState(true);
+    document.querySelectorAll(".torrent-video").forEach(video => {
+      video.play();
+    });
+  };
+
   const parseContent = ([key, item]) => {
     if (item.type === "text/paragraph") {
       return <p key={key}>{item.text}</p>;
@@ -90,12 +111,6 @@ const Post = ({
             className={`torrent-img-${id}-${key}`}
             data-torrent={`${id}-${key}`}
             key={key}
-            style={{
-              width: "100%",
-              maxWidth: 800,
-              maxHeight: 800,
-              objectFit: "contain"
-            }}
           />
         </>
       );
@@ -103,14 +118,20 @@ const Post = ({
 
     if (item.type === "video/embedded") {
       return (
-        <video
-          className={`torrent-video torrent-video-${id}-${key}`}
-          data-torrent={`${id}-${key}`}
-          key={key}
-          controls
-          autoPlay
-          muted
-        />
+        <div className="video-container">
+          {!playState ? (
+            <div className="video-play-button" onClick={playVideo}>
+              <i className="fas fa-play"></i>
+            </div>
+          ) : null}
+          <video
+            className={`torrent-video torrent-video-${id}-${key}`}
+            data-torrent={`${id}-${key}`}
+            key={key}
+            controls={playState}
+            autoPlay={playState}
+          />
+        </div>
       );
     }
 
@@ -120,6 +141,53 @@ const Post = ({
   useEffect(() => {
     attachMedia();
   }, [contentItems.length]);
+
+  useEffect(() => {
+    listenPath({
+      path: `wall/pages/${page}/posts/${id}/tipCounter`,
+      gunPointer: gunUser(publicKey),
+      callback: data => {
+        dispatch(
+          updateWallPost({
+            postID: id,
+            data: {
+              tipCounter: data
+            }
+          })
+        );
+      }
+    });
+    listenPath({
+      path: `wall/pages/${page}/posts/${id}/tipValue`,
+      gunPointer: gunUser(publicKey),
+      callback: data => {
+        dispatch(
+          updateWallPost({
+            postID: id,
+            data: {
+              tipValue: data
+            }
+          })
+        );
+      }
+    });
+  }, [dispatch]);
+
+  const tipPost = useCallback(() => {
+    if (!isOnlineNode) {
+      return;
+    }
+
+    openTipModal({
+      targetType: "post",
+      postID: id,
+      postPage: page
+    });
+  }, [id, page]);
+
+  useEffect(() => {
+    Tooltip.rebuild();
+  }, []);
 
   return (
     <div className="post">
@@ -143,7 +211,28 @@ const Post = ({
       </div>
 
       <div className="actions">
-        <img src="" alt="" />
+        <div
+          className="tip-btn-container"
+          onClick={tipPost}
+          data-tip={
+            isOnlineNode
+              ? tipCounter > 0
+                ? `${tipValue} Sats tipped so far`
+                : null
+              : "You can only tip online users"
+          }
+          style={{
+            opacity: isOnlineNode ? 1 : 0.5,
+            cursor: isOnlineNode ? "pointer" : "default"
+          }}
+        >
+          <div className="tip-btn-icon">
+            <img src={lightning} alt="Send Tip" />
+          </div>
+          <div className="tip-btn-text">
+            <Counter value={tipCounter} /> {tipCounter === 1 ? "Tip" : "Tips"}
+          </div>
+        </div>
         <i className="fas fa-external-link-alt"></i>
       </div>
     </div>

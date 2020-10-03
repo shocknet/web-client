@@ -62,6 +62,23 @@ const user = (state = INITIAL_STATE, action) => {
         }
       };
     }
+    case ACTIONS.UPDATE_WALL_POST: {
+      const { data: updatedPost } = action;
+      return {
+        ...state,
+        wall: {
+          ...state.wall,
+          posts: state.wall.posts.map(post =>
+            updatedPost.postID === post.id
+              ? {
+                  ...post,
+                  ...updatedPost.data
+                }
+              : post
+          )
+        }
+      };
+    }
     case ACTIONS.RESET_USER_WALL: {
       return { ...state, wall: INITIAL_STATE.wall };
     }

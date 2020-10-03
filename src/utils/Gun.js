@@ -173,7 +173,6 @@ export const setPath = ({ path = "", data = {}, gunPointer = Gun }) =>
 export const listenPath = ({ path = "", gunPointer = Gun, callback }) => {
   const GunContext = parseGunPath({ path, gunPointer });
   return GunContext.on(event => {
-    console.log("Listen Path:", event);
     callback(event);
   });
 };

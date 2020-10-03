@@ -45,7 +45,8 @@ export const payUser = ({
     from: me.sea.pub,
     memo: $$_SHOCKWALLET__ENCRYPTED__ + encryptedMemo,
     timestamp: Date.now(),
-    metadata
+    // Tip type
+    ...metadata
   };
 
   console.log("Order:", order);

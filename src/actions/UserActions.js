@@ -4,6 +4,7 @@ export const ACTIONS = {
   LOAD_USER_WALL: "wall/load",
   LOAD_USER_WALL_TOTAL_PAGES: "wall/loadTotalPages",
   RESET_USER_WALL: "wall/reset",
+  UPDATE_WALL_POST: "wallPost/update",
   RESET_USER_DATA: "user/reset",
   LOAD_USER_DATA: "user/load",
   LOAD_USER_AVATAR: "avatar/load",
@@ -194,15 +195,10 @@ export const getUserWall = (publicKey, page = 0) => async dispatch => {
             };
           })
         );
-        const date = await fetchPath({
-          path: `${gunPostsKey}/${id}/date`,
-          gunPointer
-        });
 
         return {
           ...(wallPost ?? {}),
           id,
-          date,
           contentItems: fetchedContentItems ?? [],
           page
         };
@@ -227,6 +223,13 @@ export const getUserWall = (publicKey, page = 0) => async dispatch => {
 export const updateUserProfile = data => dispatch => {
   dispatch({
     type: ACTIONS.UPDATE_USER_PROFILE,
+    data
+  });
+};
+
+export const updateWallPost = data => dispatch => {
+  dispatch({
+    type: ACTIONS.UPDATE_WALL_POST,
     data
   });
 };

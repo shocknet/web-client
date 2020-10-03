@@ -33,11 +33,13 @@ export const getCachedFile = async fileName => {
 };
 
 export const renderCachedFile = (fileURL, selector) => {
-  const element = document.querySelector(selector);
-  if (element) {
-    element.src = fileURL;
+  const elements = document.querySelectorAll(selector);
+  if (elements && elements.length) {
+    elements.forEach(element => {
+      element.src = fileURL;
+    });
   }
-  return !!element;
+  return !!elements && !!elements.length;
 };
 
 export const saveFile = (fileName, buffer) => {

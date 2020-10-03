@@ -1,6 +1,7 @@
 import React, { useEffect } from "react";
 import moment from "moment";
 import { getCachedFile, renderCachedFile, saveFile } from "../utils/Cache";
+import { useState } from "react";
 
 const supportedFileTypes = {
   "video/embedded": {
@@ -12,7 +13,7 @@ const supportedFileTypes = {
     }
   },
   "image/embedded": {
-    formats: ["jpg", "png", "webp"],
+    formats: ["jpg", "png", "webp", "jpeg"],
     element: "img",
     options: {}
   }
@@ -37,34 +38,42 @@ const Post = ({
             const extension = file.name?.split(".")?.slice(-1)[0];
             return fileType.formats.includes(extension);
           });
-          const fileName = `${id}-${key}-${file.name}`;
+          if (file) {
+            const fileName = `${id}-${key}-${file.name}`;
 
-          const element = fileType.element;
-          const target = `${element}#torrent-${element}-${id}-${key}`;
-          const cachedFile = await getCachedFile(fileName);
+            const element = fileType.element;
+            const target = `${element}.torrent-${element}-${id}-${key}`;
+            const cachedFile = await getCachedFile(fileName);
 
-          if (cachedFile) {
-            webTorrentClient.remove(item.magnetURI);
-            renderCachedFile(cachedFile, target);
-            return;
-          }
+            if (cachedFile) {
+              webTorrentClient.remove(item.magnetURI);
+              renderCachedFile(cachedFile, target);
+              return;
+            }
 
-          // Prioritizes the file
-          file.select();
+            // Prioritizes the file
+            // file.select();
 
-          file.renderTo(target, fileType.options);
-
-          torrent.on("done", () => {
-            file.getBlob((err, blob) => {
-              console.log("File blob retrieved!");
-              if (err) {
-                console.warn(err);
-                return;
-              }
-              console.log("Caching loaded file...", fileName, blob);
-              saveFile(fileName, blob);
+            const torrentElements = document.querySelectorAll(
+              `[data-torrent="${id}-${key}"]`
+            );
+            console.log("Torrent Elements:", torrentElements);
+            torrentElements.forEach(torrentElement => {
+              file.renderTo(torrentElement, fileType.options);
             });
-          });
+
+            torrent.on("done", () => {
+              file.getBlob((err, blob) => {
+                console.log("File blob retrieved!");
+                if (err) {
+                  console.warn(err);
+                  return;
+                }
+                console.log("Caching loaded file...", fileName, blob);
+                saveFile(fileName, blob);
+              });
+            });
+          }
         });
       });
   };
@@ -76,25 +85,28 @@ const Post = ({
 
     if (item.type === "image/embedded") {
       return (
-        <img
-          id={`torrent-img-${id}-${key}`}
-          key={key}
-          style={{
-            width: "100%",
-            maxWidth: 800,
-            maxHeight: 800,
-            objectFit: "contain"
-          }}
-        />
+        <>
+          <img
+            className={`torrent-img-${id}-${key}`}
+            data-torrent={`${id}-${key}`}
+            key={key}
+            style={{
+              width: "100%",
+              maxWidth: 800,
+              maxHeight: 800,
+              objectFit: "contain"
+            }}
+          />
+        </>
       );
     }
 
     if (item.type === "video/embedded") {
       return (
         <video
-          id={`torrent-video-${id}-${key}`}
+          className={`torrent-video torrent-video-${id}-${key}`}
+          data-torrent={`${id}-${key}`}
           key={key}
-          className="torrent-video"
           controls
           autoPlay
           muted

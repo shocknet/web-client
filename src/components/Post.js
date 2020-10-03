@@ -41,7 +41,7 @@ const Post = ({
 }) => {
   const dispatch = useDispatch();
   const [playState, setPlayState] = useState(false);
-  const [test, setTest] = useState(0);
+
   const attachMedia = () => {
     Object.entries(contentItems)
       .filter(([key, item]) => supportedFileTypes[item.type])
@@ -92,11 +92,14 @@ const Post = ({
       });
   };
 
-  const playVideo = () => {
+  const playVideo = (e, selector) => {
+    e.stopPropagation();
+    if (playState) {
+      return;
+    }
     setPlayState(true);
-    document.querySelectorAll(".torrent-video").forEach(video => {
-      video.play();
-    });
+    const video = document.querySelector(selector);
+    video.play();
   };
 
   const parseContent = ([key, item]) => {
@@ -106,31 +109,39 @@ const Post = ({
 
     if (item.type === "image/embedded") {
       return (
-        <>
+        <div className="media-container">
           <img
             className={`torrent-img-${id}-${key}`}
             data-torrent={`${id}-${key}`}
             key={key}
           />
-        </>
+        </div>
       );
     }
 
     if (item.type === "video/embedded") {
       return (
-        <div className="video-container">
-          {!playState ? (
-            <div className="video-play-button" onClick={playVideo}>
-              <i className="fas fa-play"></i>
-            </div>
-          ) : null}
-          <video
-            className={`torrent-video torrent-video-${id}-${key}`}
-            data-torrent={`${id}-${key}`}
-            key={key}
-            controls={playState}
-            autoPlay={playState}
-          />
+        <div className="media-container">
+          <div
+            className="video-container"
+            style={{
+              cursor: !playState ? "pointer" : "auto"
+            }}
+            onClick={e => playVideo(e, `.torrent-video-${id}-${key}`)}
+          >
+            {!playState ? (
+              <div className="video-play-button">
+                <i className="fas fa-play"></i>
+              </div>
+            ) : null}
+            <video
+              className={`torrent-video torrent-video-${id}-${key}`}
+              data-torrent={`${id}-${key}`}
+              key={key}
+              controls={playState}
+              autoPlay={playState}
+            />
+          </div>
         </div>
       );
     }

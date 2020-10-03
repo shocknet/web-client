@@ -9,22 +9,6 @@ import "./css/Post.css";
 import { listenPath, gunUser } from "../utils/Gun";
 import Counter from "./Counter";
 
-const supportedFileTypes = {
-  "video/embedded": {
-    formats: ["mp4", "webm"],
-    element: "video",
-    options: {
-      autoplay: true,
-      muted: true
-    }
-  },
-  "image/embedded": {
-    formats: ["jpg", "png", "webp", "jpeg"],
-    element: "img",
-    options: {}
-  }
-};
-
 const Post = ({
   id,
   timestamp,
@@ -41,56 +25,6 @@ const Post = ({
 }) => {
   const dispatch = useDispatch();
   const [playState, setPlayState] = useState(false);
-
-  const attachMedia = () => {
-    Object.entries(contentItems)
-      .filter(([key, item]) => supportedFileTypes[item.type])
-      .map(([key, item]) => {
-        webTorrentClient.add(item.magnetURI, async torrent => {
-          const fileType = supportedFileTypes[item.type];
-          const file = torrent.files.find(file => {
-            const extension = file.name?.split(".")?.slice(-1)[0];
-            return fileType.formats.includes(extension);
-          });
-          if (file) {
-            const fileName = `${id}-${key}-${file.name}`;
-
-            const element = fileType.element;
-            const target = `${element}.torrent-${element}-${id}-${key}`;
-            const cachedFile = await getCachedFile(fileName);
-
-            if (cachedFile) {
-              webTorrentClient.remove(item.magnetURI);
-              renderCachedFile(cachedFile, target);
-              return;
-            }
-
-            // Prioritizes the file
-            // file.select();
-
-            const torrentElements = document.querySelectorAll(
-              `[data-torrent="${id}-${key}"]`
-            );
-            console.log("Torrent Elements:", torrentElements);
-            torrentElements.forEach(torrentElement => {
-              file.renderTo(torrentElement, fileType.options);
-            });
-
-            torrent.on("done", () => {
-              file.getBlob((err, blob) => {
-                console.log("File blob retrieved!");
-                if (err) {
-                  console.warn(err);
-                  return;
-                }
-                console.log("Caching loaded file...", fileName, blob);
-                saveFile(fileName, blob);
-              });
-            });
-          }
-        });
-      });
-  };
 
   const playVideo = (e, selector) => {
     e.stopPropagation();
@@ -112,7 +46,7 @@ const Post = ({
         <div className="media-container">
           <img
             className={`torrent-img-${id}-${key}`}
-            data-torrent={`${id}-${key}`}
+            data-torrent={item.magnetURI}
             key={key}
           />
           {tipValue > 0 ? (
@@ -135,17 +69,17 @@ const Post = ({
             }}
             onClick={e => playVideo(e, `.torrent-video-${id}-${key}`)}
           >
-            {!playState ? (
+            {/* {!playState ? (
               <div className="video-play-button">
                 <i className="fas fa-play"></i>
               </div>
-            ) : null}
+            ) : null} */}
             <video
               className={`torrent-video torrent-video-${id}-${key}`}
-              data-torrent={`${id}-${key}`}
+              data-torrent={item.magnetURI}
               key={key}
-              controls={playState}
-              autoPlay={playState}
+              // {...(playState ? { controls: true } : { controls: false })}
+              data-played={`${playState}`}
             />
           </div>
           {tipValue > 0 ? (
@@ -161,9 +95,9 @@ const Post = ({
     return null;
   };
 
-  useEffect(() => {
-    attachMedia();
-  }, [contentItems.length]);
+  // useEffect(() => {
+  //   attachMedia();
+  // }, [contentItems.length]);
 
   useEffect(() => {
     listenPath({

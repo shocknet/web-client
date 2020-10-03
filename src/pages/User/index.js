@@ -17,6 +17,9 @@ import {
 } from "../../actions/UserActions";
 import { generateGunPair } from "../../actions/AuthActions";
 import { payUser, resetPaymentRequest } from "../../actions/TransactionActions";
+import { listenPath, gunUser } from "../../utils/Gun";
+import { getCachedFile, renderCachedFile, saveFile } from "../../utils/Cache";
+import { runSerial } from "../../utils/Promise";
 
 import Loader from "../../components/Loader";
 
@@ -25,13 +28,28 @@ import bannerbg from "../../images/banner-bg.jpg";
 import av1 from "../../images/av1.jpg";
 import shockLogo from "../../images/lightning-logo.svg";
 import "./css/index.css";
-import { listenPath, gunUser } from "../../utils/Gun";
 
 const Post = React.lazy(() => import("../../components/Post"));
 
 const webTorrentClient = new WebTorrent();
 
 const ONLINE_INTERVAL = 1 * 30 * 1000;
+
+const supportedFileTypes = {
+  "video/embedded": {
+    formats: ["mp4", "webm"],
+    element: "video",
+    options: {
+      autoplay: true,
+      muted: true
+    }
+  },
+  "image/embedded": {
+    formats: ["jpg", "png", "webp", "jpeg"],
+    element: "img",
+    options: {}
+  }
+};
 
 const UserPage = () => {
   const dispatch = useDispatch();
@@ -136,6 +154,77 @@ const UserPage = () => {
     }
   }, [dispatch, paymentRequest]);
 
+  const attachMedia = () => {
+    const torrentTasks = wall.posts
+      .map(post => {
+        const { contentItems, id } = post;
+        return Object.entries(contentItems)
+          .filter(([key, item]) => supportedFileTypes[item.type])
+          .map(([key, item]) => () =>
+            new Promise(resolve => {
+              const torrentExists = webTorrentClient.get(item.magnetURI);
+
+              if (torrentExists) {
+                return;
+              }
+
+              webTorrentClient.add(item.magnetURI, async torrent => {
+                resolve(true);
+                const fileType = supportedFileTypes[item.type];
+                const file = torrent.files.find(file => {
+                  const extension = file.name?.split(".")?.slice(-1)[0];
+                  return fileType.formats.includes(extension);
+                });
+                if (file) {
+                  const fileName = `${id}-${key}-${file.name}`;
+
+                  const element = fileType.element;
+                  const target = `[data-torrent="${item.magnetURI}"]`;
+                  const cachedFile = await getCachedFile(fileName);
+
+                  if (cachedFile) {
+                    webTorrentClient.remove(item.magnetURI);
+                    renderCachedFile(cachedFile, target);
+                    return;
+                  }
+
+                  // Prioritizes the file
+                  // file.select();
+
+                  const torrentElements = document.querySelectorAll(
+                    `[data-torrent="${item.magnetURI}"]`
+                  );
+                  console.log("Torrent Elements:", torrentElements);
+                  torrentElements.forEach(torrentElement => {
+                    file.renderTo(torrentElement, fileType.options);
+                  });
+
+                  torrent.on("done", () => {
+                    file.getBlob(async (err, blob) => {
+                      console.log("File blob retrieved!");
+                      if (err) {
+                        console.warn(err);
+                        return;
+                      }
+                      console.log("Caching loaded file...", fileName, blob);
+                      await saveFile(fileName, blob);
+                      const element = document.querySelector(target);
+                      if (element.dataset.played === "false") {
+                        const cachedFile = await getCachedFile(fileName);
+                        renderCachedFile(cachedFile, target);
+                      }
+                    });
+                  });
+                }
+              });
+            })
+          );
+      })
+      .reduce((torrents, contentItems) => [...torrents, ...contentItems], []);
+
+    runSerial(torrentTasks);
+  };
+
   useEffect(() => {
     fetchUserData();
     fetchUserWallPages();
@@ -181,6 +270,10 @@ const UserPage = () => {
       bioListener.off();
     };
   }, [fetchUserData]);
+
+  useEffect(() => {
+    attachMedia();
+  }, [wall.posts.length]);
 
   useEffect(() => {
     if (onlineCheckTimer) {

@@ -76,7 +76,7 @@ const UserPage = () => {
       dispatch(resetUserWall());
       const totalPages = await dispatch(getWallTotalPages(publicKey));
       if (totalPages > 0) {
-        const posts = await dispatch(getUserWall(publicKey));
+        await dispatch(getUserWall(publicKey));
       }
       console.log("Setting Loading status to:", false);
       setWallLoading(false);

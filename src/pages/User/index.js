@@ -1,6 +1,5 @@
 import React, { useEffect, useState, useCallback, Suspense } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import WebTorrent from "webtorrent";
 import { useParams } from "react-router-dom";
 import InfiniteScroll from "react-infinite-scroller";
 import QRCode from "react-qr-code";
@@ -18,8 +17,7 @@ import {
 import { generateGunPair } from "../../actions/AuthActions";
 import { payUser, resetPaymentRequest } from "../../actions/TransactionActions";
 import { listenPath, gunUser } from "../../utils/Gun";
-import { getCachedFile, renderCachedFile, saveFile } from "../../utils/Cache";
-import { runSerial } from "../../utils/Promise";
+import { webTorrentClient, attachMedia } from "../../utils/Torrents";
 
 import Loader from "../../components/Loader";
 
@@ -31,25 +29,7 @@ import "./css/index.css";
 
 const Post = React.lazy(() => import("../../components/Post"));
 
-const webTorrentClient = new WebTorrent();
-
 const ONLINE_INTERVAL = 1 * 30 * 1000;
-
-const supportedFileTypes = {
-  "video/embedded": {
-    formats: ["mp4", "webm"],
-    element: "video",
-    options: {
-      autoplay: true,
-      muted: true
-    }
-  },
-  "image/embedded": {
-    formats: ["jpg", "png", "webp", "jpeg"],
-    element: "img",
-    options: {}
-  }
-};
 
 const UserPage = () => {
   const dispatch = useDispatch();
@@ -154,97 +134,6 @@ const UserPage = () => {
     }
   }, [dispatch, paymentRequest]);
 
-  const attachMedia = () => {
-    const torrentTasks = wall.posts
-      .map(post => {
-        const { contentItems, id } = post;
-        return Object.entries(contentItems)
-          .filter(([key, item]) => supportedFileTypes[item.type])
-          .map(([key, item]) => () =>
-            new Promise(resolve => {
-              const torrentExists = webTorrentClient.get(item.magnetURI);
-
-              if (torrentExists) {
-                resolve(true);
-                return;
-              }
-
-              webTorrentClient.add(item.magnetURI, async torrent => {
-                // Proceed to the next torrent in queue
-                resolve(true);
-
-                const files = torrent.files.filter(file => {
-                  const extension = file.name?.split(".")?.slice(-1)[0];
-                  const supportedFileType = Object.entries(
-                    supportedFileTypes
-                  ).filter(([type, options]) =>
-                    options.formats.includes(extension)
-                  )[0];
-                  if (supportedFileType) {
-                    const [name, fileType] = supportedFileType;
-                    const matched = fileType.formats.includes(extension);
-                    return matched;
-                  }
-                  return false;
-                });
-
-                files.map(async (file, key) => {
-                  const extension = file.name?.split(".")?.slice(-1)[0];
-                  const supportedFileType = Object.entries(
-                    supportedFileTypes
-                  ).filter(([type, options]) =>
-                    options.formats.includes(extension)
-                  )[0];
-
-                  if (!supportedFileType) {
-                    return;
-                  }
-
-                  const [name, fileType] = supportedFileType;
-                  const fileName = `${id}-${key}-${file.name}`;
-
-                  const element = fileType.element;
-                  const target = `${element}[data-torrent="${item.magnetURI}"]`;
-                  const cachedFile = await getCachedFile(fileName);
-
-                  if (cachedFile) {
-                    webTorrentClient.remove(item.magnetURI);
-                    renderCachedFile(cachedFile, target);
-                    return;
-                  }
-
-                  const torrentElements = document.querySelectorAll(target);
-                  console.log("Torrent Elements:", torrentElements);
-                  torrentElements.forEach(torrentElement => {
-                    file.renderTo(torrentElement, fileType.options);
-                  });
-
-                  torrent.on("done", () => {
-                    file.getBlob(async (err, blob) => {
-                      console.log("File blob retrieved!");
-                      if (err) {
-                        console.warn(err);
-                        return;
-                      }
-                      console.log("Caching loaded file...", fileName, blob);
-                      await saveFile(fileName, blob);
-                      const element = document.querySelector(target);
-                      if (element.dataset.played === "false") {
-                        const cachedFile = await getCachedFile(fileName);
-                        renderCachedFile(cachedFile, target);
-                      }
-                    });
-                  });
-                });
-              });
-            })
-          );
-      })
-      .reduce((torrents, contentItems) => [...torrents, ...contentItems], []);
-
-    runSerial(torrentTasks);
-  };
-
   useEffect(() => {
     fetchUserData();
     fetchUserWallPages();
@@ -292,7 +181,7 @@ const UserPage = () => {
   }, [fetchUserData]);
 
   useEffect(() => {
-    attachMedia();
+    attachMedia(wall.posts);
   }, [wall.posts.length]);
 
   useEffect(() => {
@@ -433,6 +322,7 @@ const UserPage = () => {
                     <Loader text="Loading Post..." />
                   </div>
                 }
+                key={post.id}
               >
                 <Post
                   timestamp={post.date}
@@ -448,7 +338,6 @@ const UserPage = () => {
                   webTorrentClient={webTorrentClient}
                   page={post.page}
                   id={post.id}
-                  key={post.id}
                   tipValue={post.tipValue ?? 0}
                   tipCounter={post.tipCounter ?? 0}
                   isOnlineNode={isOnlineNode}
@@ -479,13 +368,15 @@ const UserPage = () => {
                   We've successfully generated an invoice for you to tip, please
                   scan the QR Code below using a Lightning wallet to pay it!
                 </p>
-                <QRCode
-                  className="tip-modal-qr-code"
-                  value={paymentRequest}
-                  size={190}
-                  bgColor="#1b2129"
-                  fgColor="#4db1ff"
-                />
+                <div className="tip-modal-qr-code-container">
+                  <QRCode
+                    className="tip-modal-qr-code"
+                    value={paymentRequest}
+                    size={210}
+                    bgColor="#4db1ff"
+                    fgColor="#1b2129"
+                  />
+                </div>
               </div>
             ) : (
               <div className="tip-modal-content">

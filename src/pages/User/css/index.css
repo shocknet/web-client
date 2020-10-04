@@ -154,9 +154,6 @@
   font-weight: bold;
 }
 
-.tip-modal-head {
-}
-
 .tip-modal {
   border-radius: 10px;
   overflow: hidden;
@@ -229,4 +226,10 @@ p.tip-modal-instructions {
 
 .post-loading .loading-wall {
   margin-bottom: 0;
+}
+
+.tip-modal-qr-code-container {
+  display: flex;
+  padding: 8px;
+  background-color: #4db1ff;
 }

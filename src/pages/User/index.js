@@ -165,21 +165,46 @@ const UserPage = () => {
               const torrentExists = webTorrentClient.get(item.magnetURI);
 
               if (torrentExists) {
+                resolve(true);
                 return;
               }
 
               webTorrentClient.add(item.magnetURI, async torrent => {
+                // Proceed to the next torrent in queue
                 resolve(true);
-                const fileType = supportedFileTypes[item.type];
-                const file = torrent.files.find(file => {
+
+                const files = torrent.files.filter(file => {
                   const extension = file.name?.split(".")?.slice(-1)[0];
-                  return fileType.formats.includes(extension);
+                  const supportedFileType = Object.entries(
+                    supportedFileTypes
+                  ).filter(([type, options]) =>
+                    options.formats.includes(extension)
+                  )[0];
+                  if (supportedFileType) {
+                    const [name, fileType] = supportedFileType;
+                    const matched = fileType.formats.includes(extension);
+                    return matched;
+                  }
+                  return false;
                 });
-                if (file) {
+
+                files.map(async (file, key) => {
+                  const extension = file.name?.split(".")?.slice(-1)[0];
+                  const supportedFileType = Object.entries(
+                    supportedFileTypes
+                  ).filter(([type, options]) =>
+                    options.formats.includes(extension)
+                  )[0];
+
+                  if (!supportedFileType) {
+                    return;
+                  }
+
+                  const [name, fileType] = supportedFileType;
                   const fileName = `${id}-${key}-${file.name}`;
 
                   const element = fileType.element;
-                  const target = `[data-torrent="${item.magnetURI}"]`;
+                  const target = `${element}[data-torrent="${item.magnetURI}"]`;
                   const cachedFile = await getCachedFile(fileName);
 
                   if (cachedFile) {
@@ -188,12 +213,7 @@ const UserPage = () => {
                     return;
                   }
 
-                  // Prioritizes the file
-                  // file.select();
-
-                  const torrentElements = document.querySelectorAll(
-                    `[data-torrent="${item.magnetURI}"]`
-                  );
+                  const torrentElements = document.querySelectorAll(target);
                   console.log("Torrent Elements:", torrentElements);
                   torrentElements.forEach(torrentElement => {
                     file.renderTo(torrentElement, fileType.options);
@@ -215,7 +235,7 @@ const UserPage = () => {
                       }
                     });
                   });
-                }
+                });
               });
             })
           );

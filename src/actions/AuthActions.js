@@ -5,7 +5,6 @@ export const ACTIONS = {
 };
 
 export const generateGunPair = () => async dispatch => {
-  console.log("[Gun] Checking if keypair exists...");
   const alias = localStorage.getItem("shocknet/gun/alias");
   const pass = localStorage.getItem("shocknet/gun/pass");
   const publicKey = localStorage.getItem("shocknet/gun/pub");
@@ -13,8 +12,8 @@ export const generateGunPair = () => async dispatch => {
 
   if (!alias || !pass) {
     console.log("[Gun] Keypair not found, generating a new one...");
+
     const randomUser = await createRandomGunUser();
-    console.log("Keypair generated!", randomUser);
     localStorage.setItem("shocknet/gun/alias", randomUser.alias);
     localStorage.setItem("shocknet/gun/pass", randomUser.pass);
     localStorage.setItem("shocknet/gun/pub", randomUser.pub);
@@ -41,7 +40,7 @@ export const generateGunPair = () => async dispatch => {
     pass: pass
   };
 
-  console.log("User Authenticated", JSON.stringify(user));
+  console.log("[Gun] User Authenticated");
 
   dispatch({
     type: ACTIONS.LOAD_GUN_PAIR,

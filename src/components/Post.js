@@ -36,7 +36,7 @@ const Post = ({
     video.play();
   };
 
-  const parseContent = ([key, item]) => {
+  const parseContent = ([key, item], index) => {
     if (item.type === "text/paragraph") {
       return <p key={key}>{item.text}</p>;
     }
@@ -47,6 +47,7 @@ const Post = ({
           <img
             className={`torrent-img-${id}-${key}`}
             data-torrent={item.magnetURI}
+            data-file-key={index}
             key={key}
           />
           {tipValue > 0 ? (
@@ -67,7 +68,7 @@ const Post = ({
             style={{
               cursor: !playState ? "pointer" : "auto"
             }}
-            onClick={e => playVideo(e, `.torrent-video-${id}-${key}`)}
+            // onClick={e => playVideo(e, `.torrent-video-${id}-${key}`)}
           >
             {/* {!playState ? (
               <div className="video-play-button">
@@ -77,7 +78,9 @@ const Post = ({
             <video
               className={`torrent-video torrent-video-${id}-${key}`}
               data-torrent={item.magnetURI}
+              data-file-key={index}
               key={key}
+              controls
               // {...(playState ? { controls: true } : { controls: false })}
               data-played={`${playState}`}
             />

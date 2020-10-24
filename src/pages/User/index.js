@@ -12,7 +12,8 @@ import {
   resetUserData,
   getUserProfile,
   getUserAvatar,
-  updateUserProfile
+  updateUserProfile,
+  getUserHeader
 } from "../../actions/UserActions";
 import { generateGunPair } from "../../actions/AuthActions";
 import { payUser, resetPaymentRequest } from "../../actions/TransactionActions";
@@ -22,7 +23,7 @@ import { webTorrentClient, attachMedia } from "../../utils/Torrents";
 import Loader from "../../components/Loader";
 
 // Assets
-import bannerbg from "../../images/banner-bg.jpg";
+import defaultBanner from "../../images/banner-bg.jpg";
 import av1 from "../../images/av1.jpg";
 import shockLogo from "../../images/lightning-logo.svg";
 import "./css/index.css";
@@ -62,6 +63,7 @@ const UserPage = () => {
       console.log(user);
       setUserLoading(false);
       // Load user avatar in the background
+      dispatch(getUserHeader(publicKey));
       await dispatch(getUserAvatar(publicKey));
     } catch (err) {
       console.error(err);
@@ -226,7 +228,13 @@ const UserPage = () => {
     <div className="user-page">
       <div
         className="top-banner"
-        style={{ backgroundImage: `url(${bannerbg})` }}
+        style={{
+          backgroundImage: `url(${
+            profile.header
+              ? `data:image/png;base64,${profile.header}`
+              : defaultBanner
+          })`
+        }}
       ></div>
       <div className="user-details">
         <div

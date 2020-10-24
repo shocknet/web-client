@@ -16,7 +16,7 @@ const _filterGunProps = ([key, item]) => item && key !== "_" && key !== "#";
 export const getUserAvatar = publicKey => async dispatch => {
   const gunUser = Gun.user(publicKey);
   const avatar = await fetchPath({
-    path: "Profile/avatar",
+    path: "profileBinary/avatar",
     gunPointer: gunUser
   });
 
@@ -26,6 +26,21 @@ export const getUserAvatar = publicKey => async dispatch => {
   });
 
   return avatar;
+};
+
+export const getUserHeader = publicKey => async dispatch => {
+  const gunUser = Gun.user(publicKey);
+  const header = await fetchPath({
+    path: "profileBinary/header",
+    gunPointer: gunUser
+  });
+
+  dispatch({
+    type: ACTIONS.UPDATE_USER_PROFILE,
+    data: { header }
+  });
+
+  return header;
 };
 
 export const getUserProfile = publicKey => async dispatch => {
@@ -98,16 +113,15 @@ export const getWallTotalPages = publicKey => async dispatch => {
   return totalPages;
 };
 
-export const getUserWall = (publicKey, page = 0) => async dispatch => {
+export const getUserWall = publicKey => async dispatch => {
   try {
     const gunPointer = Gun.user(publicKey);
-    const gunPostsKey = `wall/pages/${page}/posts`;
+    const gunPostsKey = `posts`;
     const rawPosts = await fetchPath({
       path: gunPostsKey,
       gunPointer
     });
     console.log("Posts:", rawPosts);
-    console.log("Page:", page);
     const filteredRawPosts = Object.entries(rawPosts ?? {}).filter(
       _filterGunProps
     );
@@ -199,19 +213,18 @@ export const getUserWall = (publicKey, page = 0) => async dispatch => {
         return {
           ...(wallPost ?? {}),
           id,
-          contentItems: fetchedContentItems ?? [],
-          page
+          contentItems: fetchedContentItems ?? []
         };
       })
     );
 
-    console.log(`User wall page #${page}`, fetchedPosts);
+    console.log(`User wall`, fetchedPosts);
 
     const sortedPosts = fetchedPosts?.sort((a, b) => b.date - a.date);
 
     dispatch({
       type: ACTIONS.LOAD_USER_WALL,
-      data: { posts: sortedPosts, page: page }
+      data: { posts: sortedPosts, page: 0 }
     });
 
     return fetchedPosts;

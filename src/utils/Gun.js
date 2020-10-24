@@ -14,7 +14,10 @@ const peersConfig = safeParse(process.env.PEERS);
 
 const peers = peersConfig
   ? peersConfig
-  : ["http://gun.shock.network:8765/gun", "http://gun2.shock.network:8765/gun"];
+  : [
+      "http://gun.shock.network:8765/gun"
+      // "http://gun2.shock.network:8765/gun"
+    ];
 
 const wait = ms =>
   new Promise((resolve, reject) => {
@@ -56,6 +59,7 @@ const _isIncompleteGunResponse = data => {
 
   if (typeof data === "object") {
     const stringifiedData = JSON.stringify(data);
+    console.log(data);
 
     if (stringifiedData === "{}") {
       return true;

@@ -7,7 +7,6 @@ import Moment from "moment";
 
 import {
   getUserWall,
-  getWallTotalPages,
   resetUserWall,
   resetUserData,
   getUserProfile,
@@ -76,10 +75,7 @@ const UserPage = () => {
       console.log("Setting Loading status to:", true);
       setWallLoading(true);
       dispatch(resetUserWall());
-      const totalPages = await dispatch(getWallTotalPages(publicKey));
-      if (totalPages > 0) {
-        await dispatch(getUserWall(publicKey));
-      }
+      await dispatch(getUserWall(publicKey));
       console.log("Setting Loading status to:", false);
       setWallLoading(false);
     } catch (err) {
@@ -314,47 +310,43 @@ const UserPage = () => {
         <p className="tab active">Feed</p>
         <p className="tab">Services</p>
       </div>
-      <InfiniteScroll
+      {/* <InfiniteScroll
         initialLoad={false}
         pageStart={0}
         hasMore={wall.page < wall.totalPages - 1 && !wallLoading}
         loadMore={loadMorePosts}
         useWindow={true}
-      >
-        <div className="posts-holder">
-          {wall.posts.map(post => {
-            return (
-              <Suspense
-                fallback={
-                  <div className="post-loading">
-                    <Loader text="Loading Post..." />
-                  </div>
-                }
-                key={post.id}
-              >
-                <Post
-                  timestamp={post.date}
-                  contentItems={post.contentItems}
-                  username={username}
-                  avatar={
-                    profile.avatar
-                      ? `data:image/png;base64,${profile.avatar}`
-                      : av1
-                  }
-                  publicKey={publicKey}
-                  openTipModal={openTipModal}
-                  webTorrentClient={webTorrentClient}
-                  page={post.page}
-                  id={post.id}
-                  tipValue={post.tipValue ?? 0}
-                  tipCounter={post.tipCounter ?? 0}
-                  isOnlineNode={isOnlineNode}
-                />
-              </Suspense>
-            );
-          })}
-        </div>
-      </InfiniteScroll>
+      > */}
+      <div className="posts-holder">
+        {wall.posts.map(post => (
+          <Suspense
+            fallback={
+              <div className="post-loading">
+                <Loader text="Loading Post..." />
+              </div>
+            }
+            key={post.id}
+          >
+            <Post
+              timestamp={post.date}
+              contentItems={post.contentItems}
+              username={username}
+              avatar={
+                profile.avatar ? `data:image/png;base64,${profile.avatar}` : av1
+              }
+              publicKey={publicKey}
+              openTipModal={openTipModal}
+              webTorrentClient={webTorrentClient}
+              page={post.page}
+              id={post.id}
+              tipValue={post.tipValue ?? 0}
+              tipCounter={post.tipCounter ?? 0}
+              isOnlineNode={isOnlineNode}
+            />
+          </Suspense>
+        ))}
+      </div>
+      {/* </InfiniteScroll> */}
       {wallLoading ? (
         <Loader text={`Loading ${wall.page >= 0 ? "More" : "Wall"} Posts...`} />
       ) : null}

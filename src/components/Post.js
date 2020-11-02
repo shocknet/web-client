@@ -2,8 +2,9 @@ import React, { useEffect, useCallback, useState } from "react";
 import moment from "moment";
 import Tooltip from "react-tooltip";
 import { useDispatch } from "react-redux";
+import { useEmblaCarousel } from "embla-carousel/react";
+import classNames from "classnames";
 import { updateWallPost } from "../actions/UserActions";
-import { getCachedFile, renderCachedFile, saveFile } from "../utils/Cache";
 import lightning from "../images/lightning-logo.svg";
 import "./css/Post.css";
 import { listenPath, gunUser } from "../utils/Gun";
@@ -24,16 +25,24 @@ const Post = ({
   isOnlineNode
 }) => {
   const dispatch = useDispatch();
-  const [playState, setPlayState] = useState(false);
+  const [carouselRef, carouselAPI] = useEmblaCarousel({
+    slidesToScroll: 1,
+    align: "start"
+  });
 
-  const playVideo = (e, selector) => {
-    e.stopPropagation();
-    if (playState) {
-      return;
-    }
-    setPlayState(true);
-    const video = document.querySelector(selector);
-    video.play();
+  const [sliderLength, setSliderLength] = useState(0);
+  const [activeSlide, setActiveSlide] = useState(0);
+
+  const getMediaContent = () => {
+    return Object.entries(contentItems).filter(
+      ([_, item]) => item.type !== "text/paragraph"
+    );
+  };
+
+  const getTextContent = () => {
+    return Object.entries(contentItems).filter(
+      ([_, item]) => item.type === "text/paragraph"
+    );
   };
 
   const parseContent = ([key, item], index) => {
@@ -43,7 +52,7 @@ const Post = ({
 
     if (item.type === "image/embedded") {
       return (
-        <div className="media-container">
+        <div className="media-container" key={`${key}-${index}`}>
           <img
             className={`torrent-img-${id}-${key}`}
             data-torrent={item.magnetURI}
@@ -62,11 +71,11 @@ const Post = ({
 
     if (item.type === "video/embedded") {
       return (
-        <div className="media-container">
+        <div className="media-container" key={`${key}-${index}`}>
           <div
             className="video-container"
             style={{
-              cursor: !playState ? "pointer" : "auto"
+              cursor: "pointer"
             }}
             // onClick={e => playVideo(e, `.torrent-video-${id}-${key}`)}
           >
@@ -82,7 +91,7 @@ const Post = ({
               key={key}
               controls
               // {...(playState ? { controls: true } : { controls: false })}
-              data-played={`${playState}`}
+              data-played="false"
             />
           </div>
           {tipValue > 0 ? (
@@ -101,6 +110,42 @@ const Post = ({
   // useEffect(() => {
   //   attachMedia();
   // }, [contentItems.length]);
+
+  const nextSlide = useCallback(() => {
+    if (!carouselAPI) return;
+
+    if (carouselAPI.canScrollNext()) {
+      carouselAPI.scrollNext();
+    }
+  }, [carouselAPI]);
+
+  const prevSlide = useCallback(() => {
+    if (!carouselAPI) return;
+
+    if (carouselAPI.canScrollPrev()) {
+      carouselAPI.scrollPrev();
+    }
+  }, [carouselAPI]);
+
+  const handleUserKeyDown = useCallback(
+    e => {
+      if (sliderLength === 0) return;
+      const { key } = e;
+
+      if (key === "ArrowRight") {
+        nextSlide();
+      }
+
+      if (key === "ArrowLeft") {
+        prevSlide();
+      }
+    },
+    [sliderLength, prevSlide, nextSlide]
+  );
+
+  const updateActiveSlide = useCallback(() => {
+    setActiveSlide(carouselAPI.selectedScrollSnap());
+  }, [carouselAPI, setActiveSlide]);
 
   useEffect(() => {
     listenPath({
@@ -133,6 +178,19 @@ const Post = ({
     });
   }, [dispatch]);
 
+  useEffect(() => {
+    if (!carouselAPI) return;
+
+    carouselAPI.on("scroll", updateActiveSlide);
+    setSliderLength(carouselAPI.scrollSnapList().length);
+    window.addEventListener("keydown", handleUserKeyDown);
+
+    return () => {
+      window.removeEventListener("keydown", handleUserKeyDown);
+      carouselAPI.off("scroll", updateActiveSlide);
+    };
+  }, [carouselAPI, sliderLength]);
+
   const tipPost = useCallback(() => {
     if (!isOnlineNode) {
       return;
@@ -140,10 +198,9 @@ const Post = ({
 
     openTipModal({
       targetType: "post",
-      postID: id,
-      postPage: page
+      postID: id
     });
-  }, [id, page]);
+  }, [id]);
 
   useEffect(() => {
     Tooltip.rebuild();
@@ -167,7 +224,37 @@ const Post = ({
       </div>
 
       <div className="content">
-        {Object.entries(contentItems).map(parseContent)}
+        {getTextContent().map(parseContent)}
+        <div className="media-content-carousel">
+          {sliderLength > 1 ? (
+            <div className="media-carousel-controls-container">
+              <div
+                className="media-carousel-arrow fas fa-angle-left"
+                onClick={prevSlide}
+              ></div>
+              <div className="media-carousel-pages">
+                {Array.from({ length: sliderLength }).map((_, key) => (
+                  <div
+                    className={classNames({
+                      "media-carousel-page": true,
+                      "active-carousel-page": activeSlide === key
+                    })}
+                    onClick={() => carouselAPI?.scrollTo(key)}
+                  ></div>
+                ))}
+              </div>
+              <div
+                className="media-carousel-arrow fas fa-angle-right"
+                onClick={nextSlide}
+              ></div>
+            </div>
+          ) : null}
+          <div className="media-content-root" ref={carouselRef}>
+            <div className="media-content-container">
+              {getMediaContent().map(parseContent)}
+            </div>
+          </div>
+        </div>
       </div>
 
       <div className="actions">

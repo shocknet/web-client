@@ -179,7 +179,7 @@ const UserPage = () => {
   }, [fetchUserData]);
 
   useEffect(() => {
-    attachMedia(wall.posts);
+    attachMedia(wall.posts, false);
   }, [wall.posts.length]);
 
   useEffect(() => {

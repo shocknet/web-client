@@ -27,7 +27,7 @@ const Post = ({
   const dispatch = useDispatch();
   const [carouselRef, carouselAPI] = useEmblaCarousel({
     slidesToScroll: 1,
-    align: "start"
+    align: "center"
   });
 
   const [sliderLength, setSliderLength] = useState(0);

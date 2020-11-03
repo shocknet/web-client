@@ -37,7 +37,7 @@ const _getFileType = file => {
 
 export const webTorrentClient = new WebTorrent();
 
-export const attachMedia = (posts = []) => {
+export const attachMedia = (posts = [], torrentMode = true) => {
   const torrentTasks = posts
     .map(post => {
       const { contentItems, id } = post;
@@ -98,7 +98,15 @@ export const attachMedia = (posts = []) => {
                 const torrentElements = document.querySelectorAll(target);
                 console.log("Torrent Elements:", torrentElements);
                 torrentElements.forEach(torrentElement => {
-                  file.renderTo(torrentElement, fileType.options);
+                  if (torrentMode) {
+                    file.renderTo(torrentElement, fileType.options);
+                    return;
+                  }
+
+                  const contentURL = decodeURIComponent(
+                    item.magnetURI.replace(/.*(ws\=)/gi, "")
+                  );
+                  torrentElement.setAttribute("src", contentURL);
                 });
               });
 

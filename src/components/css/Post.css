@@ -203,6 +203,8 @@ i.fas.fa-play {
   max-width: 500px;
   overflow: hidden;
   border-radius: 8px;
+  align-self: center;
+  margin-bottom: 30px;
 }
 
 .media-content-root {

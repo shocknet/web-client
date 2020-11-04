@@ -70,7 +70,7 @@ const UserPage = () => {
     }
   }, [dispatch, publicKey]);
 
-  const fetchUserWallPages = useCallback(async () => {
+  const fetchUserWall = useCallback(async () => {
     try {
       console.log("Setting Loading status to:", true);
       setWallLoading(true);
@@ -132,10 +132,10 @@ const UserPage = () => {
     }
   }, [dispatch, paymentRequest]);
 
-  useEffect(() => {
-    fetchUserData();
-    fetchUserWallPages();
-    dispatch(generateGunPair());
+  const initializeUserWall = useCallback(async () => {
+    await fetchUserData();
+    await dispatch(generateGunPair());
+    fetchUserWall();
 
     // Subscribe for updates
     const lastSeenAppListener = listenPath({
@@ -177,6 +177,12 @@ const UserPage = () => {
       bioListener.off();
     };
   }, [fetchUserData]);
+
+  useEffect(() => {
+    const userWallInitializer = initializeUserWall();
+
+    return userWallInitializer;
+  }, [initializeUserWall]);
 
   useEffect(() => {
     attachMedia(wall.posts, false);

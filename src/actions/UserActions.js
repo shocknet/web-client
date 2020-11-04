@@ -119,7 +119,9 @@ export const getUserWall = publicKey => async dispatch => {
     const gunPostsKey = `posts`;
     const rawPosts = await fetchPath({
       path: gunPostsKey,
-      gunPointer
+      gunPointer,
+      retryLimit: 5,
+      retryDelay: 1000
     });
     console.log("Posts:", rawPosts);
     const filteredRawPosts = Object.entries(rawPosts ?? {}).filter(
@@ -129,12 +131,16 @@ export const getUserWall = publicKey => async dispatch => {
       filteredRawPosts.map(async ([id], key) => {
         const wallPost = await fetchPath({
           path: `${gunPostsKey}/${id}`,
-          gunPointer
+          gunPointer,
+          retryLimit: 5,
+          retryDelay: 1000
         });
         const contentItemsKey = `${gunPostsKey}/${id}/contentItems`;
         const contentItems = await fetchPath({
           path: contentItemsKey,
-          gunPointer
+          gunPointer,
+          retryLimit: 5,
+          retryDelay: 500
         });
         const filteredContentItems = Object.entries(contentItems).filter(
           _filterGunProps

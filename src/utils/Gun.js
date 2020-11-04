@@ -42,6 +42,7 @@ const _filterGunProps = ([key, item]) => item && key !== "_" && key !== "#";
 
 const _isIncompleteGunResponse = data => {
   try {
+    console.log("Incomplete Gun Response Check:", typeof data, data);
     if (data === null || data === undefined) {
       return true;
     }
@@ -68,13 +69,15 @@ const _isIncompleteGunResponse = data => {
       }
 
       const stringifiedData = JSON.stringify(data);
-      console.log(data);
+      console.log(data, stringifiedData);
 
       if (stringifiedData === "{}") {
         return true;
       }
 
       const filteredGunProps = Object.entries(data).filter(_filterGunProps);
+
+      console.log(filteredGunProps, filteredGunProps?.length);
 
       if (!filteredGunProps?.length) {
         return true;

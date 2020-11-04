@@ -308,7 +308,6 @@ const UserPage = () => {
 
       <div className="tabs-holder">
         <p className="tab active">Feed</p>
-        <p className="tab">Services</p>
       </div>
       {/* <InfiniteScroll
         initialLoad={false}

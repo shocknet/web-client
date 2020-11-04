@@ -41,38 +41,51 @@ const _randomString = length => {
 const _filterGunProps = ([key, item]) => item && key !== "_" && key !== "#";
 
 const _isIncompleteGunResponse = data => {
-  if (Array.isArray(data)) {
-    if (!data.length) {
+  try {
+    if (data === null || data === undefined) {
       return true;
     }
 
-    const incompleteCollection = data.reduce((empty, item) => {
-      if (empty) {
-        return empty;
+    if (Array.isArray(data)) {
+      if (!data.length) {
+        return true;
       }
 
-      return _isIncompleteGunResponse(item);
-    });
+      const incompleteCollection = data.reduce((empty, item) => {
+        if (empty) {
+          return empty;
+        }
 
-    return incompleteCollection;
-  }
+        return _isIncompleteGunResponse(item);
+      });
 
-  if (typeof data === "object") {
-    const stringifiedData = JSON.stringify(data);
-    console.log(data);
-
-    if (stringifiedData === "{}") {
-      return true;
+      return incompleteCollection;
     }
 
-    const filteredGunProps = Object.entries(data).filter(_filterGunProps);
+    if (typeof data === "object") {
+      if (!data) {
+        return true;
+      }
 
-    if (!filteredGunProps?.length) {
-      return true;
+      const stringifiedData = JSON.stringify(data);
+      console.log(data);
+
+      if (stringifiedData === "{}") {
+        return true;
+      }
+
+      const filteredGunProps = Object.entries(data).filter(_filterGunProps);
+
+      if (!filteredGunProps?.length) {
+        return true;
+      }
     }
-  }
 
-  return data === null || data === undefined;
+    return false;
+  } catch (err) {
+    console.warn("An error has occurred:", err);
+    return true;
+  }
 };
 
 const parseGunPath = ({ path, gunPointer }) =>

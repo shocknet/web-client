@@ -64,7 +64,7 @@ export const attachMedia = (posts = [], torrentMode = true) => {
                   options.formats.includes(extension)
                 )[0];
                 if (supportedFileType) {
-                  const [_, fileType] = supportedFileType;
+                  const [, fileType] = supportedFileType;
                   const matched = fileType.formats.includes(extension);
                   return matched;
                 }

@@ -55,6 +55,7 @@ const Post = ({
         <div className="media-container" key={`${key}-${index}`}>
           <img
             className={`torrent-img-${id}-${key}`}
+            alt="Post Media"
             data-torrent={item.magnetURI}
             data-file-key={index}
             key={key}
@@ -176,7 +177,7 @@ const Post = ({
         );
       }
     });
-  }, [dispatch]);
+  }, [dispatch, id, page, publicKey]);
 
   useEffect(() => {
     if (!carouselAPI) return;
@@ -189,7 +190,7 @@ const Post = ({
       window.removeEventListener("keydown", handleUserKeyDown);
       carouselAPI.off("scroll", updateActiveSlide);
     };
-  }, [carouselAPI, sliderLength]);
+  }, [carouselAPI, sliderLength, handleUserKeyDown, updateActiveSlide]);
 
   const tipPost = useCallback(() => {
     if (!isOnlineNode) {
@@ -200,7 +201,7 @@ const Post = ({
       targetType: "post",
       postID: id
     });
-  }, [id]);
+  }, [id, isOnlineNode, openTipModal]);
 
   useEffect(() => {
     Tooltip.rebuild();

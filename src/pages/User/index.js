@@ -1,7 +1,6 @@
 import React, { useEffect, useState, useCallback, Suspense } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { useParams } from "react-router-dom";
-import InfiniteScroll from "react-infinite-scroller";
 import QRCode from "react-qr-code";
 import Moment from "moment";
 
@@ -40,12 +39,13 @@ const UserPage = () => {
   const paymentRequest = useSelector(
     ({ transaction }) => transaction.paymentRequest
   );
-  // Reserved for future use @eslint-disable-next-line no-undef
+  // Reserved for future use
+  // eslint-disable-next-line no-unused-vars
   const [userLoading, setUserLoading] = useState(true);
   const [wallLoading, setWallLoading] = useState(true);
   const [tipModalOpen, setTipModalOpen] = useState(false);
   const [tipLoading, setTipLoading] = useState(false);
-  const [tipAmount, setTipAmount] = useState(0);
+  const [tipAmount, setTipAmount] = useState(10);
   const [isOnlineApp, setIsOnlineApp] = useState(false);
   const [isOnlineNode, setIsOnlineNode] = useState(false);
 
@@ -84,22 +84,6 @@ const UserPage = () => {
       setWallLoading(false);
     }
   }, [dispatch, publicKey]);
-
-  const loadMorePosts = useCallback(
-    async page => {
-      try {
-        console.log("Setting Loading status to (loadMorePosts):", true);
-        setWallLoading(true);
-        const posts = await dispatch(getUserWall(publicKey, page));
-        console.log("Setting Loading status to (loadMorePosts):", false, posts);
-        setWallLoading(false);
-      } catch (error) {
-        console.log("Setting Loading status to (loadMorePosts):", false);
-        setWallLoading(false);
-      }
-    },
-    [dispatch, publicKey]
-  );
 
   const sendTip = useCallback(async () => {
     try {
@@ -176,7 +160,7 @@ const UserPage = () => {
       displayNameListener.off();
       bioListener.off();
     };
-  }, [fetchUserData]);
+  }, [dispatch, fetchUserData, fetchUserWall, publicKey]);
 
   useEffect(() => {
     const userWallInitializer = initializeUserWall();
@@ -186,7 +170,7 @@ const UserPage = () => {
 
   useEffect(() => {
     attachMedia(wall.posts, false);
-  }, [wall.posts.length]);
+  }, [wall.posts]);
 
   useEffect(() => {
     if (onlineCheckTimer) {
@@ -209,6 +193,7 @@ const UserPage = () => {
     setOnlineCheckTimer(timer);
 
     return () => clearTimeout(onlineCheckTimer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [profile]);
 
   useEffect(() => {

@@ -7,12 +7,11 @@ const Counter = ({ value = 0 }) => {
   const [counterAnimation, setCounterAnimation] = useState("initial");
 
   useEffect(() => {
-    console.log("Value changed!", value, currentValue);
     setTimeout(() => setCounterAnimation("goUp"), 0);
     setTimeout(() => setCurrentValue(value), 200);
     setTimeout(() => setCounterAnimation("waitDown"), 200);
     setTimeout(() => setCounterAnimation("initial"), 400);
-  }, [value]);
+  }, [currentValue, value]);
 
   return (
     <div className="counter-container">

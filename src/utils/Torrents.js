@@ -64,7 +64,7 @@ export const attachMedia = (posts = [], torrentMode = true) => {
                   options.formats.includes(extension)
                 )[0];
                 if (supportedFileType) {
-                  const [name, fileType] = supportedFileType;
+                  const [_, fileType] = supportedFileType;
                   const matched = fileType.formats.includes(extension);
                   return matched;
                 }
@@ -104,7 +104,7 @@ export const attachMedia = (posts = [], torrentMode = true) => {
                   }
 
                   const contentURL = decodeURIComponent(
-                    item.magnetURI.replace(/.*(ws\=)/gi, "")
+                    item.magnetURI.replace(/.*(ws=)/gi, "")
                   );
                   torrentElement.setAttribute("src", contentURL);
                 });

@@ -249,37 +249,54 @@ const UserPage = () => {
         ></div>
 
         <div className="details">
-          <p className="username">{username}</p>
+          <div className="user-info">
+            <p className="username">{username}</p>
 
-          <div className="activity">
-            <p
-              className="status"
-              style={
-                !isOnlineApp
-                  ? {
-                      color: isOnlineApp
-                        ? "#01a33d"
-                        : isOnlineNode
-                        ? "#f2a900"
-                        : "#888"
-                    }
-                  : {}
-              }
-            >
-              {isOnlineApp
-                ? "Active Recently"
-                : isOnlineNode
-                ? "Node Online"
-                : "Node Offline"}
-            </p>
+            <div className="activity">
+              <p
+                className="status"
+                style={
+                  !isOnlineApp
+                    ? {
+                        color: isOnlineApp
+                          ? "#01a33d"
+                          : isOnlineNode
+                          ? "#f2a900"
+                          : "#888"
+                      }
+                    : {}
+                }
+              >
+                {isOnlineApp
+                  ? "Active Recently"
+                  : isOnlineNode
+                  ? "Node Online"
+                  : "Node Offline"}
+              </p>
+            </div>
+
+            {profile.bio ? (
+              <div className="desc">
+                <p className="title">Bio</p>
+                <p>{profile.bio}</p>
+              </div>
+            ) : null}
           </div>
 
-          {profile.bio ? (
-            <div className="desc">
-              <p className="title">Bio</p>
-              <p>{profile.bio}</p>
-            </div>
-          ) : null}
+          <div
+            className="send-tip-btn"
+            onClick={() => (isOnlineNode ? setTipModalOpen(true) : null)}
+            style={{
+              opacity: isOnlineNode ? 1 : 0.5,
+              cursor: isOnlineNode ? "pointer" : "default"
+            }}
+            data-tip={
+              !isOnlineNode ? "You can only tip users with online nodes" : null
+            }
+          >
+            <img src={shockLogo} alt="Bitcoin Lightning" />
+            <p>Send Tip</p>
+          </div>
 
           {/* <div className="followers">
               <div className="av-heads">
@@ -294,21 +311,6 @@ const UserPage = () => {
               </div>
               <p>Followed by username, username, and 4 others you know</p>
             </div> */}
-        </div>
-
-        <div
-          className="send-tip-btn"
-          onClick={() => (isOnlineNode ? setTipModalOpen(true) : null)}
-          style={{
-            opacity: isOnlineNode ? 1 : 0.5,
-            cursor: isOnlineNode ? "pointer" : "default"
-          }}
-          data-tip={
-            !isOnlineNode ? "You can only tip users with online nodes" : null
-          }
-        >
-          <img src={shockLogo} alt="Bitcoin Lightning" />
-          <p>Send Tip</p>
         </div>
       </div>
 
@@ -397,10 +399,8 @@ const UserPage = () => {
               </div>
             )}
             {!paymentRequest ? (
-              <div className="tip-modal-footer">
-                <div className="tip-modal-submit" onClick={() => sendTip()}>
-                  SEND TIP
-                </div>
+              <div className="tip-modal-footer" onClick={() => sendTip()}>
+                <div className="tip-modal-submit">SEND TIP</div>
               </div>
             ) : null}
           </div>

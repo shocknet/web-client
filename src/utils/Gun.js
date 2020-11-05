@@ -64,7 +64,7 @@ const _isIncompleteGunResponse = data => {
     }
 
     if (typeof data === "object") {
-      if (!data) {
+      if (!data || typeof data.err === "number") {
         return true;
       }
 

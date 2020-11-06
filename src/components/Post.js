@@ -150,7 +150,7 @@ const Post = ({
 
   useEffect(() => {
     listenPath({
-      path: `wall/pages/${page}/posts/${id}/tipCounter`,
+      path: `posts/${id}/tipCounter`,
       gunPointer: gunUser(publicKey),
       callback: data => {
         dispatch(
@@ -164,7 +164,7 @@ const Post = ({
       }
     });
     listenPath({
-      path: `wall/pages/${page}/posts/${id}/tipValue`,
+      path: `posts/${id}/tipValue`,
       gunPointer: gunUser(publicKey),
       callback: data => {
         dispatch(

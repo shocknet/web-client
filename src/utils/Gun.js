@@ -15,7 +15,7 @@ const peersConfig = safeParse(process.env.PEERS);
 const peers = peersConfig
   ? peersConfig
   : [
-      "http://gun.shock.network:8765/gun"
+      "https://gun.shock.network:8765/gun"
       // "http://gun2.shock.network:8765/gun"
     ];
 

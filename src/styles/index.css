@@ -1,10 +1,11 @@
 @font-face {
   font-family: shockicons;
-  src: url("/fonts/icomoon.eot?hqhemx");
-  src: url("/fonts/icomoon.eot?hqhemx#iefix") format("embedded-opentype"),
-    url("/fonts/icomoon.ttf?hqhemx") format("truetype"),
-    url("/fonts/icomoon.woff?hqhemx") format("woff"),
-    url("/fonts/icomoon.svg?hqhemx#icomoon") format("svg");
+  src: url("/web-client/fonts/icomoon.eot?hqhemx");
+  src: url("/web-client/fonts/icomoon.eot?hqhemx#iefix")
+      format("embedded-opentype"),
+    url("/web-client/fonts/icomoon.ttf?hqhemx") format("truetype"),
+    url("/web-client/fonts/icomoon.woff?hqhemx") format("woff"),
+    url("/web-client/fonts/icomoon.svg?hqhemx#icomoon") format("svg");
   font-weight: normal;
   font-style: normal;
   font-display: block;

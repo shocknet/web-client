@@ -53,7 +53,7 @@ export const getUserProfile = publicKey => async dispatch => {
     lastSeenNode
   ] = await Promise.all([
     fetchPath({
-      path: "bio",
+      path: "Profile/bio",
       gunPointer: gunUser
     }),
     fetchPath({

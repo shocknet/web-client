@@ -103,8 +103,28 @@
 
 .user-page .posts-holder .post .actions {
   display: flex;
-  justify-content: flex-end;
+  justify-content: center;
   align-items: center;
+}
+
+.icon-tip-btn {
+  font-size: 28px;
+  cursor: pointer;
+  text-shadow: 0 0 0px #4080b2;
+  transition: text-shadow 0.25s ease;
+}
+
+.icon-tip-btn:hover {
+  text-shadow: 0 0 4px #4080b2;
+}
+
+.tip-icon.icon-thin-feed::before {
+  color: #4285b9;
+  transition: color 0.25s ease;
+}
+
+.tip-icon.icon-thin-feed:hover::before {
+  color: #54a3e0;
 }
 
 .video-container {

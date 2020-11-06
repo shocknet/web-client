@@ -45,6 +45,16 @@ const Post = ({
     );
   };
 
+  const TipRibbon = () =>
+    tipValue > 0 ? (
+      <div className="ribbon-container">
+        <p className="ribbon-title">Total Tips</p>
+        <p className="ribbon-value">
+          {tipCounter} {tipCounter === 1 ? "Tip" : "Tips"}
+        </p>
+      </div>
+    ) : null;
+
   const parseContent = ([key, item], index) => {
     if (item.type === "text/paragraph") {
       return <p key={key}>{item.text}</p>;
@@ -60,12 +70,7 @@ const Post = ({
             data-file-key={index}
             key={key}
           />
-          {tipValue > 0 ? (
-            <div className="ribbon-container">
-              <p className="ribbon-title">Total Tips</p>
-              <p className="ribbon-value">{tipValue} Sats</p>
-            </div>
-          ) : null}
+          <TipRibbon />
         </div>
       );
     }
@@ -94,12 +99,7 @@ const Post = ({
               // {...(playState ? { controls: true } : { controls: false })}
               data-played="false"
             />
-            {tipValue > 0 ? (
-              <div className="ribbon-container">
-                <p className="ribbon-title">Total Tips</p>
-                <p className="ribbon-value">{tipValue} Sats</p>
-              </div>
-            ) : null}
+            <TipRibbon />
           </div>
         </div>
       );
@@ -260,6 +260,13 @@ const Post = ({
 
       <div className="actions">
         <div
+          className="icon-tip-btn"
+          data-tip="Tip this post"
+          onClick={tipPost}
+        >
+          <div className="tip-icon icon-thin-feed"></div>
+        </div>
+        {/* <div
           className="tip-btn-container"
           onClick={tipPost}
           data-tip={
@@ -280,8 +287,8 @@ const Post = ({
           <div className="tip-btn-text">
             <Counter value={tipCounter} /> {tipCounter === 1 ? "Tip" : "Tips"}
           </div>
-        </div>
-        <i className="fas fa-external-link-alt"></i>
+        </div> */}
+        {/* <i className="fas fa-external-link-alt"></i> */}
       </div>
     </div>
   );

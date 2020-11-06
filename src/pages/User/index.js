@@ -154,7 +154,7 @@ const UserPage = () => {
     });
 
     const bioListener = listenPath({
-      path: "bio",
+      path: "Profile/bio",
       gunPointer: gunUser(publicKey),
       callback: event => {
         dispatch(updateUserProfile({ bio: event }));

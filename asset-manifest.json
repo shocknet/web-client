@@ -1,0 +1,39 @@
+{
+  "files": {
+    "main.css": "/static/css/main.68d925a6.chunk.css",
+    "main.js": "/static/js/main.ecc0dddd.chunk.js",
+    "main.js.map": "/static/js/main.ecc0dddd.chunk.js.map",
+    "runtime-main.js": "/static/js/runtime-main.9552142b.js",
+    "runtime-main.js.map": "/static/js/runtime-main.9552142b.js.map",
+    "static/js/2.de1eea9f.chunk.js": "/static/js/2.de1eea9f.chunk.js",
+    "static/js/2.de1eea9f.chunk.js.map": "/static/js/2.de1eea9f.chunk.js.map",
+    "static/js/3.8d19ca2d.chunk.js": "/static/js/3.8d19ca2d.chunk.js",
+    "static/js/3.8d19ca2d.chunk.js.map": "/static/js/3.8d19ca2d.chunk.js.map",
+    "static/css/4.972814ed.chunk.css": "/static/css/4.972814ed.chunk.css",
+    "static/js/4.ca201152.chunk.js": "/static/js/4.ca201152.chunk.js",
+    "static/js/4.ca201152.chunk.js.map": "/static/js/4.ca201152.chunk.js.map",
+    "static/css/5.56a305cf.chunk.css": "/static/css/5.56a305cf.chunk.css",
+    "static/js/5.e14d85f8.chunk.js": "/static/js/5.e14d85f8.chunk.js",
+    "static/js/5.e14d85f8.chunk.js.map": "/static/js/5.e14d85f8.chunk.js.map",
+    "static/js/6.824f8b54.chunk.js": "/static/js/6.824f8b54.chunk.js",
+    "static/js/6.824f8b54.chunk.js.map": "/static/js/6.824f8b54.chunk.js.map",
+    "index.html": "/index.html",
+    "precache-manifest.031f98dc246ecaa4db4c609a43a8e7c1.js": "/precache-manifest.031f98dc246ecaa4db4c609a43a8e7c1.js",
+    "service-worker.js": "/service-worker.js",
+    "static/css/4.972814ed.chunk.css.map": "/static/css/4.972814ed.chunk.css.map",
+    "static/css/5.56a305cf.chunk.css.map": "/static/css/5.56a305cf.chunk.css.map",
+    "static/css/main.68d925a6.chunk.css.map": "/static/css/main.68d925a6.chunk.css.map",
+    "static/js/2.de1eea9f.chunk.js.LICENSE.txt": "/static/js/2.de1eea9f.chunk.js.LICENSE.txt",
+    "static/js/3.8d19ca2d.chunk.js.LICENSE.txt": "/static/js/3.8d19ca2d.chunk.js.LICENSE.txt",
+    "static/js/6.824f8b54.chunk.js.LICENSE.txt": "/static/js/6.824f8b54.chunk.js.LICENSE.txt",
+    "static/media/av1.jpg": "/static/media/av1.48bf5c6a.jpg",
+    "static/media/banner-bg.jpg": "/static/media/banner-bg.f59337b5.jpg",
+    "static/media/lightning-logo.svg": "/static/media/lightning-logo.ea3bd789.svg"
+  },
+  "entrypoints": [
+    "static/js/runtime-main.9552142b.js",
+    "static/js/3.8d19ca2d.chunk.js",
+    "static/css/main.68d925a6.chunk.css",
+    "static/js/main.ecc0dddd.chunk.js"
+  ]
+}

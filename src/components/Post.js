@@ -94,13 +94,13 @@ const Post = ({
               // {...(playState ? { controls: true } : { controls: false })}
               data-played="false"
             />
+            {tipValue > 0 ? (
+              <div className="ribbon-container">
+                <p className="ribbon-title">Total Tips</p>
+                <p className="ribbon-value">{tipValue} Sats</p>
+              </div>
+            ) : null}
           </div>
-          {tipValue > 0 ? (
-            <div className="ribbon-container">
-              <p className="ribbon-title">Total Tips</p>
-              <p className="ribbon-value">{tipValue} Sats</p>
-            </div>
-          ) : null}
         </div>
       );
     }

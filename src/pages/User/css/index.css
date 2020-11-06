@@ -198,6 +198,8 @@
   overflow: hidden;
   position: relative;
   z-index: 3;
+  width: 90%;
+  max-width: 620px;
 }
 
 .tip-modal-content {
@@ -279,6 +281,38 @@ p.tip-modal-instructions {
   background-color: #4db1ff;
 }
 
+.tip-modal-action-btns {
+  margin-top: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tip-modal-action-btns .tip-modal-action-btn:first-of-type {
+  margin-right: 15px;
+}
+
+.tip-modal-action-btn {
+  display: flex;
+  line-height: 1;
+  padding: 10px 40px;
+  border-radius: 4px;
+  background-color: #2a384a;
+  font-weight: bold;
+  font-size: 14px;
+  border: 2px solid #314054;
+  color: #ffffffcf;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.tip-modal-action-btn:hover {
+  background-color: #f2a90087;
+  border-color: #ad8220;
+  color: #fff;
+}
+
 @media only screen and (max-width: 570px) {
   .user-page .user-details {
     flex-direction: column;
@@ -301,5 +335,19 @@ p.tip-modal-instructions {
 
   .video-container .torrent-video {
     min-width: auto;
+  }
+
+  .tip-modal-action-btns {
+    flex-direction: column;
+  }
+
+  .tip-modal-action-btns .tip-modal-action-btn:first-of-type {
+    margin-right: 0;
+    margin-bottom: 20px;
+  }
+
+  .tip-modal-action-btns .tip-modal-action-btn {
+    width: 100%;
+    justify-content: center;
   }
 }

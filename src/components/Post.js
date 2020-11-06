@@ -5,10 +5,8 @@ import { useDispatch } from "react-redux";
 import { useEmblaCarousel } from "embla-carousel/react";
 import classNames from "classnames";
 import { updateWallPost } from "../actions/UserActions";
-import lightning from "../images/lightning-logo.svg";
 import "./css/Post.css";
 import { listenPath, gunUser } from "../utils/Gun";
-import Counter from "./Counter";
 
 const Post = ({
   id,

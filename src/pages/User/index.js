@@ -292,33 +292,12 @@ const UserPage = () => {
             <img src={shockLogo} alt="Bitcoin Lightning" />
             <p>Send Tip</p>
           </div>
-
-          {/* <div className="followers">
-              <div className="av-heads">
-                <div
-                  className="av"
-                  style={{ backgroundImage: `url(${av2})` }}
-                ></div>
-                <div
-                  className="av"
-                  style={{ backgroundImage: `url(${av3})` }}
-                ></div>
-              </div>
-              <p>Followed by username, username, and 4 others you know</p>
-            </div> */}
         </div>
       </div>
 
       <div className="tabs-holder">
         <p className="tab active">Feed</p>
       </div>
-      {/* <InfiniteScroll
-        initialLoad={false}
-        pageStart={0}
-        hasMore={wall.page < wall.totalPages - 1 && !wallLoading}
-        loadMore={loadMorePosts}
-        useWindow={true}
-      > */}
       <div className="posts-holder">
         {wall.posts.map(post => (
           <Suspense
@@ -348,7 +327,6 @@ const UserPage = () => {
           </Suspense>
         ))}
       </div>
-      {/* </InfiniteScroll> */}
       {wallLoading ? (
         <Loader text={`Loading ${wall.page >= 0 ? "More" : "Wall"} Posts...`} />
       ) : null}

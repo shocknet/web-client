@@ -208,12 +208,10 @@
   padding: 25px 10px;
   max-width: 620px;
   background-color: #1b2129;
-  /* justify-content: center; */
   align-items: center;
 }
 
 input.tip-modal-input {
-  /* align-self: flex-start; */
   width: 270px;
   padding: 6px 20px;
   border: 0;
@@ -222,7 +220,6 @@ input.tip-modal-input {
   color: #ffffffc9;
   font-weight: 600;
   font-family: Poppins;
-  /* line-height: 1; */
 }
 
 .tip-modal-footer {

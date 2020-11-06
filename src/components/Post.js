@@ -83,20 +83,13 @@ const Post = ({
             style={{
               cursor: "pointer"
             }}
-            // onClick={e => playVideo(e, `.torrent-video-${id}-${key}`)}
           >
-            {/* {!playState ? (
-              <div className="video-play-button">
-                <i className="fas fa-play"></i>
-              </div>
-            ) : null} */}
             <video
               className={`torrent-video torrent-video-${id}-${key}`}
               data-torrent={item.magnetURI}
               data-file-key={index}
               key={key}
               controls
-              // {...(playState ? { controls: true } : { controls: false })}
               data-played="false"
             />
             <TipRibbon />
@@ -288,7 +281,6 @@ const Post = ({
             <Counter value={tipCounter} /> {tipCounter === 1 ? "Tip" : "Tips"}
           </div>
         </div> */}
-        {/* <i className="fas fa-external-link-alt"></i> */}
       </div>
     </div>
   );

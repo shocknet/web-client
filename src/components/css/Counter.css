@@ -3,11 +3,9 @@
   overflow: hidden;
 }
 .counter-container .goUp {
-  /* display: inline-flex; */
   opacity: 1;
   transform: translate3d(0, 0px, 0);
   transition: transform 0.2s ease-in-out, opacity 0.2s ease-in-out;
-  /* height: 10px; */
   line-height: 1;
 }
 .counter-container .waitDown {

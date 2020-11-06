@@ -21,7 +21,7 @@ jobs:
       - name: Install and Build 🔧
         run: |
           yarn install
-          yarn build
+          CI="" yarn build
 
       - name: Deploy to GitHub Pages
         uses: JamesIves/github-pages-deploy-action@3.7.1

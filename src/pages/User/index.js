@@ -3,6 +3,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { useParams } from "react-router-dom";
 import QRCode from "react-qr-code";
 import Moment from "moment";
+import CopyClipboard from "react-copy-to-clipboard";
 
 import {
   getUserWall,
@@ -25,6 +26,7 @@ import defaultBanner from "../../images/banner-bg.jpg";
 import av1 from "../../images/av1.jpg";
 import shockLogo from "../../images/lightning-logo.svg";
 import "./css/index.css";
+import ReactTooltip from "react-tooltip";
 
 const Post = React.lazy(() => import("../../components/Post"));
 
@@ -48,6 +50,7 @@ const UserPage = () => {
   const [tipAmount, setTipAmount] = useState(10);
   const [isOnlineApp, setIsOnlineApp] = useState(false);
   const [isOnlineNode, setIsOnlineNode] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   const [onlineCheckTimer, setOnlineCheckTimer] = useState(null);
   const [tipMetadata, setTipMetadata] = useState({ targetType: "user" });
@@ -209,6 +212,15 @@ const UserPage = () => {
     setIsOnlineApp(isOnlineApp);
   }, [profile]);
 
+  const setCopiedStatus = useCallback(() => {
+    setCopied(true);
+    ReactTooltip.rebuild();
+    setTimeout(() => {
+      setCopied(false);
+      ReactTooltip.rebuild();
+    }, 500);
+  }, []);
+
   const username = profile.displayName ?? profile.alias;
 
   return (
@@ -368,6 +380,19 @@ const UserPage = () => {
                     bgColor="#4db1ff"
                     fgColor="#1b2129"
                   />
+                </div>
+                <div className="tip-modal-action-btns">
+                  <a
+                    href={`lightning:${paymentRequest}`}
+                    className="tip-modal-action-btn"
+                  >
+                    PAY INVOICE
+                  </a>
+                  <CopyClipboard text={paymentRequest} onCopy={setCopiedStatus}>
+                    <div className="tip-modal-action-btn">
+                      {copied ? "INVOICE COPIED!" : "COPY INVOICE"}
+                    </div>
+                  </CopyClipboard>
                 </div>
               </div>
             ) : (

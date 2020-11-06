@@ -123,6 +123,10 @@ const UserPage = () => {
     await fetchUserData();
     await dispatch(generateGunPair());
     fetchUserWall();
+  }, [dispatch, fetchUserData, fetchUserWall]);
+
+  useEffect(() => {
+    initializeUserWall();
 
     // Subscribe for updates
     const lastSeenAppListener = listenPath({
@@ -163,13 +167,7 @@ const UserPage = () => {
       displayNameListener.off();
       bioListener.off();
     };
-  }, [dispatch, fetchUserData, fetchUserWall, publicKey]);
-
-  useEffect(() => {
-    const userWallInitializer = initializeUserWall();
-
-    return userWallInitializer;
-  }, [initializeUserWall]);
+  }, [dispatch, initializeUserWall, publicKey]);
 
   useEffect(() => {
     attachMedia(wall.posts, false);

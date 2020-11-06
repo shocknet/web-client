@@ -327,5 +327,6 @@ i.fas.fa-play {
 
   .user-page .posts-holder .post .content img {
     border-radius: 0;
+    object-fit: cover;
   }
 }

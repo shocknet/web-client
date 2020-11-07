@@ -98,14 +98,20 @@ export const attachMedia = (posts = [], torrentMode = true) => {
                 const torrentElements = document.querySelectorAll(target);
                 console.log("Torrent Elements:", torrentElements);
                 torrentElements.forEach(torrentElement => {
-                  if (torrentMode) {
+                  const contentURL = decodeURIComponent(
+                    item.magnetURI.replace(/.*(ws=)/gi, "")
+                  );
+                  const [compatibleURL] = fileType.formats.filter(format =>
+                    contentURL
+                      .toLowerCase()
+                      .endsWith(`.${format.toLowerCase()}`)
+                  );
+
+                  if (torrentMode || !compatibleURL) {
                     file.renderTo(torrentElement, fileType.options);
                     return;
                   }
 
-                  const contentURL = decodeURIComponent(
-                    item.magnetURI.replace(/.*(ws=)/gi, "")
-                  );
                   torrentElement.setAttribute("src", contentURL);
                 });
               });

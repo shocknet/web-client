@@ -280,7 +280,7 @@ const UserPage = () => {
 
           <div
             className="send-tip-btn"
-            onClick={() => (isOnlineNode ? setTipModalOpen(true) : null)}
+            onClick={openTipModal}
             style={{
               opacity: isOnlineNode ? 1 : 0.5,
               cursor: isOnlineNode ? "pointer" : "default"

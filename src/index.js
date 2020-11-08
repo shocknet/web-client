@@ -10,7 +10,7 @@ import * as serviceWorker from "./serviceWorker";
 ReactDOM.render(
   <Provider store={store}>
     <React.StrictMode>
-      <Router basename="/web-client">
+      <Router basename="/">
         <App />
       </Router>
     </React.StrictMode>

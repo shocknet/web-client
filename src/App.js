@@ -11,8 +11,8 @@ function App() {
     <div className="App">
       <Suspense fallback={<Loader />}>
         <Switch>
-          <Route path="/user/:userId" component={UserPage} />
-          <Redirect to="/user/qsgziGQS99sPUxV1CRwwRckn9cG6cJ3prbDsrbL7qko.oRbCaVKwJFQURWrS1pFhkfAzrkEvkQgBRIUz9uoWtrg" />
+          <Route path="/:userId" component={UserPage} />
+          <Redirect to="/qsgziGQS99sPUxV1CRwwRckn9cG6cJ3prbDsrbL7qko.oRbCaVKwJFQURWrS1pFhkfAzrkEvkQgBRIUz9uoWtrg" />
         </Switch>
       </Suspense>
       <Tooltip backgroundColor="#3a4d67" effect="solid" />

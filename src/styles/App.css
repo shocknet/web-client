@@ -74,3 +74,34 @@
 .loading-circle-8 {
   animation-delay: 0.8s;
 }
+
+i.download-shockwallet-btn-icon {
+  margin-right: 10px;
+  font-size: 30px;
+  line-height: 0;
+  position: absolute;
+  left: 15px;
+}
+
+.download-shockwallet-btn {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  display: flex;
+  align-items: center;
+  padding: 15px 24px;
+  line-height: 1;
+  border-radius: 10px;
+  background-color: #4080b2;
+  color: white !important;
+  text-decoration: none;
+  font-weight: bold;
+  padding-left: 60px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.download-shockwallet-btn:hover {
+  background-color: #468dc4;
+  bottom: 25px;
+}

@@ -4,6 +4,7 @@ import { useParams } from "react-router-dom";
 import QRCode from "react-qr-code";
 import Moment from "moment";
 import CopyClipboard from "react-copy-to-clipboard";
+import { isIOS } from "react-device-detect";
 
 import {
   getUserWall,
@@ -391,6 +392,17 @@ const UserPage = () => {
             ) : null}
           </div>
         </div>
+      ) : null}
+      {!isIOS ? (
+        <a
+          href="https://github.com/shocknet/wallet/releases"
+          target="_blank"
+          rel="noreferrer noopener"
+          className="download-shockwallet-btn"
+        >
+          <i className="download-shockwallet-btn-icon fab fa-android"></i>
+          <p className="download-shockwallet-btn-text">Download ShockWallet</p>
+        </a>
       ) : null}
     </div>
   );

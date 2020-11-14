@@ -1,8 +1,17 @@
+# Shock Web Client
+
+The Shock Web-Client allows non-Shockwallet users to interact with your feed. This is a fully static client app which communicates to the network directly.
+
+This repo is automatically delivered to a github page at [Shock.Pub](https://shock.pub)
+
+Wallet users may direct the public to their feed via `https://shock.pub/your_public_key`
+
+## 
+
+<hr>
+
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
-## Available Scripts
-
-In the project directory, you can run:
 
 ### `yarn start`
 

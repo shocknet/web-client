@@ -6,7 +6,6 @@ This repo is automatically delivered to a github page at [Shock.Pub](https://sho
 
 Wallet users may direct the public to their feed via `https://shock.pub/your_public_key`
 
-## 
 
 <hr>
 

@@ -4,9 +4,11 @@ import Tooltip from "react-tooltip";
 import { useDispatch } from "react-redux";
 import { useEmblaCarousel } from "embla-carousel/react";
 import classNames from "classnames";
-import { updateWallPost } from "../actions/UserActions";
-import "./css/Post.css";
-import { listenPath, gunUser } from "../utils/Gun";
+import { updateWallPost } from "../../actions/UserActions";
+import "./css/index.css";
+import { listenPath, gunUser } from "../../utils/Gun";
+import Video from "./components/Video";
+import Image from "./components/Image";
 
 const Post = ({
   id,
@@ -43,16 +45,6 @@ const Post = ({
     );
   };
 
-  const TipRibbon = () =>
-    tipValue > 0 ? (
-      <div className="ribbon-container">
-        <p className="ribbon-title">Total Tips</p>
-        <p className="ribbon-value">
-          {tipCounter} {tipCounter === 1 ? "Tip" : "Tips"}
-        </p>
-      </div>
-    ) : null;
-
   const parseContent = ([key, item], index) => {
     if (item.type === "text/paragraph") {
       return <p key={key}>{item.text}</p>;
@@ -60,39 +52,29 @@ const Post = ({
 
     if (item.type === "image/embedded") {
       return (
-        <div className="media-container" key={`${key}-${index}`}>
-          <img
-            className={`torrent-img-${id}-${key}`}
-            alt="Post Media"
-            data-torrent={item.magnetURI}
-            data-file-key={index}
-            key={key}
-          />
-          <TipRibbon />
-        </div>
+        <Image
+          id={key}
+          item={item}
+          index={index}
+          postId={id}
+          tipCounter={tipCounter}
+          tipValue={tipValue}
+          key={`${id}-${index}`}
+        />
       );
     }
 
     if (item.type === "video/embedded") {
       return (
-        <div className="media-container" key={`${key}-${index}`}>
-          <div
-            className="video-container"
-            style={{
-              cursor: "pointer"
-            }}
-          >
-            <video
-              className={`torrent-video torrent-video-${id}-${key}`}
-              data-torrent={item.magnetURI}
-              data-file-key={index}
-              key={key}
-              controls
-              data-played="false"
-            />
-            <TipRibbon />
-          </div>
-        </div>
+        <Video
+          id={key}
+          item={item}
+          index={index}
+          postId={id}
+          tipCounter={tipCounter}
+          tipValue={tipValue}
+          key={`${id}-${index}`}
+        />
       );
     }
 

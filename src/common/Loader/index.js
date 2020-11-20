@@ -1,4 +1,5 @@
 import React from "react";
+import "./css/index.css";
 
 const Loader = ({ text = "Loading..." }) => (
   <div className="loading-wall">

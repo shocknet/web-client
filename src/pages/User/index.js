@@ -20,7 +20,7 @@ import { payUser, resetPaymentRequest } from "../../actions/TransactionActions";
 import { listenPath, gunUser } from "../../utils/Gun";
 import { webTorrentClient, attachMedia } from "../../utils/Torrents";
 
-import Loader from "../../components/Loader";
+import Loader from "../../common/Loader";
 
 // Assets
 import defaultBanner from "../../images/banner-bg.jpg";
@@ -29,7 +29,7 @@ import shockLogo from "../../images/lightning-logo.svg";
 import "./css/index.css";
 import ReactTooltip from "react-tooltip";
 
-const Post = React.lazy(() => import("../../components/Post"));
+const Post = React.lazy(() => import("../../common/Post"));
 
 const ONLINE_INTERVAL = 1 * 30 * 1000;
 

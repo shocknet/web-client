@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import "./css/Counter.css";
+import "./css/index.css";
 
 const Counter = ({ value = 0 }) => {
   const [currentValue, setCurrentValue] = useState(0);

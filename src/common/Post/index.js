@@ -14,14 +14,12 @@ const Post = ({
   id,
   timestamp,
   avatar,
-  page,
   tipCounter,
   tipValue,
   publicKey,
   openTipModal,
   contentItems = {},
   username,
-  webTorrentClient,
   isOnlineNode
 }) => {
   const dispatch = useDispatch();
@@ -150,7 +148,7 @@ const Post = ({
         );
       }
     });
-  }, [dispatch, id, page, publicKey]);
+  }, [dispatch, id, publicKey]);
 
   useEffect(() => {
     if (!carouselAPI) return;

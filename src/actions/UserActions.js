@@ -14,6 +14,7 @@ export const ACTIONS = {
 const _filterGunProps = ([key, item]) => item && key !== "_" && key !== "#";
 
 const GUN_POSTS_KEY = `posts`;
+const GUN_SHARED_POSTS_KEY = `sharedPosts`;
 
 export const getUserAvatar = publicKey => async dispatch => {
   const gunUser = Gun.user(publicKey);
@@ -87,6 +88,7 @@ export const fetchUserProfile = async ({
   ]);
 
   const user = {
+    publicKey,
     bio,
     displayName,
     alias,
@@ -133,13 +135,15 @@ export const getWallTotalPages = publicKey => async dispatch => {
 };
 
 export const getUserPost = async ({ id, gunPointer }) => {
+  const wallPostKey = `${GUN_POSTS_KEY}/${id}`;
+  const contentItemsKey = `${wallPostKey}/contentItems`;
+
   const wallPost = await fetchPath({
-    path: `${GUN_POSTS_KEY}/${id}`,
+    path: wallPostKey,
     gunPointer,
     retryLimit: 5,
     retryDelay: 1000
   });
-  const contentItemsKey = `${GUN_POSTS_KEY}/${id}/contentItems`;
   const contentItems = await fetchPath({
     path: contentItemsKey,
     gunPointer,
@@ -223,30 +227,65 @@ export const getUserPost = async ({ id, gunPointer }) => {
   return {
     ...(wallPost ?? {}),
     id,
-    contentItems: fetchedContentItems ?? []
+    contentItems: fetchedContentItems ?? [],
+    type: "post"
+  };
+};
+
+export const getSharedPost = async ({ id, sharedGunPointer }) => {
+  const sharedPostKey = `${GUN_SHARED_POSTS_KEY}/${id}`;
+
+  const sharedPost = await fetchPath({
+    path: sharedPostKey,
+    gunPointer: sharedGunPointer,
+    retryLimit: 5,
+    retryDelay: 1000
+  });
+
+  return {
+    id,
+    date: sharedPost.shareDate,
+    originalAuthor: sharedPost.originalAuthor,
+    type: "shared"
   };
 };
 
 export const getUserWall = publicKey => async dispatch => {
   try {
     const gunPointer = Gun.user(publicKey);
-    const rawPosts = await fetchPath({
-      path: GUN_POSTS_KEY,
-      gunPointer,
-      retryLimit: 5,
-      retryDelay: 1000
-    });
+    const [rawPosts, rawSharedPosts] = await Promise.all([
+      fetchPath({
+        path: GUN_POSTS_KEY,
+        gunPointer,
+        retryLimit: 5,
+        retryDelay: 1000
+      }),
+      fetchPath({
+        path: GUN_SHARED_POSTS_KEY,
+        gunPointer
+      })
+    ]);
     console.log("Posts:", rawPosts);
+    console.log("Shared Posts:", rawSharedPosts);
     const filteredRawPosts = Object.entries(rawPosts ?? {}).filter(
       _filterGunProps
     );
-    const fetchedPosts = await Promise.all(
-      filteredRawPosts.map(([id], key) => getUserPost({ id, gunPointer }))
+    const filteredRawSharedPosts = Object.entries(rawSharedPosts ?? {}).filter(
+      _filterGunProps
     );
+    const fetchedPosts = await Promise.all([
+      ...filteredRawPosts.map(([id], key) => getUserPost({ id, gunPointer })),
+      ...filteredRawSharedPosts.map(([id], key) =>
+        getSharedPost({
+          id,
+          sharedGunPointer: gunPointer
+        })
+      )
+    ]);
 
     console.log(`User wall`, fetchedPosts);
 
-    const sortedPosts = fetchedPosts?.sort((a, b) => b.date - a.date);
+    const sortedPosts = fetchedPosts.sort((a, b) => b.date - a.date);
 
     dispatch({
       type: ACTIONS.LOAD_USER_WALL,

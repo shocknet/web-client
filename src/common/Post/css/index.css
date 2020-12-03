@@ -260,6 +260,9 @@ img.torrent-img {
 
 [data-rmiz-wrap="visible"],
 [data-rmiz-wrap="hidden"] {
+  width: 100%;
+  max-width: 700px;
+  max-height: 700px;
   opacity: 1;
   visibility: visible;
   transition: all 0.25s ease;
@@ -290,6 +293,15 @@ img.enlarged-img {
 
 .user-page .posts-holder .post .content img.enlarged-img {
   display: none;
+}
+
+.user-page .posts-holder .post.shared-post {
+  background-color: #1b2129a6;
+  border: 1px solid #4080b291;
+}
+
+.user-page .posts-holder .post.shared-post > .head {
+  opacity: 0.8;
 }
 
 .media-content-container .media-container {

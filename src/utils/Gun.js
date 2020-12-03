@@ -116,6 +116,7 @@ export const fetchPath = ({
       console.log("Retrying event:", path, `${_retryCount}/${retryLimit}`);
     }
     const GunContext = parseGunPath({ path, gunPointer });
+    console.log("Fetching Path:", path);
     GunContext[method](async event => {
       console.log(path + " Response:", event);
       if (retryCondition && retryCondition(event)) {
@@ -223,7 +224,13 @@ export const authUser = (alias, pass) =>
     });
   });
 
-export const gunUser = publicKey => Gun.user(publicKey);
+export const gunUser = publicKey => {
+  console.log("Getting Gun User:", publicKey);
+  if (!publicKey) {
+    throw new Error("Undefined public key");
+  }
+  return Gun.user(publicKey);
+};
 
 // Magic number provided from GunDB docs
 export const DEFAULT_ONCE_WAIT_MS = 99;

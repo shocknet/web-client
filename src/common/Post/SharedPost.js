@@ -8,8 +8,13 @@ import {
   fetchUserProfile
 } from "../../actions/UserActions";
 import { listenPath, gunUser, Gun } from "../../utils/Gun";
-import "../Post/css/index.css";
+
 import Post from ".";
+
+import av1 from "../../images/av1.jpg";
+import "../Post/css/index.css";
+import { attachMedia } from "../../utils/Torrents";
+import Loader from "../Loader";
 
 const SharedPost = ({
   sharedPostId,
@@ -58,29 +63,20 @@ const SharedPost = ({
     });
   }, [dispatch, sharedPostId, sharerPublicKey]);
 
-  const tipPost = useCallback(() => {
-    if (!isOnlineNode) {
-      return;
-    }
-
-    openTipModal({
-      targetType: "post",
-      postID: sharedPostId
-    });
-  }, [isOnlineNode, openTipModal, sharedPostId]);
-
   const loadPost = useCallback(async () => {
     setPostLoading(true);
+    if (!postPublicKey) return;
     const [userProfile, userPost] = await Promise.all([
       fetchUserProfile({ publicKey: postPublicKey, includeAvatar: true }),
       getUserPost({
         id: postID,
-        gunPointer: Gun.user(postPublicKey)
+        gunPointer: gunUser(postPublicKey)
       })
     ]);
     setPostUser(userProfile);
     setPostContent(userPost);
     setPostLoading(false);
+    attachMedia([userPost], false);
   }, [postID, postPublicKey]);
 
   useEffect(() => {
@@ -89,7 +85,7 @@ const SharedPost = ({
   }, [loadPost]);
 
   return (
-    <div className="post">
+    <div className="post shared-post">
       <div className="head">
         <div className="user">
           <div
@@ -107,24 +103,26 @@ const SharedPost = ({
 
       <div className="shared-content">
         {postLoading ? (
-          <div className="loading" />
+          <Loader text="Loading Post..." />
         ) : postContent && postUser ? (
           <Post
             id={postContent.id}
-            timestamp={postContent.timestamp}
-            avatar={postUser.avatar}
+            timestamp={postContent.date}
+            avatar={
+              postUser.avatar ? `data:image/png;base64,${postUser.avatar}` : av1
+            }
             tipCounter={postContent.tipCounter}
             tipValue={postContent.tipValue}
-            publicKey={postContent.publicKey}
+            publicKey={postPublicKey}
             openTipModal={openTipModal}
             contentItems={postContent.contentItems}
-            username={postUser.username}
+            username={postUser.displayName ?? postUser.alias}
             isOnlineNode={isOnlineNode}
           />
         ) : null}
       </div>
 
-      <div className="actions">
+      {/* <div className="actions">
         <div
           className="icon-tip-btn"
           data-tip="Tip this post"
@@ -132,7 +130,7 @@ const SharedPost = ({
         >
           <div className="tip-icon icon-thin-feed"></div>
         </div>
-      </div>
+      </div> */}
     </div>
   );
 };

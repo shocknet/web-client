@@ -30,6 +30,7 @@ import "./css/index.css";
 import ReactTooltip from "react-tooltip";
 
 const Post = React.lazy(() => import("../../common/Post"));
+const SharedPost = React.lazy(() => import("../../common/Post/SharedPost"));
 
 const ONLINE_INTERVAL = 1 * 30 * 1000;
 
@@ -171,7 +172,10 @@ const UserPage = () => {
   }, [dispatch, initializeUserWall, publicKey]);
 
   useEffect(() => {
-    attachMedia(wall.posts, false);
+    attachMedia(
+      wall.posts.filter(post => post.type === "post").map(post => post),
+      false
+    );
   }, [wall.posts]);
 
   useEffect(() => {
@@ -221,6 +225,70 @@ const UserPage = () => {
   }, []);
 
   const username = profile.displayName ?? profile.alias;
+
+  const renderPost = useCallback(
+    post => {
+      const avatar = profile.avatar
+        ? `data:image/png;base64,${profile.avatar}`
+        : av1;
+
+      if (post.type === "shared") {
+        const { originalAuthor } = post;
+        console.log("originalAuthor:", originalAuthor);
+        return (
+          <Suspense
+            fallback={
+              <div className="post-loading">
+                <Loader text="Loading Post..." />
+              </div>
+            }
+            key={post.id}
+          >
+            <SharedPost
+              postID={post.id}
+              postPublicKey={post.originalAuthor}
+              sharedPostId={post.id}
+              sharedTimestamp={post.date}
+              sharerAvatar={avatar}
+              sharerPublicKey={publicKey}
+              sharerUsername={username}
+              isOnlineNode={isOnlineNode}
+              openTipModal={openTipModal}
+            />
+          </Suspense>
+        );
+      }
+
+      if (post.type === "post") {
+        return (
+          <Suspense
+            fallback={
+              <div className="post-loading">
+                <Loader text="Loading Post..." />
+              </div>
+            }
+            key={post.id}
+          >
+            <Post
+              timestamp={post.date}
+              contentItems={post.contentItems}
+              username={username}
+              avatar={avatar}
+              publicKey={publicKey}
+              openTipModal={openTipModal}
+              webTorrentClient={webTorrentClient}
+              page={post.page}
+              id={post.id}
+              tipValue={post.tipValue ?? 0}
+              tipCounter={post.tipCounter ?? 0}
+              isOnlineNode={isOnlineNode}
+            />
+          </Suspense>
+        );
+      }
+    },
+    [isOnlineNode, profile.avatar, publicKey, username]
+  );
 
   return (
     <div className="user-page">
@@ -300,33 +368,7 @@ const UserPage = () => {
         <p className="tab active">Feed</p>
       </div>
       <div className="posts-holder">
-        {wall.posts.map(post => (
-          <Suspense
-            fallback={
-              <div className="post-loading">
-                <Loader text="Loading Post..." />
-              </div>
-            }
-            key={post.id}
-          >
-            <Post
-              timestamp={post.date}
-              contentItems={post.contentItems}
-              username={username}
-              avatar={
-                profile.avatar ? `data:image/png;base64,${profile.avatar}` : av1
-              }
-              publicKey={publicKey}
-              openTipModal={openTipModal}
-              webTorrentClient={webTorrentClient}
-              page={post.page}
-              id={post.id}
-              tipValue={post.tipValue ?? 0}
-              tipCounter={post.tipCounter ?? 0}
-              isOnlineNode={isOnlineNode}
-            />
-          </Suspense>
-        ))}
+        {wall.posts.map(post => renderPost(post))}
       </div>
       {wallLoading ? (
         <Loader text={`Loading ${wall.page >= 0 ? "More" : "Wall"} Posts...`} />

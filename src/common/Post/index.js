@@ -9,6 +9,7 @@ import "./css/index.css";
 import { listenPath, gunUser } from "../../utils/Gun";
 import Video from "./components/Video";
 import Image from "./components/Image";
+import { Link } from "react-router-dom";
 
 const Post = ({
   id,
@@ -182,14 +183,15 @@ const Post = ({
     <div className="post">
       <div className="head">
         <div className="user">
-          <div
+          <Link
             className="av"
+            to={`/${publicKey}`}
             style={{
               backgroundImage: `url(${avatar})`
             }}
-          ></div>
+          />
           <div className="details">
-            <p>{username}</p>
+            <Link to={`/${publicKey}`}>{username}</Link>
             <p>{moment.utc(timestamp).fromNow()}</p>
           </div>
         </div>

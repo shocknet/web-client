@@ -68,9 +68,12 @@
   margin-right: 10px;
 }
 
-.user-page .posts-holder .post .head .user .details p:first-of-type {
+.user-page .posts-holder .post .head .user .details p:first-of-type,
+.user-page .posts-holder .post .head .user .details a {
   font-size: 20px;
   margin-bottom: 0px;
+  text-decoration: none;
+  color: white;
 }
 
 .user-page .posts-holder .post .head .user .details p:last-of-type {
@@ -185,6 +188,7 @@ i.fas.fa-play {
   position: relative;
   display: flex;
   overflow: hidden;
+  justify-content: center;
 }
 
 .ribbon-container {

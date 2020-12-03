@@ -233,8 +233,6 @@ const UserPage = () => {
         : av1;
 
       if (post.type === "shared") {
-        const { originalAuthor } = post;
-        console.log("originalAuthor:", originalAuthor);
         return (
           <Suspense
             fallback={

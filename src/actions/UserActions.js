@@ -216,6 +216,18 @@ export const getUserPost = async ({ id, gunPointer }) => {
           type
         };
       }
+      if (type === "stream/embedded") {
+        const magnetURI = await fetchPath({
+            path: `${contentItemsKey}/${id}/magnetURI`,
+            gunPointer
+          })
+        return {
+          magnetURI,
+          width:0,
+          height:0,
+          type
+        };
+      }
 
       return {
         text: "Unsupported media type",

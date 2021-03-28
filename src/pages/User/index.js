@@ -107,7 +107,7 @@ const UserPage = () => {
     }
   }, [dispatch, me, publicKey, tipAmount, tipMetadata]);
 
-  const openTipModal = (metadata = { targetType: "user" }) => {
+  const openTipModal = (metadata = { targetType: "spontaneousPayment" }) => {
     setTipMetadata(metadata);
     setTipModalOpen(true);
   };

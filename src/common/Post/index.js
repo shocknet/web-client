@@ -170,8 +170,8 @@ const Post = ({
     }
 
     openTipModal({
-      targetType: "post",
-      postID: id
+      targetType: "tip",
+      ackInfo: id
     });
   }, [id, isOnlineNode, openTipModal]);
 

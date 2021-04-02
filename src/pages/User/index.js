@@ -441,7 +441,7 @@ const UserPage = () => {
           className="download-shockwallet-btn"
         >
           <i className="download-shockwallet-btn-icon fab user"></i>
-          <p className="download-shockwallet-btn-text">Create a ShockWallet</p>
+          <p className="download-shockwallet-btn-text">Create a Shockwallet</p>
         </a>
       ) : null}
     </div>

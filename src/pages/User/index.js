@@ -440,7 +440,7 @@ const UserPage = () => {
           rel="noreferrer noopener"
           className="download-shockwallet-btn"
         >
-          <i className="download-shockwallet-btn-icon fab fa-user"></i>
+          <i className="download-shockwallet-btn-icon fab user"></i>
           <p className="download-shockwallet-btn-text">Create a ShockWallet</p>
         </a>
       ) : null}

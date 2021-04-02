@@ -435,13 +435,13 @@ const UserPage = () => {
       ) : null}
       {!isIOS ? (
         <a
-          href="https://github.com/shocknet/wallet/releases"
+          href="https://wallet.shock.pub"
           target="_blank"
           rel="noreferrer noopener"
           className="download-shockwallet-btn"
         >
-          <i className="download-shockwallet-btn-icon fab fa-android"></i>
-          <p className="download-shockwallet-btn-text">Download ShockWallet</p>
+          <i className="download-shockwallet-btn-icon fab fa-user"></i>
+          <p className="download-shockwallet-btn-text">Create a ShockWallet</p>
         </a>
       ) : null}
     </div>

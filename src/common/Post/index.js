@@ -6,7 +6,7 @@ import { useEmblaCarousel } from "embla-carousel/react";
 import classNames from "classnames";
 import { updateWallPost } from "../../actions/UserActions";
 import "./css/index.css";
-import { listenPath, gunUser } from "../../utils/Gun";
+import { gunUser, fetchPath } from "../../utils/Gun";
 import Video from "./components/Video";
 import Image from "./components/Image";
 import Stream from "./components/Stream";
@@ -136,34 +136,29 @@ const Post = ({
   }, [carouselAPI, setActiveSlide]);
 
   useEffect(() => {
-    listenPath({
-      path: `posts/${id}/tipCounter`,
+    fetchPath({
+      path:`posts/${id}/tipsSet`,
       gunPointer: gunUser(publicKey),
-      callback: data => {
-        dispatch(
-          updateWallPost({
-            postID: id,
-            data: {
-              tipCounter: data
-            }
-          })
-        );
-      }
-    });
-    listenPath({
-      path: `posts/${id}/tipValue`,
-      gunPointer: gunUser(publicKey),
-      callback: data => {
-        dispatch(
-          updateWallPost({
-            postID: id,
-            data: {
-              tipValue: data
-            }
-          })
-        );
-      }
-    });
+      method:'load'
+    }).then(data => {
+      const tipSet = data
+        ? Object.values(data)
+        : [];
+      const lenSet = tipSet.length;
+      const tot =
+        lenSet > 0
+        ? tipSet.reduce((acc, val) => Number(val) + Number(acc))
+        : 0;
+      dispatch(
+        updateWallPost({
+          postID: id,
+          data: {
+            tipValue: tot,
+            tipCounter: lenSet
+          }
+        })
+      );
+    })
   }, [dispatch, id, publicKey]);
 
   useEffect(() => {

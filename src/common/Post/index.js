@@ -32,7 +32,25 @@ const Post = ({
 
   const [sliderLength, setSliderLength] = useState(0);
   const [activeSlide, setActiveSlide] = useState(0);
+  const [liveStatus,setLiveStatus] = useState('')
 
+  //effect for liveStatus
+  useEffect(() =>{
+    const values = Object.values(contentItems)
+    const videoContent = values.find(item => item.type === 'video/embedded' && item.liveStatus === 'wasLive')
+    const streamContent = values.find(item => item.type === 'stream/embedded' && item.liveStatus === 'live')
+    let status = ''
+    if(videoContent){
+      status = videoContent.liveStatus
+    }
+    if(streamContent){
+      status = streamContent.liveStatus
+    }
+    if(status){
+      setLiveStatus(status)
+    }
+  },[contentItems,setLiveStatus])
+  
   const getMediaContent = () => {
     return Object.entries(contentItems).filter(
       ([_, item]) => item.type !== "text/paragraph"
@@ -201,7 +219,14 @@ const Post = ({
             }}
           />
           <div className="details">
-            <Link to={`/${publicKey}`}>{username}</Link>
+            <div className="username">
+              <Link to={`/otherUser/${publicKey}`}>{username}</Link>
+              {liveStatus && <p className="liveStatus">
+                {liveStatus} 
+                <i className={`fas fa-circle liveStatusIcon ${liveStatus === 'live' ? "liveIcon" : ""}`}></i>
+                </p>
+              }
+            </div>
             <p>{moment.utc(timestamp).fromNow()}</p>
           </div>
         </div>

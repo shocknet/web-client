@@ -13,11 +13,11 @@ function App() {
       <Suspense fallback={<Loader />}>
         <Switch>
           <Route path="/user/:userId" component={UserPage} />
+          <Route path="/:userId/:type/:postId" component={UserPage} />
           <Route path="/:userId" component={UserPage} />
           <Redirect to="/qsgziGQS99sPUxV1CRwwRckn9cG6cJ3prbDsrbL7qko.oRbCaVKwJFQURWrS1pFhkfAzrkEvkQgBRIUz9uoWtrg" />
         </Switch>
       </Suspense>
-      <Tooltip backgroundColor="#3a4d67" effect="solid" />
     </div>
   );
 }

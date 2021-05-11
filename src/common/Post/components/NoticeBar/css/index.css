@@ -1,0 +1,9 @@
+.notice-bar {
+  padding: 10px 30px;
+  background-color: #4080b2;
+  font-weight: bold;
+}
+
+.notice-bar i {
+  margin-right: 12px;
+}

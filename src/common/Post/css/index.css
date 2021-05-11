@@ -41,7 +41,6 @@
 
 .user-page .posts-holder .post {
   width: 100%;
-  padding: 30px;
   background-color: #1b2129;
   border: 1px solid #4080b2;
   margin-bottom: 25px;
@@ -51,12 +50,14 @@
   display: flex;
   justify-content: space-between;
   width: 100%;
+  padding: 30px;
+  padding-bottom: 0;
+  margin-bottom: 15px;
 }
 
 .user-page .posts-holder .post .head .user {
   display: flex;
   align-items: center;
-  margin-bottom: 15px;
 }
 
 .user-page .posts-holder .post .head .user .av {
@@ -85,6 +86,7 @@
   display: flex;
   flex-direction: column;
   align-items: flex-start;
+  padding: 0 30px;
 }
 
 .post .content p {
@@ -104,10 +106,16 @@
   transition: all 0.25s ease;
 }
 
+.post .shared-content {
+  padding: 0 30px;
+}
+
 .user-page .posts-holder .post .actions {
   display: flex;
-  justify-content: center;
+  justify-content: space-between;
   align-items: center;
+  padding: 30px;
+  padding-top: 0;
 }
 
 .icon-tip-btn {
@@ -117,17 +125,28 @@
   transition: text-shadow 0.25s ease;
 }
 
-.icon-tip-btn:hover {
+.icon-tip-btn:hover,
+.share-btn:hover {
   text-shadow: 0 0 4px #4080b2;
 }
 
-.tip-icon.icon-thin-feed::before {
+.tip-icon.icon-thin-feed::before,
+.share-btn i::before {
   color: #4285b9;
   transition: color 0.25s ease;
 }
 
-.tip-icon.icon-thin-feed:hover::before {
+.tip-icon.icon-thin-feed:hover::before,
+.share-btn i:hover::before {
   color: #54a3e0;
+}
+
+.post .actions i {
+  width: 28px;
+}
+
+.share-btn {
+  cursor: pointer;
 }
 
 .video-container {
@@ -381,13 +400,18 @@ img.enlarged-img {
   }
 
   .user-page .posts-holder .post {
-    padding: 30px 0;
     border-left: 0;
     border-right: 0;
   }
 
   .user-page .posts-holder .post .head {
     padding: 0 20px;
+    padding-top: 20px;
+  }
+
+  .user-page .posts-holder .post .content,
+  .user-page .posts-holder .post .shared-content {
+    padding: 0;
   }
 
   .user-page .posts-holder .post .content p {
@@ -396,6 +420,7 @@ img.enlarged-img {
 
   .user-page .posts-holder .post .actions {
     padding: 0 20px;
+    padding-bottom: 20px;
   }
 
   .media-content-carousel {

@@ -7,7 +7,7 @@ import {
   getUserPost,
   fetchUserProfile
 } from "../../actions/UserActions";
-import { listenPath, gunUser, Gun } from "../../utils/Gun";
+import { listenPath, gunUser } from "../../utils/Gun";
 
 import Post from ".";
 
@@ -15,6 +15,7 @@ import av1 from "../../images/av1.jpg";
 import "../Post/css/index.css";
 import { attachMedia } from "../../utils/Torrents";
 import Loader from "../Loader";
+import NoticeBar from "./components/NoticeBar";
 
 const SharedPost = ({
   sharedPostId,
@@ -25,7 +26,8 @@ const SharedPost = ({
   isOnlineNode,
   postID,
   postPublicKey,
-  openTipModal
+  openTipModal,
+  pinned
 }) => {
   const dispatch = useDispatch();
   const [postLoading, setPostLoading] = useState(true);
@@ -86,6 +88,7 @@ const SharedPost = ({
 
   return (
     <div className="post shared-post">
+      <NoticeBar text="Linked post" visible={pinned} />
       <div className="head">
         <div className="user">
           <div
@@ -118,6 +121,8 @@ const SharedPost = ({
             contentItems={postContent.contentItems}
             username={postUser.displayName ?? postUser.alias}
             isOnlineNode={isOnlineNode}
+            shared={true}
+            pinned={pinned}
           />
         ) : null}
       </div>

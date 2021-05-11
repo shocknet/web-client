@@ -4,7 +4,8 @@ export const ACTIONS = {
   LOAD_USER_WALL: "wall/load",
   LOAD_USER_WALL_TOTAL_PAGES: "wall/loadTotalPages",
   RESET_USER_WALL: "wall/reset",
-  UPDATE_WALL_POST: "wallPost/update",
+  PIN_WALL_POST: "wall/pin",
+  UPDATE_WALL_POST: "wall/post/update",
   RESET_USER_DATA: "user/reset",
   LOAD_USER_DATA: "user/load",
   LOAD_USER_AVATAR: "avatar/load",
@@ -218,13 +219,13 @@ export const getUserPost = async ({ id, gunPointer }) => {
       }
       if (type === "stream/embedded") {
         const magnetURI = await fetchPath({
-            path: `${contentItemsKey}/${id}/magnetURI`,
-            gunPointer
-          })
+          path: `${contentItemsKey}/${id}/magnetURI`,
+          gunPointer
+        });
         return {
           magnetURI,
-          width:0,
-          height:0,
+          width: 0,
+          height: 0,
           type
         };
       }
@@ -307,6 +308,49 @@ export const getUserWall = publicKey => async dispatch => {
     return fetchedPosts;
   } catch (err) {
     console.error(err);
+  }
+};
+
+export const getPinnedPost = ({
+  publicKey,
+  postId,
+  type = "post"
+}) => async dispatch => {
+  console.log("Getting Pinned post:", publicKey, postId, type);
+
+  if (!publicKey || !postId) {
+    return;
+  }
+
+  const gunPointer = Gun.user(publicKey);
+
+  if (type === "post") {
+    const post = await getUserPost({ id: postId, gunPointer });
+
+    if (post) {
+      dispatch({
+        type: ACTIONS.PIN_WALL_POST,
+        data: post
+      });
+    }
+
+    return post;
+  }
+
+  if (type === "sharedPost") {
+    const post = await getSharedPost({
+      id: postId,
+      sharedGunPointer: gunPointer
+    });
+
+    if (post) {
+      dispatch({
+        type: ACTIONS.PIN_WALL_POST,
+        data: post
+      });
+    }
+
+    return post;
   }
 };
 

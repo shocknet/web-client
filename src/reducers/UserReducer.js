@@ -26,7 +26,7 @@ const user = (state = INITIAL_STATE, action) => {
     }
     case ACTIONS.LOAD_USER_WALL_TOTAL_PAGES: {
       const { data } = action;
-      console.log("Total pages:", data);
+
       return {
         ...state,
         wall: {
@@ -76,6 +76,16 @@ const user = (state = INITIAL_STATE, action) => {
                 }
               : post
           )
+        }
+      };
+    }
+    case ACTIONS.PIN_WALL_POST: {
+      const { data } = action;
+      return {
+        ...state,
+        wall: {
+          ...state.wall,
+          pinnedPost: { ...data, pinned: true }
         }
       };
     }

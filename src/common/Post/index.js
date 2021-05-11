@@ -1,16 +1,20 @@
-import React, { useEffect, useCallback, useState } from "react";
+import React, { useEffect, useCallback, useState, useMemo } from "react";
 import moment from "moment";
 import Tooltip from "react-tooltip";
 import { useDispatch } from "react-redux";
 import { useEmblaCarousel } from "embla-carousel/react";
 import classNames from "classnames";
+import { Link } from "react-router-dom";
+import CopyClipboard from "react-copy-to-clipboard";
 import { updateWallPost } from "../../actions/UserActions";
 import "./css/index.css";
 import { gunUser, fetchPath } from "../../utils/Gun";
 import Video from "./components/Video";
 import Image from "./components/Image";
 import Stream from "./components/Stream";
-import { Link } from "react-router-dom";
+import NoticeBar from "./components/NoticeBar";
+import ReactTooltip from "react-tooltip";
+import ShareBtn from "./components/ShareBtn";
 
 const Post = ({
   id,
@@ -22,7 +26,9 @@ const Post = ({
   openTipModal,
   contentItems = {},
   username,
-  isOnlineNode
+  isOnlineNode,
+  shared,
+  pinned
 }) => {
   const dispatch = useDispatch();
   const [carouselRef, carouselAPI] = useEmblaCarousel({
@@ -137,18 +143,14 @@ const Post = ({
 
   useEffect(() => {
     fetchPath({
-      path:`posts/${id}/tipsSet`,
+      path: `posts/${id}/tipsSet`,
       gunPointer: gunUser(publicKey),
-      method:'load'
+      method: "load"
     }).then(data => {
-      const tipSet = data
-        ? Object.values(data)
-        : [];
+      const tipSet = data ? Object.values(data) : [];
       const lenSet = tipSet.length;
       const tot =
-        lenSet > 0
-        ? tipSet.reduce((acc, val) => Number(val) + Number(acc))
-        : 0;
+        lenSet > 0 ? tipSet.reduce((acc, val) => Number(val) + Number(acc)) : 0;
       dispatch(
         updateWallPost({
           postID: id,
@@ -158,7 +160,7 @@ const Post = ({
           }
         })
       );
-    })
+    });
   }, [dispatch, id, publicKey]);
 
   useEffect(() => {
@@ -191,6 +193,7 @@ const Post = ({
 
   return (
     <div className="post">
+      <NoticeBar text="Linked post" visible={pinned && !shared} />
       <div className="head">
         <div className="user">
           <Link
@@ -205,6 +208,12 @@ const Post = ({
             <p>{moment.utc(timestamp).fromNow()}</p>
           </div>
         </div>
+        <ShareBtn
+          publicKey={publicKey}
+          id={id}
+          username={username}
+          pinned={pinned}
+        />
       </div>
 
       <div className="content">
@@ -242,12 +251,14 @@ const Post = ({
       </div>
 
       <div className="actions">
+        {/* Centers content in flex-box */}
+        <i className="icon-placeholder"></i>
         <div
           className="icon-tip-btn"
           data-tip="Tip this post"
           onClick={tipPost}
         >
-          <div className="tip-icon icon-thin-feed"></div>
+          <i className="tip-icon icon-thin-feed"></i>
         </div>
         {/* <div
           className="tip-btn-container"
@@ -271,6 +282,7 @@ const Post = ({
             <Counter value={tipCounter} /> {tipCounter === 1 ? "Tip" : "Tips"}
           </div>
         </div> */}
+        <Tooltip backgroundColor="#3a4d67" effect="solid" />
       </div>
     </div>
   );

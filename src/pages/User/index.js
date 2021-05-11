@@ -13,7 +13,8 @@ import {
   getUserProfile,
   getUserAvatar,
   updateUserProfile,
-  getUserHeader
+  getUserHeader,
+  getPinnedPost
 } from "../../actions/UserActions";
 import { generateGunPair } from "../../actions/AuthActions";
 import { payUser, resetPaymentRequest } from "../../actions/TransactionActions";
@@ -21,13 +22,14 @@ import { listenPath, gunUser } from "../../utils/Gun";
 import { webTorrentClient, attachMedia } from "../../utils/Torrents";
 
 import Loader from "../../common/Loader";
+import Divider from "../../common/Divider";
 
 // Assets
 import defaultBanner from "../../images/banner-bg.jpg";
 import av1 from "../../images/av1.jpg";
 import shockLogo from "../../images/lightning-logo.svg";
 import "./css/index.css";
-import ReactTooltip from "react-tooltip";
+import Tooltip from "react-tooltip";
 
 const Post = React.lazy(() => import("../../common/Post"));
 const SharedPost = React.lazy(() => import("../../common/Post/SharedPost"));
@@ -63,12 +65,11 @@ const UserPage = () => {
     try {
       setUserLoading(true);
       dispatch(resetUserData());
-      const user = await dispatch(getUserProfile(publicKey));
-      console.log(user);
+      dispatch(getUserProfile(publicKey));
       setUserLoading(false);
       // Load user avatar in the background
       dispatch(getUserHeader(publicKey));
-      await dispatch(getUserAvatar(publicKey));
+      dispatch(getUserAvatar(publicKey));
     } catch (err) {
       console.error(err);
       setUserLoading(false);
@@ -122,10 +123,19 @@ const UserPage = () => {
   }, [dispatch, paymentRequest]);
 
   const initializeUserWall = useCallback(async () => {
+    const { postId, userId, type } = params;
     await fetchUserData();
     await dispatch(generateGunPair());
     fetchUserWall();
-  }, [dispatch, fetchUserData, fetchUserWall]);
+
+    dispatch(
+      getPinnedPost({
+        postId,
+        publicKey: userId,
+        type
+      })
+    );
+  }, [dispatch, fetchUserData, fetchUserWall, params]);
 
   useEffect(() => {
     initializeUserWall();
@@ -173,7 +183,7 @@ const UserPage = () => {
 
   useEffect(() => {
     attachMedia(
-      wall.posts.filter(post => post.type === "post").map(post => post),
+      wall.posts.filter(post => post.type === "post"),
       false
     );
   }, [wall.posts]);
@@ -217,10 +227,10 @@ const UserPage = () => {
 
   const setCopiedStatus = useCallback(() => {
     setCopied(true);
-    ReactTooltip.rebuild();
+    Tooltip.rebuild();
     setTimeout(() => {
       setCopied(false);
-      ReactTooltip.rebuild();
+      Tooltip.rebuild();
     }, 500);
   }, []);
 
@@ -228,6 +238,10 @@ const UserPage = () => {
 
   const renderPost = useCallback(
     post => {
+      if (!post) {
+        return;
+      }
+
       const avatar = profile.avatar
         ? `data:image/png;base64,${profile.avatar}`
         : av1;
@@ -252,6 +266,7 @@ const UserPage = () => {
               sharerUsername={username}
               isOnlineNode={isOnlineNode}
               openTipModal={openTipModal}
+              pinned={post.pinned}
             />
           </Suspense>
         );
@@ -280,6 +295,7 @@ const UserPage = () => {
               tipValue={post.tipValue ?? 0}
               tipCounter={post.tipCounter ?? 0}
               isOnlineNode={isOnlineNode}
+              pinned={post.pinned}
             />
           </Suspense>
         );
@@ -317,17 +333,13 @@ const UserPage = () => {
             <div className="activity">
               <p
                 className="status"
-                style={
-                  !isOnlineApp
-                    ? {
-                        color: isOnlineApp
-                          ? "#01a33d"
-                          : isOnlineNode
-                          ? "#f2a900"
-                          : "#888"
-                      }
-                    : {}
-                }
+                style={{
+                  color: isOnlineApp
+                    ? "#01a33d"
+                    : isOnlineNode
+                    ? "#f2a900"
+                    : "#888"
+                }}
               >
                 {isOnlineApp
                   ? "Active Recently"
@@ -359,6 +371,8 @@ const UserPage = () => {
             <img src={shockLogo} alt="Bitcoin Lightning" />
             <p>Send Tip</p>
           </div>
+
+          <Tooltip backgroundColor="#3a4d67" effect="solid" />
         </div>
       </div>
 
@@ -366,7 +380,9 @@ const UserPage = () => {
         <p className="tab active">Feed</p>
       </div>
       <div className="posts-holder">
-        {wall.posts.map(post => renderPost(post))}
+        {renderPost(wall.pinnedPost)}
+        {wall.pinnedPost && <Divider text="More Posts" />}
+        {wall.posts.map(renderPost)}
       </div>
       {wallLoading ? (
         <Loader text={`Loading ${wall.page >= 0 ? "More" : "Wall"} Posts...`} />
@@ -426,7 +442,7 @@ const UserPage = () => {
               </div>
             )}
             {!paymentRequest ? (
-              <div className="tip-modal-footer" onClick={() => sendTip()}>
+              <div className="tip-modal-footer" onClick={sendTip}>
                 <div className="tip-modal-submit">SEND TIP</div>
               </div>
             ) : null}
@@ -440,7 +456,7 @@ const UserPage = () => {
           rel="noreferrer noopener"
           className="download-shockwallet-btn"
         >
-          <i className="download-shockwallet-btn-icon fab fa-user"></i>
+          <i className="download-shockwallet-btn-icon fas fa-user"></i>
           <p className="download-shockwallet-btn-text">Create a Shockwallet</p>
         </a>
       ) : null}

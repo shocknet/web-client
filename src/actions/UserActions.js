@@ -221,12 +221,28 @@ export const getUserPost = async ({ id, gunPointer }) => {
         const magnetURI = await fetchPath({
           path: `${contentItemsKey}/${id}/magnetURI`,
           gunPointer
-        });
+        })
+        const liveStatus = await fetchPath({
+          path: `${contentItemsKey}/${id}/liveStatus`,
+          gunPointer
+        })
+        const playbackMagnet = await fetchPath({
+          path: `${contentItemsKey}/${id}/playbackMagnet`,
+          gunPointer
+        })
+        let finalType = type
+        let finalMagnet = magnetURI
+        if(liveStatus === 'wasLive' && playbackMagnet){
+          finalMagnet = playbackMagnet
+          finalType = "video/embedded"
+        }
         return {
-          magnetURI,
-          width: 0,
-          height: 0,
-          type
+          magnetURI:finalMagnet,
+          width:0,
+          height:0,
+          type:finalType,
+          liveStatus,
+          playbackMagnet
         };
       }
 

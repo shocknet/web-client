@@ -1,6 +1,5 @@
 import React, { Suspense } from "react";
 import { withRouter, Redirect, Route, Switch } from "react-router-dom";
-import Tooltip from "react-tooltip";
 import Loader from "./common/Loader";
 import "./styles/App.css";
 import "./styles/video.js.css";

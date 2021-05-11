@@ -1,11 +1,10 @@
-import React, { useEffect, useCallback, useState, useMemo } from "react";
+import React, { useEffect, useCallback, useState } from "react";
 import moment from "moment";
 import Tooltip from "react-tooltip";
 import { useDispatch } from "react-redux";
 import { useEmblaCarousel } from "embla-carousel/react";
 import classNames from "classnames";
 import { Link } from "react-router-dom";
-import CopyClipboard from "react-copy-to-clipboard";
 import { updateWallPost } from "../../actions/UserActions";
 import "./css/index.css";
 import { gunUser, fetchPath } from "../../utils/Gun";
@@ -13,7 +12,6 @@ import Video from "./components/Video";
 import Image from "./components/Image";
 import Stream from "./components/Stream";
 import NoticeBar from "./components/NoticeBar";
-import ReactTooltip from "react-tooltip";
 import ShareBtn from "./components/ShareBtn";
 
 const Post = ({

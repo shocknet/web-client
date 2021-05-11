@@ -101,10 +101,6 @@ const Post = ({
     return null;
   };
 
-  // useEffect(() => {
-  //   attachMedia();
-  // }, [contentItems.length]);
-
   const nextSlide = useCallback(() => {
     if (!carouselAPI) return;
 
@@ -251,8 +247,6 @@ const Post = ({
       </div>
 
       <div className="actions">
-        {/* Centers content in flex-box */}
-        <i className="icon-placeholder"></i>
         <div
           className="icon-tip-btn"
           data-tip="Tip this post"

@@ -126,16 +126,6 @@ const SharedPost = ({
           />
         ) : null}
       </div>
-
-      {/* <div className="actions">
-        <div
-          className="icon-tip-btn"
-          data-tip="Tip this post"
-          onClick={tipPost}
-        >
-          <div className="tip-icon icon-thin-feed"></div>
-        </div>
-      </div> */}
     </div>
   );
 };

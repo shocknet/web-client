@@ -112,7 +112,7 @@
 
 .user-page .posts-holder .post .actions {
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
   padding: 30px;
   padding-top: 0;
@@ -123,6 +123,11 @@
   cursor: pointer;
   text-shadow: 0 0 0px #4080b2;
   transition: text-shadow 0.25s ease;
+}
+
+.share-btn {
+  cursor: pointer;
+  font-size: 18px;
 }
 
 .icon-tip-btn:hover,
@@ -139,14 +144,6 @@
 .tip-icon.icon-thin-feed:hover::before,
 .share-btn i:hover::before {
   color: #54a3e0;
-}
-
-.post .actions i {
-  width: 28px;
-}
-
-.share-btn {
-  cursor: pointer;
 }
 
 .video-container {

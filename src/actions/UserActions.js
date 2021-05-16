@@ -230,6 +230,10 @@ export const getUserPost = async ({ id, gunPointer }) => {
           path: `${contentItemsKey}/${id}/playbackMagnet`,
           gunPointer
         })
+        const viewersCounter = await fetchPath({
+          path: `${contentItemsKey}/${id}/viewersCounter`,
+          gunPointer
+        })
         let finalType = type
         let finalMagnet = magnetURI
         if(liveStatus === 'wasLive' && playbackMagnet){
@@ -242,7 +246,8 @@ export const getUserPost = async ({ id, gunPointer }) => {
           height:0,
           type:finalType,
           liveStatus,
-          playbackMagnet
+          playbackMagnet,
+          viewersCounter
         };
       }
 

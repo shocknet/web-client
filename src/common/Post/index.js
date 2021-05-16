@@ -37,18 +37,22 @@ const Post = ({
   const [sliderLength, setSliderLength] = useState(0);
   const [activeSlide, setActiveSlide] = useState(0);
   const [liveStatus,setLiveStatus] = useState('')
+  const [viewersCounter, setViewersCounter] = useState(0);
 
-  //effect for liveStatus
+  //effect for liveStatus and viewers counter
   useEffect(() =>{
     const values = Object.values(contentItems)
     const videoContent = values.find(item => item.type === 'video/embedded' && item.liveStatus === 'wasLive')
     const streamContent = values.find(item => item.type === 'stream/embedded' && item.liveStatus === 'live')
     let status = ''
     if(videoContent){
-      status = videoContent.liveStatus
+      status = "Was Live"
     }
     if(streamContent){
-      status = streamContent.liveStatus
+      status = "Is Live"
+      if(streamContent.viewersCounter){
+        setViewersCounter(streamContent.viewersCounter)
+      }
     }
     if(status){
       setLiveStatus(status)
@@ -220,7 +224,8 @@ const Post = ({
               <Link to={`/otherUser/${publicKey}`}>{username}</Link>
               {liveStatus && <p className="liveStatus">
                 {liveStatus} 
-                <i className={`fas fa-circle liveStatusIcon ${liveStatus === 'live' ? "liveIcon" : ""}`}></i>
+                <i className={`fas fa-circle liveStatusIcon ${liveStatus === 'Is Live' ? "liveIcon" : ""}`}></i>
+                {liveStatus === 'Is Live' &&  <span> | {viewersCounter} watching</span>}
                 </p>
               }
             </div>

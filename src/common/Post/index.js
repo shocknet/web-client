@@ -46,10 +46,10 @@ const Post = ({
     const streamContent = values.find(item => item.type === 'stream/embedded' && item.liveStatus === 'live')
     let status = ''
     if(videoContent){
-      status = "Was Live"
+      status = "was Live"
     }
     if(streamContent){
-      status = "Is Live"
+      status = "is Live"
       if(streamContent.viewersCounter){
         setViewersCounter(streamContent.viewersCounter)
       }

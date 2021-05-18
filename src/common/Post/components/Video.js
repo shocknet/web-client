@@ -1,5 +1,6 @@
 import React from "react";
 import TipRibbon from "./TipRibbon";
+import "../../../styles/video.js.css";
 import "../css/index.css";
 
 const Video = ({ id, item, index, postId, tipValue, tipCounter }) => {

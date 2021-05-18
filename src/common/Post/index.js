@@ -13,6 +13,7 @@ import Image from "./components/Image";
 import Stream from "./components/Stream";
 import NoticeBar from "./components/NoticeBar";
 import ShareBtn from "./components/ShareBtn";
+import { openModal } from "../../actions/TipActions";
 
 const Post = ({
   id,
@@ -21,7 +22,6 @@ const Post = ({
   tipCounter,
   tipValue,
   publicKey,
-  openTipModal,
   contentItems = {},
   username,
   isOnlineNode,
@@ -36,29 +36,33 @@ const Post = ({
 
   const [sliderLength, setSliderLength] = useState(0);
   const [activeSlide, setActiveSlide] = useState(0);
-  const [liveStatus,setLiveStatus] = useState('')
+  const [liveStatus, setLiveStatus] = useState("");
   const [viewersCounter, setViewersCounter] = useState(0);
 
   //effect for liveStatus and viewers counter
-  useEffect(() =>{
-    const values = Object.values(contentItems)
-    const videoContent = values.find(item => item.type === 'video/embedded' && item.liveStatus === 'wasLive')
-    const streamContent = values.find(item => item.type === 'stream/embedded' && item.liveStatus === 'live')
-    let status = ''
-    if(videoContent){
-      status = "was Live"
+  useEffect(() => {
+    const values = Object.values(contentItems);
+    const videoContent = values.find(
+      item => item.type === "video/embedded" && item.liveStatus === "wasLive"
+    );
+    const streamContent = values.find(
+      item => item.type === "stream/embedded" && item.liveStatus === "live"
+    );
+    let status = "";
+    if (videoContent) {
+      status = "was Live";
     }
-    if(streamContent){
-      status = "is Live"
-      if(streamContent.viewersCounter){
-        setViewersCounter(streamContent.viewersCounter)
+    if (streamContent) {
+      status = "is Live";
+      if (streamContent.viewersCounter) {
+        setViewersCounter(streamContent.viewersCounter);
       }
     }
-    if(status){
-      setLiveStatus(status)
+    if (status) {
+      setLiveStatus(status);
     }
-  },[contentItems,setLiveStatus])
-  
+  }, [contentItems, setLiveStatus]);
+
   const getMediaContent = () => {
     return Object.entries(contentItems).filter(
       ([_, item]) => item.type !== "text/paragraph"
@@ -197,11 +201,13 @@ const Post = ({
       return;
     }
 
-    openTipModal({
-      targetType: "tip",
-      ackInfo: id
-    });
-  }, [id, isOnlineNode, openTipModal]);
+    dispatch(
+      openModal({
+        targetType: "tip",
+        ackInfo: id
+      })
+    );
+  }, [dispatch, id, isOnlineNode]);
 
   useEffect(() => {
     Tooltip.rebuild();
@@ -222,12 +228,19 @@ const Post = ({
           <div className="details">
             <div className="username">
               <Link to={`/otherUser/${publicKey}`}>{username}</Link>
-              {liveStatus && <p className="liveStatus">
-                {liveStatus} 
-                <i className={`fas fa-circle liveStatusIcon ${liveStatus === 'Is Live' ? "liveIcon" : ""}`}></i>
-                {liveStatus === 'Is Live' &&  <span> | {viewersCounter} watching</span>}
+              {liveStatus && (
+                <p className="liveStatus">
+                  {liveStatus}
+                  <i
+                    className={`fas fa-circle liveStatusIcon ${
+                      liveStatus === "Is Live" ? "liveIcon" : ""
+                    }`}
+                  ></i>
+                  {liveStatus === "Is Live" && (
+                    <span> | {viewersCounter} watching</span>
+                  )}
                 </p>
-              }
+              )}
             </div>
             <p>{moment.utc(timestamp).fromNow()}</p>
           </div>

@@ -1,12 +1,12 @@
 import { combineReducers } from "redux";
 import UserReducer from "./UserReducer";
 import AuthReducer from "./AuthReducer";
-import TransactionReducer from "./TransactionReducer";
+import TipReducer from "./TipReducer";
 
 const reducers = combineReducers({
   user: UserReducer,
   auth: AuthReducer,
-  transaction: TransactionReducer
+  tip: TipReducer
 });
 
 export default reducers;

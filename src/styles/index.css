@@ -1,8 +1,7 @@
 @font-face {
   font-family: shockicons;
   src: url("/fonts/icomoon.eot?hqhemx");
-  src: url("/fonts/icomoon.eot?hqhemx#iefix")
-      format("embedded-opentype"),
+  src: url("/fonts/icomoon.eot?hqhemx#iefix") format("embedded-opentype"),
     url("/fonts/icomoon.ttf?hqhemx") format("truetype"),
     url("/fonts/icomoon.woff?hqhemx") format("woff"),
     url("/fonts/icomoon.svg?hqhemx#icomoon") format("svg");
@@ -74,6 +73,10 @@
 
 * {
   box-sizing: border-box;
+}
+
+:root {
+  --navbar-height: 65px;
 }
 
 html,

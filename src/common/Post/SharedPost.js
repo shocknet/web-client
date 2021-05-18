@@ -26,7 +26,6 @@ const SharedPost = ({
   isOnlineNode,
   postID,
   postPublicKey,
-  openTipModal,
   pinned
 }) => {
   const dispatch = useDispatch();
@@ -117,7 +116,6 @@ const SharedPost = ({
             tipCounter={postContent.tipCounter}
             tipValue={postContent.tipValue}
             publicKey={postPublicKey}
-            openTipModal={openTipModal}
             contentItems={postContent.contentItems}
             username={postUser.displayName ?? postUser.alias}
             isOnlineNode={isOnlineNode}

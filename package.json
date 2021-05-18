@@ -30,10 +30,12 @@
     "react-tooltip": "^4.2.10",
     "redux": "^4.0.5",
     "redux-thunk": "^2.3.0",
+    "source-map-explorer": "^2.5.2",
     "video.js": "^7.11.4",
     "webtorrent": "^0.108.6"
   },
   "scripts": {
+    "analyze": "source-map-explorer 'build/static/js/*.js'",
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",

@@ -125,6 +125,7 @@ const PostPage = () => {
               tipValue={post.tipValue ?? 0}
               tipCounter={post.tipCounter ?? 0}
               isOnlineNode={isOnlineNode}
+              pinned={true}
             />
           </Suspense>
         );

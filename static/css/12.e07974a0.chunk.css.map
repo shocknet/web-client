@@ -1,0 +1,1 @@
+{"version":3,"sources":["index.css"],"names":[],"mappings":"AAAA,YACE,iBAAkB,CAClB,wBAAyB,CACzB,eACF,CAEA,cACE,iBACF","file":"12.e07974a0.chunk.css","sourcesContent":[".notice-bar {\n  padding: 10px 30px;\n  background-color: #4080b2;\n  font-weight: bold;\n}\n\n.notice-bar i {\n  margin-right: 12px;\n}\n"]}

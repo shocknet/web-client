@@ -47,7 +47,7 @@ const UserPage = () => {
     try {
       setUserLoading(true);
       dispatch(resetUserData());
-      dispatch(getUserProfile(publicKey));
+      await dispatch(getUserProfile(publicKey));
       setUserLoading(false);
       // Load user avatar in the background
       dispatch(getUserHeader(publicKey));

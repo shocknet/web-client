@@ -6,14 +6,23 @@ import { useEmblaCarousel } from "embla-carousel/react";
 import classNames from "classnames";
 import { Link } from "react-router-dom";
 import { updateWallPost } from "../../actions/UserActions";
-import "./css/index.css";
+import { openModal } from "../../actions/TipActions";
 import { gunUser, fetchPath } from "../../utils/Gun";
 import Video from "./components/Video";
 import Image from "./components/Image";
 import Stream from "./components/Stream";
-import NoticeBar from "./components/NoticeBar";
 import ShareBtn from "./components/ShareBtn";
-import { openModal } from "../../actions/TipActions";
+import "./css/index.css";
+
+const insertMetaTag = ({ ...attributes }) => {
+  const meta = document.createElement("meta");
+  Object.entries(attributes).map(([key, value]) =>
+    meta.setAttribute(key, value)
+  );
+  const head = document.querySelector("head");
+  head.insertBefore(meta, head.firstChild);
+  return meta;
+};
 
 const Post = ({
   id,
@@ -62,6 +71,54 @@ const Post = ({
       setLiveStatus(status);
     }
   }, [contentItems, setLiveStatus]);
+
+  useEffect(() => {
+    if (pinned) {
+      insertMetaTag({
+        property: "og:title",
+        content: `${username} Post`
+      });
+      insertMetaTag({
+        property: "og:url",
+        content: `https://shock.pub/${publicKey}/post/${id}`
+      });
+      insertMetaTag({
+        property: `og:type`,
+        content: `website`
+      });
+      insertMetaTag({
+        property: "og:description",
+        content:
+          contentItems
+            .filter(item => item.type === "text/paragraph")
+            .map(item => item.text)
+            .join("\n") || `View ${username}'s posts on ShockWallet`
+      });
+
+      contentItems
+        .filter(item =>
+          ["image/embedded", "video/embedded"].includes(item.type)
+        )
+        .map(item => {
+          const [type] = item.type.split("/");
+
+          insertMetaTag({
+            property: `og:${type}:height`,
+            content: "314"
+          });
+
+          insertMetaTag({
+            property: `og:${type}:width`,
+            content: "600"
+          });
+
+          insertMetaTag({
+            property: `og:${type}`,
+            content: decodeURIComponent(item.magnetURI.split("ws=")[1])
+          });
+        });
+    }
+  }, [pinned, username, contentItems, publicKey, id]);
 
   const getMediaContent = () => {
     return Object.entries(contentItems).filter(
@@ -215,7 +272,6 @@ const Post = ({
 
   return (
     <div className="post">
-      <NoticeBar text="Linked post" visible={pinned && !shared} />
       <div className="head">
         <div className="user">
           <Link

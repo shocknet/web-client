@@ -45,6 +45,7 @@ const Image = ({ id, item, index, postId, tipValue, tipCounter }) => {
           alt="Post Media"
           data-torrent={item.magnetURI}
           data-file-key={index}
+          src={decodeURIComponent(item.magnetURI.split("ws=")[1])}
           style={{ opacity: previewVisible ? 1 : 0 }}
         />
         <img

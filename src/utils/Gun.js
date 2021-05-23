@@ -94,7 +94,7 @@ const _isIncompleteGunResponse = data => {
 const parseGunPath = ({ path, gunPointer }) =>
   path.split("/").reduce((gun, path) => gun.get(path), gunPointer);
 
-export const Gun = GunDB(peers);
+export const Gun = GunDB({axe: false, peers: peers});
 
 export const fetchPath = ({
   path = "",

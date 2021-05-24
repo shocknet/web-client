@@ -31,7 +31,8 @@ const Post = ({
   const dispatch = useDispatch();
   const [carouselRef, carouselAPI] = useEmblaCarousel({
     slidesToScroll: 1,
-    align: "center"
+    align: "center",
+    draggable: false
   });
   const { inView, observe } = useInView({
     trackVisibility: false

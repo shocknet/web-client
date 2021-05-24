@@ -45,7 +45,7 @@ const Image = ({ id, item, index, postId, tipValue, tipCounter }) => {
           alt="Post Media"
           data-torrent={item.magnetURI}
           data-file-key={index}
-          src={decodeURIComponent(item.magnetURI.split("ws=")[1])}
+          src={decodeURIComponent(item.magnetURI.replace(/.*(ws=)/gi, ""))}
           style={{ opacity: previewVisible ? 1 : 0 }}
         />
         <img
@@ -56,7 +56,7 @@ const Image = ({ id, item, index, postId, tipValue, tipCounter }) => {
             setZoomLoaded(true);
           }}
           style={{ opacity: zoomLoaded ? 1 : 0 }}
-          src={decodeURIComponent(item.magnetURI.split("ws=")[1])}
+          src={decodeURIComponent(item.magnetURI.replace(/.*(ws=)/gi, ""))}
         />
         <TipRibbon
           tipCounter={tipCounter}

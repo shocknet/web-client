@@ -5,6 +5,7 @@ import { useDispatch } from "react-redux";
 import { useEmblaCarousel } from "embla-carousel/react";
 import classNames from "classnames";
 import { Link } from "react-router-dom";
+import useInView from "react-cool-inview";
 import { updateWallPost } from "../../actions/UserActions";
 import { openModal } from "../../actions/TipActions";
 import { gunUser, fetchPath } from "../../utils/Gun";
@@ -13,16 +14,7 @@ import Image from "./components/Image";
 import Stream from "./components/Stream";
 import ShareBtn from "./components/ShareBtn";
 import "./css/index.css";
-
-const insertMetaTag = ({ ...attributes }) => {
-  const meta = document.createElement("meta");
-  Object.entries(attributes).map(([key, value]) =>
-    meta.setAttribute(key, value)
-  );
-  const head = document.querySelector("head");
-  head.insertBefore(meta, head.firstChild);
-  return meta;
-};
+import { attachMedia } from "../../utils/Torrents";
 
 const Post = ({
   id,
@@ -34,7 +26,6 @@ const Post = ({
   contentItems = {},
   username,
   isOnlineNode,
-  shared,
   pinned
 }) => {
   const dispatch = useDispatch();
@@ -42,11 +33,15 @@ const Post = ({
     slidesToScroll: 1,
     align: "center"
   });
+  const { inView, observe } = useInView({
+    trackVisibility: false
+  });
 
   const [sliderLength, setSliderLength] = useState(0);
   const [activeSlide, setActiveSlide] = useState(0);
   const [liveStatus, setLiveStatus] = useState("");
   const [viewersCounter, setViewersCounter] = useState(0);
+  const [mediaAttached, setMediaAttached] = useState(false);
 
   //effect for liveStatus and viewers counter
   useEffect(() => {
@@ -71,54 +66,6 @@ const Post = ({
       setLiveStatus(status);
     }
   }, [contentItems, setLiveStatus]);
-
-  useEffect(() => {
-    if (pinned) {
-      insertMetaTag({
-        property: "og:title",
-        content: `${username} Post`
-      });
-      insertMetaTag({
-        property: "og:url",
-        content: `https://shock.pub/${publicKey}/post/${id}`
-      });
-      insertMetaTag({
-        property: `og:type`,
-        content: `website`
-      });
-      insertMetaTag({
-        property: "og:description",
-        content:
-          contentItems
-            .filter(item => item.type === "text/paragraph")
-            .map(item => item.text)
-            .join("\n") || `View ${username}'s posts on ShockWallet`
-      });
-
-      contentItems
-        .filter(item =>
-          ["image/embedded", "video/embedded"].includes(item.type)
-        )
-        .map(item => {
-          const [type] = item.type.split("/");
-
-          insertMetaTag({
-            property: `og:${type}:height`,
-            content: "314"
-          });
-
-          insertMetaTag({
-            property: `og:${type}:width`,
-            content: "600"
-          });
-
-          insertMetaTag({
-            property: `og:${type}`,
-            content: decodeURIComponent(item.magnetURI.split("ws=")[1])
-          });
-        });
-    }
-  }, [pinned, username, contentItems, publicKey, id]);
 
   const getMediaContent = () => {
     return Object.entries(contentItems).filter(
@@ -270,6 +217,15 @@ const Post = ({
     Tooltip.rebuild();
   }, []);
 
+  useEffect(() => {
+    if (inView && !mediaAttached) {
+      const post = { contentItems, id };
+      console.log("Post in view?", inView);
+      attachMedia([post], false);
+      setMediaAttached(true);
+    }
+  }, [inView, mediaAttached, contentItems, id]);
+
   return (
     <div className="post">
       <div className="head">
@@ -306,10 +262,11 @@ const Post = ({
           id={id}
           username={username}
           pinned={pinned}
+          contentItems={contentItems}
         />
       </div>
 
-      <div className="content">
+      <div className="content" ref={observe}>
         {getTextContent().map(parseContent)}
         <div className="media-content-carousel">
           {sliderLength > 1 ? (

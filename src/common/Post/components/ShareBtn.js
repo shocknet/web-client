@@ -2,12 +2,35 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import ReactTooltip from "react-tooltip";
 import CopyClipboard from "react-copy-to-clipboard";
 
-const ShareBtn = ({ publicKey, id, username, pinned }) => {
+const ShareBtn = ({ publicKey, id, username, pinned, contentItems = [] }) => {
   const [copiedLink, setCopiedLink] = useState(false);
-  const url = useMemo(
-    () => `https://shock.pub/${publicKey}/post/${id}`,
-    [publicKey, id]
-  );
+  const url = useMemo(() => {
+    const media = contentItems
+      .filter(item => ["image/embedded", "video/embedded"].includes(item.type))
+      .map(item => ({
+        url: decodeURIComponent(item.magnetURI.replace(/.*(ws=)/gi, "")),
+        type: item.type.replace("/embedded", "")
+      }));
+
+    const description =
+      contentItems
+        .filter(item => item.type === "text/paragraph")
+        .map(item => item.text)
+        .join("\n") || `View ${username}'s posts on ShockWallet`;
+
+    const metadata = {
+      title: `${username} Post`,
+      url: `https://${window.location.host}/${publicKey}/post/${id}`,
+      type: `website`,
+      media,
+      description
+    };
+
+    const metadataBase64 = btoa(JSON.stringify(metadata));
+    const shareLink = `https://${window.location.host}/${publicKey}/post/${id}?metadata=${metadataBase64}`;
+
+    return shareLink;
+  }, [contentItems, username, publicKey, id]);
 
   const sharePost = useCallback(async () => {
     if (navigator.share) {

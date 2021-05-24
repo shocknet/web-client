@@ -34,15 +34,19 @@ const Post = ({
     align: "center",
     draggable: false
   });
-  const { inView, observe } = useInView({
-    trackVisibility: false
+  const { observe } = useInView({
+    trackVisibility: false,
+    unobserveOnEnter: true,
+    onEnter: () => {
+      const post = { contentItems, id };
+      attachMedia([post], false);
+    }
   });
 
   const [sliderLength, setSliderLength] = useState(0);
   const [activeSlide, setActiveSlide] = useState(0);
   const [liveStatus, setLiveStatus] = useState("");
   const [viewersCounter, setViewersCounter] = useState(0);
-  const [mediaAttached, setMediaAttached] = useState(false);
 
   //effect for liveStatus and viewers counter
   useEffect(() => {
@@ -217,15 +221,6 @@ const Post = ({
   useEffect(() => {
     Tooltip.rebuild();
   }, []);
-
-  useEffect(() => {
-    if (inView && !mediaAttached) {
-      const post = { contentItems, id };
-      console.log("Post in view?", inView);
-      attachMedia([post], false);
-      setMediaAttached(true);
-    }
-  }, [inView, mediaAttached, contentItems, id]);
 
   return (
     <div className="post">

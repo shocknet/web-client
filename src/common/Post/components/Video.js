@@ -18,6 +18,7 @@ const Video = ({ id, item, index, postId, tipValue, tipCounter }) => {
           data-file-key={index}
           controls
           data-played="false"
+          src={decodeURIComponent(item.magnetURI.split("ws=")[1])}
         />
         <TipRibbon tipCounter={tipCounter} tipValue={tipValue} />
       </div>

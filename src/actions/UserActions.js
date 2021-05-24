@@ -225,7 +225,8 @@ export const getUserPost = async ({ id, gunPointer }) => {
         });
         const viewersCounter = await fetchPath({
           path: `${contentItemsKey}/${id}/viewersCounter`,
-          gunPointer
+          gunPointer,
+          retryLimit: 1
         });
         let finalType = type;
         let finalMagnet = magnetURI;

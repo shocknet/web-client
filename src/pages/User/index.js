@@ -117,12 +117,12 @@ const UserPage = () => {
     };
   }, [dispatch, initializeUserWall, publicKey]);
 
-  useEffect(() => {
-    attachMedia(
-      wall.posts.filter(post => post.type === "post"),
-      false
-    );
-  }, [wall.posts]);
+  // useEffect(() => {
+  //   attachMedia(
+  //     wall.posts.filter(post => post.type === "post"),
+  //     false
+  //   );
+  // }, [wall.posts]);
 
   const username = profile.displayName ?? profile.alias;
 
@@ -183,6 +183,7 @@ const UserPage = () => {
               tipCounter={post.tipCounter ?? 0}
               isOnlineNode={isOnlineNode}
               pinned={post.pinned}
+              post={post}
             />
           </Suspense>
         );

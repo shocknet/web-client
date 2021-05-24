@@ -54,6 +54,61 @@
         }
       })(window.location);
     </script>
+    <script>
+      const parsedURL = new URL(location.href);
+      const metadataBase64 = parsedURL.searchParams.get("metadata");
+      if (metadataBase64) {
+        const metadataJSON = atob(metadataBase64);
+        const metadata = JSON.parse(metadataJSON);
+        const insertMetaTag = ({ ...attributes }) => {
+          const meta = document.createElement("meta");
+          Object.entries(attributes).map(([key, value]) =>
+            meta.setAttribute(key, value)
+          );
+          const head = document.querySelector("head");
+          head.insertBefore(meta, head.firstChild);
+          return meta;
+        };
+
+        insertMetaTag({
+          property: "og:title",
+          content: metadata.title
+        });
+        insertMetaTag({
+          property: "og:url",
+          content: metadata.url
+        });
+        insertMetaTag({
+          property: `og:type`,
+          content: metadata.type
+        });
+        insertMetaTag({
+          property: "og:description",
+          content: metadata.description
+        });
+
+        metadata.media.map(item => {
+          const type = item.type;
+
+          console.log(`og:${type}:height`);
+
+          insertMetaTag({
+            property: `og:${type}:height`,
+            content: "314"
+          });
+
+          insertMetaTag({
+            property: `og:${type}:width`,
+            content: "600"
+          });
+
+          insertMetaTag({
+            property: `og:${type}`,
+            content: item.url
+          });
+        });
+      }
+    </script>
   </head>
 
   <body>

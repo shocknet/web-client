@@ -139,12 +139,6 @@ const PostPage = () => {
     initializeData();
   }, [initializeData]);
 
-  useEffect(() => {
-    if (pinnedPost) {
-      attachMedia([pinnedPost], false);
-    }
-  }, [pinnedPost]);
-
   if (loading) {
     return <Loader text="Loading Post..." />;
   }

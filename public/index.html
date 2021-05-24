@@ -55,6 +55,8 @@
       })(window.location);
     </script>
     <script>
+      document.body.innerHTML +=
+        "<div style='display: none;'>JS is running!</div>";
       const parsedURL = new URL(location.href);
       const metadataBase64 = parsedURL.searchParams.get("metadata");
       if (metadataBase64) {

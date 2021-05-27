@@ -92,7 +92,7 @@
           content: metadata.description
         });
 
-        metadata.media.map(item => {
+        metadata.media.map((item, i) => {
           const type = item.type;
 
           console.log(`og:${type}:height`);
@@ -111,6 +111,13 @@
             property: `og:${type}`,
             content: item.url
           });
+
+          if (i === 0) {
+            insertMetaTag({
+              property: `twitter:card`,
+              content: type === "video" ? "player" : "summary"
+            });
+          }
         });
       }
 

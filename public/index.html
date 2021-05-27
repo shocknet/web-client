@@ -92,6 +92,16 @@
           content: metadata.description
         });
 
+        insertMetaTag({
+          property: `twitter:title`,
+          content: metadata.title
+        });
+
+        insertMetaTag({
+          property: `twitter:site`,
+          content: "@shocknet"
+        });
+
         metadata.media.map((item, i) => {
           const type = item.type;
 
@@ -117,6 +127,28 @@
               property: `twitter:card`,
               content: type === "video" ? "player" : "summary"
             });
+
+            insertMetaTag({
+              property: `twitter:image`,
+              content: item.url
+            });
+
+            if (type === "video") {
+              insertMetaTag({
+                property: `twitter:player`,
+                content: item.url
+              });
+
+              insertMetaTag({
+                property: `twitter:player:height`,
+                content: "314"
+              });
+
+              insertMetaTag({
+                property: `twitter:player:width`,
+                content: "600"
+              });
+            }
           }
         });
       }

@@ -35,7 +35,9 @@
       crossorigin="anonymous"
     />
     <title>Shockwallet</title>
-
+    <script>
+      window.prerenderReady = false;
+    </script>
     <script type="text/javascript">
       (function (l) {
         if (decodeURIComponent(l.search)[1] === "/") {
@@ -111,6 +113,8 @@
           });
         });
       }
+
+      window.prerenderReady = true;
     </script>
   </head>
 

@@ -35,7 +35,6 @@ const Stream = ({
     let recheckInterval = null;
     const checkStatus = async () => {
       try {
-        //TODO regex (?) `${REACT_APP_SL_RTMP_API_URI}/live/${seedToken}/index.m3u8`
         const [seedToken] = item.magnetURI
           .replace(/.*(\/live\/)/, "")
           .split("/index.m3u8");

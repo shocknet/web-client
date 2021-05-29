@@ -1,20 +1,20 @@
-import React, { useRef, useState } from "react";
+import React, { useRef } from "react";
 import useInView from "react-cool-inview";
-import videojs from "video.js";
 import TipRibbon from "./TipRibbon";
 import "../../../styles/video.js.css";
 import "../css/index.css";
 
 const Video = ({ id, item, index, postId, tipValue, tipCounter }) => {
   const videoRef = useRef();
-  const [initialized, setInitialized] = useState(false);
   const { observe } = useInView({
     trackVisibility: true,
     delay: 100,
     onEnter: () => {
-      if (videoRef.current) {
-        videoRef.current.play();
+      if (!videoRef.current) {
+        return;
       }
+
+      videoRef.current.play();
     },
     onLeave: () => {
       if (!videoRef.current) {

@@ -2,7 +2,7 @@
 
 The Shock Web-Client allows non-Shockwallet users to interact with your feed. This is a fully static client app which communicates to the network directly.
 
-This repo is automatically delivered to a github page at [Shock.Pub](https://shock.pub)
+This repo is automatically delivered to a github page at [Shock.Pub](https://shock.pub), you can also link your visitors to other Web-Clients including [Lightning.Page](https://Lightning.Page) or [Satoshi.Watch](https://satoshi.watch)
 
 Wallet users may direct the public to their feed via `https://shock.pub/your_public_key`
 

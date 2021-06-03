@@ -235,7 +235,7 @@ const Post = ({
           />
           <div className="details">
             <div className="username">
-              <Link to={`/otherUser/${publicKey}`}>{username}</Link>
+              <Link to={`/${publicKey}`}>{username}</Link>
               {liveStatus && (
                 <p className="liveStatus">
                   {liveStatus}

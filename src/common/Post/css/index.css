@@ -406,7 +406,7 @@ img.enlarged-img {
 }
 
 @media only screen and (max-width: 500px) {
-   {
+  .user-page .posts-holder {
     padding: 0;
   }
 

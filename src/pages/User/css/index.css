@@ -187,7 +187,8 @@
     text-align: center;
   }
 
-  .user-page .user-details .details .activity {
+  .user-page .user-details .details .activity,
+  .user-page .user-details .details .username {
     justify-content: center;
     margin-right: 0;
   }

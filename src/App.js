@@ -1,6 +1,7 @@
 import React, { Suspense } from "react";
 import { withRouter, Redirect, Route, Switch } from "react-router-dom";
 import Loader from "./common/Loader";
+import DownloadBtn from "./common/DownloadBtn";
 import "./styles/App.css";
 
 const UserPage = React.lazy(() => import("./pages/User"));
@@ -17,6 +18,7 @@ function App() {
           <Redirect to="/JVz7h3yUnbgMwwKxSddGenBlrE9eeDJVYWlmOr941mI.LW5PEWM3Y-DRf-UApdSN76wH6id6zR4mXNyBApihoAA" />
         </Switch>
       </Suspense>
+      <DownloadBtn />
     </div>
   );
 }

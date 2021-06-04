@@ -25,9 +25,12 @@ const ShareBtn = ({ publicKey, id, username, pinned, contentItems = [] }) => {
         const [url] =
           item.magnetURI.match(/(?<=^magnet:\?xs=)([\w\d]).*torrent/gi, "") ??
           [];
-        const sanitizedUrl = decodeURIComponent(
-          url?.replace(".torrent", "") ?? ""
+        const sanitizedUrl = decodeURIComponent(url ?? "").replace(
+          /\/[\w\d]+.torrent/gi,
+          ""
         );
+
+        console.log("Sanitized URL:", url, sanitizedUrl);
 
         return {
           url: `${sanitizedUrl}/${type}-${index}.mp4`,

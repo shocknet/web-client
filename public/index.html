@@ -56,10 +56,7 @@
         }
       })(window.location);
     </script>
-    <meta property="og:url" content="https://shock.pub" />
     <script type="text/javascript" defer="defer">
-      document.querySelector("meta[property='og:url']").content =
-        location.href + "#no-js";
       const parsedURL = new URL(location.href);
       const metadataBase64 = parsedURL.searchParams.get("metadata");
       if (metadataBase64) {

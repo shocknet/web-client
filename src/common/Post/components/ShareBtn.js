@@ -46,7 +46,7 @@ const ShareBtn = ({ publicKey, id, username, pinned, contentItems = [] }) => {
         .join("\n") || `View ${username}'s posts on ShockWallet`;
 
     const metadata = {
-      title: `${username} Post`,
+      title: `Post by ${username}`,
       url: `https://${window.location.host}/${publicKey}/post/${id}`,
       type: `website`,
       media,

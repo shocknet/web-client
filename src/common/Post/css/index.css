@@ -157,12 +157,65 @@
 }
 
 .torrent-video {
+  position: absolute;
+  left: 0;
+  top: 0;
   width: 100%;
   height: 100%;
   max-width: 700px;
   max-height: 700px;
   min-width: 400px;
   min-height: 250px;
+  opacity: 1;
+  visibility: visible;
+  transition: all 0.2s ease;
+}
+
+.thumbnail-container {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 1;
+  visibility: visible;
+  transition: all 0.2s ease;
+}
+
+.video-thumbnail {
+  width: 100%;
+  height: 100%;
+  max-width: 700px;
+  max-height: 700px;
+  min-width: 400px;
+  min-height: 250px;
+}
+
+.play-btn {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 32px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 70px;
+  height: 70px;
+  border-radius: 100px;
+  background-color: #18191d;
+  z-index: 10;
+  transition: all 0.2s ease;
+}
+
+.play-btn i.fas.fa-play {
+  color: #4080b2;
+  width: auto;
+}
+
+.video-hidden {
+  opacity: 0;
+  visibility: hidden;
 }
 
 .tip-btn-container:hover {

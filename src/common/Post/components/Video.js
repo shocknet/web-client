@@ -1,18 +1,19 @@
-import React, { useRef, useState } from "react";
+import React, { useCallback, useMemo, useRef, useState } from "react";
 import useInView from "react-cool-inview";
-import videojs from "video.js";
+import classNames from "classnames";
 import TipRibbon from "./TipRibbon";
 import "../../../styles/video.js.css";
 import "../css/index.css";
 
 const Video = ({ id, item, index, postId, tipValue, tipCounter }) => {
   const videoRef = useRef();
-  const [initialized, setInitialized] = useState(false);
+  const [playing, setPlaying] = useState(false);
   const { observe } = useInView({
     trackVisibility: true,
     delay: 100,
     onEnter: () => {
       if (videoRef.current) {
+        setPlaying(true);
         videoRef.current.play();
       }
     },
@@ -21,25 +22,74 @@ const Video = ({ id, item, index, postId, tipValue, tipCounter }) => {
         return;
       }
 
+      setPlaying(false);
       videoRef.current.pause();
     }
   });
+
+  const togglePlayingStatus = useCallback(() => {
+    const updatedPlaying = !playing;
+    setPlaying(updatedPlaying);
+    if (videoRef.current) {
+      if (!updatedPlaying) {
+        videoRef.current.pause();
+        return;
+      }
+
+      console.log("Playing video", updatedPlaying);
+      videoRef.current.play();
+    }
+  }, [playing]);
+
+  const videoHeight = useMemo(() => {
+    if (CSS.supports("aspect-ratio: 16 / 9")) {
+      return {
+        aspectRatio: "16 / 9"
+      };
+    }
+
+    return {
+      height: 400
+    };
+  }, []);
 
   return (
     <div className="media-container">
       <div
         className="video-container"
         style={{
-          cursor: "pointer"
+          width: "100%",
+          cursor: "pointer",
+          ...videoHeight
         }}
+        onClick={togglePlayingStatus}
         ref={observe}
       >
+        <div
+          className={classNames({
+            "thumbnail-container": true,
+            "video-hidden": playing
+          })}
+        >
+          <div className="play-btn">
+            <i className="fas fa-play" />
+          </div>
+          <img
+            className="video-thumbnail"
+            data-torrent={item.magnetURI}
+            data-file-key={index}
+            alt="Video thumbnail"
+          />
+        </div>
         <video
-          className={`torrent-video torrent-video-${postId}-${id} torrent-video-${postId} video-js vjs-default-skin`}
+          className={classNames({
+            "torrent-video video-js vjs-default-skin": true,
+            "video-hidden": !playing
+          })}
           data-torrent={item.magnetURI}
           data-file-key={index}
-          controls
           data-played="false"
+          controls
           ref={videoRef}
         />
         <TipRibbon tipCounter={tipCounter} tipValue={tipValue} />

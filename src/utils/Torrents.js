@@ -1,7 +1,7 @@
 import { getCachedFile, renderCachedFile, saveFile } from "./Cache";
 import { runSerial } from "./Promise";
 
-const supportedFileTypes = {
+export const supportedFileTypes = {
   "video/embedded": {
     formats: ["mp4", "webm"],
     element: "video",
@@ -16,6 +16,11 @@ const supportedFileTypes = {
     options: {}
   }
 };
+
+export const supportedFormats = Object.values(supportedFileTypes).reduce(
+  (supportedFormats, fileType) => [...supportedFormats, ...fileType.formats],
+  []
+);
 
 const _getFileType = file => {
   const extension = file.name?.split(".")?.slice(-1)[0];
@@ -45,6 +50,33 @@ export const initializeClient = async () => {
   return webTorrentClient;
 };
 
+const getCacheId =
+  ({ id, key }) =>
+  file =>
+    `${id}-${key}-${file.name}`;
+
+const renderTorrent = ({ file, type, torrentMode, torrent }) => {
+  const element = type.element;
+  const target = `${element}[data-torrent="${torrent.magnetURI}"]`;
+  const torrentElements = document.querySelectorAll(target);
+  console.log("Torrent Elements:", torrentElements);
+  torrentElements.forEach(torrentElement => {
+    const contentURL = decodeURIComponent(
+      torrent.magnetURI.replace(/.*(ws=)/gi, "")
+    );
+    const [compatibleURL] = type.formats.filter(format =>
+      contentURL.toLowerCase().endsWith(`.${format.toLowerCase()}`)
+    );
+
+    if (torrentMode || !compatibleURL) {
+      file.renderTo(torrentElement, type.options);
+      return;
+    }
+
+    torrentElement.setAttribute("src", contentURL);
+  });
+};
+
 export const attachMedia = async (posts = [], torrentMode = true) => {
   const torrentTasks = await Promise.all(
     posts.map(async post => {
@@ -63,6 +95,7 @@ export const attachMedia = async (posts = [], torrentMode = true) => {
         ([key, item]) =>
           () =>
             new Promise(resolve => {
+              const getCacheFileName = getCacheId({ id, key });
               const torrentExists = webTorrentClient.get(item.magnetURI);
 
               if (torrentExists) {
@@ -89,18 +122,42 @@ export const attachMedia = async (posts = [], torrentMode = true) => {
                   return false;
                 });
 
+                const thumbnails = files.filter(file =>
+                  file.name.match(/-thumb\.([\w\d]){2,4}$/gi)
+                );
+                const thumbnailFileNames = thumbnails.map(file =>
+                  file.name.replace(/\.([\w\d]){2,4}$/gi, "")
+                );
+
                 files.map(async file => {
+                  // Skip thumbnails
+                  if (thumbnailFileNames.includes(file.name)) {
+                    return;
+                  }
+
                   const fileType = _getFileType(file);
 
                   if (!fileType) {
                     return;
                   }
 
-                  const fileName = `${id}-${key}-${file.name}`;
+                  const fileName = getCacheFileName(file);
 
                   const element = fileType.element;
                   const target = `${element}[data-torrent="${item.magnetURI}"]`;
                   const cachedFile = await getCachedFile(fileName);
+                  // Find thumbnail
+                  const sanitizedName = fileName
+                    .split(".")
+                    .slice(0, -1)
+                    .join(".");
+                  const thumbnailName = `${sanitizedName}-thumb`;
+                  const thumbnailIndex =
+                    thumbnailFileNames.indexOf(thumbnailName);
+                  const thumbnailFile = thumbnails[thumbnailIndex];
+                  const thumbnailFileType = thumbnailFile
+                    ? _getFileType(thumbnailFile)
+                    : null;
 
                   if (cachedFile) {
                     const torrent = webTorrentClient.get(item.magnetURI);
@@ -109,35 +166,40 @@ export const attachMedia = async (posts = [], torrentMode = true) => {
                       torrent.destroy();
                     }
 
+                    if (element === "video" && thumbnailFile) {
+                      const target = `${thumbnailFileType.element}[data-torrent="${item.magnetURI}"]`;
+                      const cachedThumbnail = await getCachedFile(
+                        getCacheFileName(thumbnailFile)
+                      );
+
+                      renderCachedFile(cachedThumbnail, target);
+                    }
+
                     renderCachedFile(cachedFile, target);
                     return;
                   }
 
-                  const torrentElements = document.querySelectorAll(target);
-                  console.log("Torrent Elements:", torrentElements);
-                  torrentElements.forEach(torrentElement => {
-                    const contentURL = decodeURIComponent(
-                      item.magnetURI.replace(/.*(ws=)/gi, "")
-                    );
-                    const [compatibleURL] = fileType.formats.filter(format =>
-                      contentURL
-                        .toLowerCase()
-                        .endsWith(`.${format.toLowerCase()}`)
-                    );
-
-                    if (torrentMode || !compatibleURL) {
-                      file.renderTo(torrentElement, fileType.options);
-                      return;
-                    }
-
-                    torrentElement.setAttribute("src", contentURL);
+                  renderTorrent({
+                    file,
+                    type: fileType,
+                    torrentMode,
+                    torrent: item
                   });
+
+                  if (thumbnailFile) {
+                    renderTorrent({
+                      file: thumbnailFile,
+                      type: thumbnailFileType,
+                      torrentMode,
+                      torrent: item
+                    });
+                  }
                 });
 
                 torrent.on("done", () => {
                   files.map(file => {
                     const fileType = _getFileType(file);
-                    const fileName = `${id}-${key}-${file.name}`;
+                    const fileName = getCacheFileName(file);
                     const element = fileType.element;
                     const target = `${element}[data-torrent="${item.magnetURI}"]`;
 

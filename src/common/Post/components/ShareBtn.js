@@ -1,16 +1,40 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import ReactTooltip from "react-tooltip";
 import CopyClipboard from "react-copy-to-clipboard";
+import { supportedFormats } from "../../../utils/Torrents";
 
 const ShareBtn = ({ publicKey, id, username, pinned, contentItems = [] }) => {
   const [copiedLink, setCopiedLink] = useState(false);
   const url = useMemo(() => {
     const media = contentItems
       .filter(item => ["image/embedded", "video/embedded"].includes(item.type))
-      .map(item => ({
-        url: decodeURIComponent(item.magnetURI.replace(/.*(ws=)/gi, "")),
-        type: item.type.replace("/embedded", "")
-      }));
+      .map((item, index) => {
+        const file = item.magnetURI.replace(/.*(ws=)/gi, "");
+        const type = item.type.replace("/embedded", "");
+        const [compatibleURL] = supportedFormats.filter(format =>
+          file.toLowerCase().endsWith(`.${format.toLowerCase()}`)
+        );
+
+        if (compatibleURL) {
+          return {
+            url: compatibleURL,
+            type
+          };
+        }
+
+        const [url] =
+          item.magnetURI.match(/(?<=^magnet:\?xs=)([\w\d]).*torrent/gi, "") ??
+          [];
+        const sanitizedUrl = decodeURIComponent(
+          url?.replace(".torrent", "") ?? ""
+        );
+
+        return {
+          url: `${sanitizedUrl}/${type}-${index}.mp4`,
+          thumbnail: `${sanitizedUrl}/${type}-${index}-thumb.png`,
+          type
+        };
+      });
 
     const description =
       contentItems

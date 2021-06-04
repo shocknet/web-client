@@ -127,10 +127,17 @@
             });
 
             if (type === "video") {
-              insertMetaTag({
-                property: `twitter:image`,
-                content: `${location.origin}/link-static.jpg`
-              });
+              if (item.thumbnail) {
+                insertMetaTag({
+                  property: `twitter:image`,
+                  content: item.thumbnail
+                });
+              } else {
+                insertMetaTag({
+                  property: `twitter:image`,
+                  content: `${location.origin}/link-static.jpg`
+                });
+              }
 
               insertMetaTag({
                 property: `twitter:image:height`,

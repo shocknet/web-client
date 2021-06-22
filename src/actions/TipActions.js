@@ -120,7 +120,7 @@ export const payUser =
       data: decryptedOrder.response.replace($$_SHOCKWALLET__ENCRYPTED__, "")
     });
 
-    return decryptedOrder.response.replace($$_SHOCKWALLET__ENCRYPTED__, "");
+    return {paymentRequest:decryptedOrder.response.replace($$_SHOCKWALLET__ENCRYPTED__, ""), ackNode:encryptedOrder.ackNode};
   };
 
 export const resetPaymentRequest = () => dispatch => {

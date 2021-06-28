@@ -241,10 +241,10 @@ const Post = ({
                   {liveStatus}
                   <i
                     className={`fas fa-circle liveStatusIcon ${
-                      liveStatus === "Is Live" ? "liveIcon" : ""
+                      liveStatus === "is Live" ? "liveIcon" : ""
                     }`}
                   ></i>
-                  {liveStatus === "Is Live" && (
+                  {liveStatus === "is Live" && (
                     <span> | {viewersCounter} watching</span>
                   )}
                 </p>

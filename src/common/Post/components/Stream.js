@@ -27,62 +27,23 @@ const Stream = ({
   if (width) {
     videoStyle.width = width;
   }
-  useEffect(() => {
-    if (!item || !inView) {
-      return;
-    }
-
-    let recheckInterval = null;
-    const checkStatus = async () => {
-      try {
-        //TODO regex (?) `${REACT_APP_SL_RTMP_API_URI}/live/${seedToken}/index.m3u8`
-        const [seedToken] = item.magnetURI
-          .replace(/.*(\/live\/)/, "")
-          .split("/index.m3u8");
-        const res = await fetch(`${STREAM_STATUS_URI}/${seedToken}`);
-        const resJ = await res.json();
-        if (!resJ.isLive) {
-          return false;
-        }
-        const player = videojs(playerDOM.current, {
-          autoplay: true,
-          muted: true,
-          aspectRatio: "16:9"
-        });
-        player.src({
-          src: item.magnetURI,
-          type: "application/x-mpegURL"
-        });
-        /*listen for 404s from the player
-        player.tech().on('retryplaylist', () => {
-          console.log('retryplaylist');
-        });*/
-        player.play();
-        return true;
-      } catch (err) {
-        console.log(err);
-        return false;
-      }
-    };
-    checkStatus().then(isLive => {
-      if (isLive) {
-        setIsLive(true);
-        return;
-      }
-      recheckInterval = setInterval(async () => {
-        const isLive = await checkStatus();
-        if (isLive) {
-          setIsLive(true);
-          clearInterval(recheckInterval);
-          return;
-        }
-      }, 10000);
+  const {liveStatus} = item
+  useEffect(() =>{
+    const player = videojs(playerDOM.current, {
+      autoplay: true,
+      muted: true,
+      aspectRatio: "16:9"
     });
-
-    return () => {
-      clearInterval(recheckInterval);
-    };
-  }, [item, inView]);
+    player.src({
+      src: item.magnetURI,
+      type: "application/x-mpegURL"
+    });
+    //listen for 404s from the player
+    //player.tech().on('retryplaylist', () => {
+    //  console.log('retryplaylist');
+    //});
+    player.play();
+  },[item])
   return (
     <div className="media-container w-100">
       <div
@@ -92,10 +53,12 @@ const Stream = ({
           width: "100%"
         }}
       >
-        {!isLive && <p>The streamer has disconnected.</p>}
+        {liveStatus === 'waiting' && <p>The stream did not start yet.</p>}
+        {liveStatus === 'wasLive' && <p>The stream is over</p>}
+        {!liveStatus && <p>The streamer has disconnected.</p>}
         <div
           style={
-            isLive ? { width: "100%" } : { display: "none", width: "100%" }
+            liveStatus === 'live' ? { width: "100%" } : { display: "none", width: "100%" }
           }
           ref={observe}
         >

@@ -123,7 +123,9 @@ const UserPage = () => {
   //     false
   //   );
   // }, [wall.posts]);
-
+  useEffect(() => {
+    document.title = profile.displayName ?? profile.alias
+  }, [profile])
   const username = profile.displayName ?? profile.alias;
 
   const renderPost = useCallback(

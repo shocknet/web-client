@@ -15,7 +15,7 @@ function App() {
           <Route path="/user/:userId" component={UserPage} />
           <Route path="/:userId/:type/:postId" component={PostPage} />
           <Route path="/:userId" component={UserPage} />
-          <Redirect to="/JVz7h3yUnbgMwwKxSddGenBlrE9eeDJVYWlmOr941mI.LW5PEWM3Y-DRf-UApdSN76wH6id6zR4mXNyBApihoAA" />
+          <Redirect to="/tcUUzRkyzXYhIZQbmopiCLREyZ_kQJqQ-C4XesecOm4.GX1Dv-eGcfKuOPobBK9Q-Sc-o697XgVCQzOCfqfimIo" />
         </Switch>
       </Suspense>
       <DownloadBtn />

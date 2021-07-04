@@ -150,8 +150,7 @@
   display: flex;
   position: relative;
   border-radius: 8px;
-  max-width: 700px;
-  max-height: 700px;
+  aspect-ratio: 16 / 9;
   background-color: #171c23;
   overflow: hidden;
 }
@@ -162,10 +161,7 @@
   top: 0;
   width: 100%;
   height: 100%;
-  max-width: 700px;
-  max-height: 700px;
-  min-width: 400px;
-  min-height: 250px;
+  aspect-ratio: 16 / 9;
   opacity: 1;
   visibility: visible;
   transition: all 0.2s ease;

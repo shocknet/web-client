@@ -11,3 +11,9 @@
   width: 90%;
   margin: auto;
 }
+
+@media (max-width: 500px) {
+  .posts-container {
+    width: 100%;
+  }
+}

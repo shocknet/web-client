@@ -22,9 +22,8 @@ const ShareBtn = ({ publicKey, id, username, pinned, contentItems = [] }) => {
           };
         }
 
-        const [url] =
-          item.magnetURI.match(/(?<=^magnet:\?xs=)([\w\d]).*torrent/gi, "") ??
-          [];
+        const [, url] =
+          item.magnetURI.match(/(?:magnet:\?xs=)([\w\d].*torrent)/i) ?? [];
         const sanitizedUrl = decodeURIComponent(url ?? "").replace(
           /\/[\w\d]+.torrent/gi,
           ""

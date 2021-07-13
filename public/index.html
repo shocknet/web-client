@@ -170,6 +170,11 @@
 
       window.prerenderReady = true;
     </script>
+    <script>
+      if (navigator.userAgent.includes("Prerender")) {
+        document.body.innerHTML = "";
+      }
+    </script>
   </head>
 
   <body>

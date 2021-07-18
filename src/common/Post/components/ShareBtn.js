@@ -52,7 +52,7 @@ const ShareBtn = ({ publicKey, id, username, pinned, contentItems = [] }) => {
       description
     };
 
-    const metadataBase64 = btoa(JSON.stringify(metadata));
+    const metadataBase64 = btoa(unescape(encodeURIComponent(JSON.stringify(metadata))));
     const shareLink = `https://${window.location.host}/${publicKey}/post/${id}?metadata=${metadataBase64}`;
 
     return shareLink;

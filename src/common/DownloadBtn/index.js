@@ -10,7 +10,7 @@ const DownloadBtn = () => {
       className="download-shockwallet-btn"
     >
       <i className="download-shockwallet-btn-icon fas fa-user"></i>
-      <p className="download-shockwallet-btn-text">Create a Shockwallet</p>
+      <p className="download-shockwallet-btn-text">Create a Lightning Page</p>
     </a>
   );
 };

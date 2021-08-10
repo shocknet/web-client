@@ -4,7 +4,7 @@ import "./css/index.css";
 const DownloadBtn = () => {
   return (
     <a
-      href="https://wallet.shock.pub"
+      href="https://My.Lightning.Page"
       target="_blank"
       rel="noreferrer noopener"
       className="download-shockwallet-btn"

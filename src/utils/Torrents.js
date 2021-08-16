@@ -212,7 +212,10 @@ export const attachMedia = async (posts = [], torrentMode = true) => {
                       console.log("Caching loaded file...", fileName, blob);
                       await saveFile(fileName, blob);
                       const element = document.querySelector(target);
-                      if (element.dataset.played === "false") {
+                      if (
+                        element?.dataset.played === "false" &&
+                        !element?.getAttribute("src")
+                      ) {
                         const cachedFile = await getCachedFile(fileName);
                         renderCachedFile(cachedFile, target);
                       }

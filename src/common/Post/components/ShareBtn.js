@@ -42,7 +42,7 @@ const ShareBtn = ({ publicKey, id, username, pinned, contentItems = [] }) => {
       contentItems
         .filter(item => item.type === "text/paragraph")
         .map(item => item.text)
-        .join("\n") || `View ${username}'s posts on ShockWallet`;
+        .join("\n") || `View ${username}'s posts on Lightning.Page`;
 
     const metadata = {
       title: `Post by ${username}`,
@@ -61,7 +61,7 @@ const ShareBtn = ({ publicKey, id, username, pinned, contentItems = [] }) => {
   const sharePost = useCallback(async () => {
     if (navigator.share) {
       navigator.share({
-        text: `Check out this post from ${username} on ShockWallet!`,
+        text: `Check out ${username}'s post on Lightning.Page!`,
         url
       });
       return;

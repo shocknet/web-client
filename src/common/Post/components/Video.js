@@ -62,7 +62,6 @@ const Video = ({ id, item, index, postId, tipValue, tipCounter }) => {
           cursor: "pointer",
           ...videoHeight
         }}
-        onClick={togglePlayingStatus}
         ref={observe}
       >
         <div
@@ -70,6 +69,7 @@ const Video = ({ id, item, index, postId, tipValue, tipCounter }) => {
             "thumbnail-container": true,
             "video-hidden": playing
           })}
+          onClick={togglePlayingStatus}
         >
           <div className="play-btn">
             <i className="fas fa-play" />

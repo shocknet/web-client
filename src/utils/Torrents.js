@@ -6,7 +6,8 @@ export const supportedFileTypes = {
     formats: ["mp4", "webm"],
     element: "video",
     options: {
-      autoplay: false
+      autoplay: false,
+      muted: true
     }
   },
   "image/embedded": {
@@ -111,11 +112,6 @@ const getThumbnailRenderer =
       thumbnailFileType?.element ?? "img"
     }[data-torrent="${item.magnetURI}"]`;
 
-    console.log({
-      thumbnailFile,
-      thumbnailName
-    });
-
     if (fileType.element === "video" && thumbnailFile) {
       const cachedThumbnail = await getCachedFile(
         getCacheFileName(thumbnailFile)
@@ -202,7 +198,8 @@ export const attachMedia = async (posts = [], torrentMode = true) => {
                 );
                 const renderThumbnail = getThumbnailRenderer({
                   getCacheFileName,
-                  thumbnailFileNames
+                  thumbnailFileNames,
+                  torrentMode
                 });
 
                 files.map(async file => {

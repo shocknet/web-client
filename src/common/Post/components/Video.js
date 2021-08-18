@@ -80,6 +80,16 @@ const Video = ({ id, item, index, postId, tipValue, tipCounter }) => {
             data-file-key={index}
             alt="Video thumbnail"
           />
+          <video
+            className="dynamic-thumbnail hidden"
+            data-torrent={item.magnetURI}
+            data-file-key={index}
+            alt="Video thumbnail"
+            data-played="false"
+            controls={false}
+            muted
+            autoPlay={false}
+          />
         </div>
         <video
           className={classNames({
@@ -91,7 +101,7 @@ const Video = ({ id, item, index, postId, tipValue, tipCounter }) => {
           data-played="false"
           controls
           ref={videoRef}
-          onPause={togglePlayingStatus}
+          muted
         />
         <TipRibbon tipCounter={tipCounter} tipValue={tipValue} />
       </div>

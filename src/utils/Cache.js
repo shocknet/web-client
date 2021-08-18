@@ -38,7 +38,6 @@ export const renderCachedFile = (fileURL, selector) => {
     elements.forEach(element => {
       element.src = fileURL;
       element.muted = true;
-      element.autoplay = true;
     });
   }
   return !!elements && !!elements.length;

@@ -53,6 +53,12 @@ const Video = ({ id, item, index, postId, tipValue, tipCounter }) => {
     };
   }, []);
 
+  const onPause = useCallback(() => {
+    if (videoRef.current?.readyState === 4) {
+      setPlaying(false);
+    }
+  }, [videoRef]);
+
   return (
     <div className="media-container">
       <div
@@ -102,6 +108,7 @@ const Video = ({ id, item, index, postId, tipValue, tipCounter }) => {
           controls
           ref={videoRef}
           muted
+          onPause={onPause}
         />
         <TipRibbon tipCounter={tipCounter} tipValue={tipValue} />
       </div>

@@ -106,10 +106,8 @@ const Post = ({
     if (item.type === "video/embedded") {
       return (
         <Video
-          id={key}
           item={item}
           index={index}
-          postId={id}
           tipCounter={tipCounter}
           tipValue={tipValue}
           key={`${id}-${index}`}

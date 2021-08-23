@@ -468,8 +468,8 @@ img.enlarged-img {
 }
 
 @media only screen and (max-width: 500px) {
-  .user-page .posts-holder {
-    padding: 0;
+  .video-container {
+    border-radius: 0px;
   }
 
   .post {

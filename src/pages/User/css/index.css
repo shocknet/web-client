@@ -181,6 +181,10 @@
 }
 
 @media only screen and (max-width: 570px) {
+  .user-page .posts-holder {
+    padding: 0;
+  }
+
   .user-page .user-details {
     flex-direction: column;
     align-items: center;

@@ -5,11 +5,11 @@ import TipRibbon from "./TipRibbon";
 import "../../../styles/video.js.css";
 import "../css/index.css";
 
-const Video = ({ id, item, index, postId, tipValue, tipCounter }) => {
+const Video = ({ item, index, tipValue, tipCounter }) => {
   const videoRef = useRef();
   const [playing, setPlaying] = useState(false);
   const { observe } = useInView({
-    trackVisibility: true,
+    trackVisibility: false,
     delay: 100,
     onEnter: () => {
       if (videoRef.current) {
@@ -60,7 +60,7 @@ const Video = ({ id, item, index, postId, tipValue, tipCounter }) => {
   }, [videoRef]);
 
   return (
-    <div className="media-container">
+    <div className="media-container" ref={observe}>
       <div
         className="video-container"
         style={{
@@ -68,7 +68,6 @@ const Video = ({ id, item, index, postId, tipValue, tipCounter }) => {
           cursor: "pointer",
           ...videoHeight
         }}
-        ref={observe}
       >
         <div
           className={classNames({

@@ -16,7 +16,6 @@ import {
 import { openModal } from "../../actions/TipActions";
 import useOnlineStatus from "../../hooks/useOnlineStatus";
 import { listenPath, gunUser } from "../../utils/Gun";
-import { attachMedia } from "../../utils/Torrents";
 
 import Loader from "../../common/Loader";
 import Divider from "../../common/Divider";

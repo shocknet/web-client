@@ -1,20 +1,26 @@
-import React, { useEffect, useCallback, useState } from "react";
+import React, {
+  useEffect,
+  useCallback,
+  useState,
+  useMemo,
+  useLayoutEffect
+} from "react";
 import moment from "moment";
 import Tooltip from "react-tooltip";
 import { useDispatch } from "react-redux";
-import { useEmblaCarousel } from "embla-carousel/react";
-import classNames from "classnames";
 import { Link } from "react-router-dom";
 import useInView from "react-cool-inview";
+import { Helmet } from "react-helmet";
 import { updateWallPost } from "../../actions/UserActions";
 import { openModal } from "../../actions/TipActions";
 import { gunUser, fetchPath } from "../../utils/Gun";
-import Video from "./components/Video";
-import Image from "./components/Image";
-import Stream from "./components/Stream";
+import { attachMedia } from "../../utils/Torrents";
+import MediaCarousel from "./components/Media";
 import ShareBtn from "./components/ShareBtn";
 import "./css/index.css";
-import { attachMedia } from "../../utils/Torrents";
+import { getMediaMetadata, getPostDescription } from "../../utils/Post";
+
+const STATIC_THUMBNAIL = `${window.location.origin}/link-static.jpg`;
 
 const Post = ({
   id,
@@ -29,11 +35,6 @@ const Post = ({
   pinned
 }) => {
   const dispatch = useDispatch();
-  const [carouselRef, carouselAPI] = useEmblaCarousel({
-    slidesToScroll: 1,
-    align: "center",
-    draggable: false
-  });
   const { observe } = useInView({
     trackVisibility: false,
     unobserveOnEnter: true,
@@ -43,10 +44,74 @@ const Post = ({
     }
   });
 
-  const [sliderLength, setSliderLength] = useState(0);
-  const [activeSlide, setActiveSlide] = useState(0);
   const [liveStatus, setLiveStatus] = useState("");
   const [viewersCounter, setViewersCounter] = useState(0);
+
+  const mediaContent = useMemo(
+    () =>
+      Object.entries(contentItems).filter(
+        ([_, item]) => item.type !== "text/paragraph"
+      ),
+    [contentItems]
+  );
+
+  const mediaMetadata = useMemo(
+    () => getMediaMetadata(Object.values(contentItems)),
+    [contentItems]
+  );
+
+  const textContent = useMemo(
+    () =>
+      Object.entries(contentItems).filter(
+        ([_, item]) => item.type === "text/paragraph"
+      ),
+    [contentItems]
+  );
+
+  const getMediaType = useCallback(mediaItem => {
+    if (mediaItem.type === "stream") {
+      return "video";
+    }
+
+    return mediaItem.type;
+  }, []);
+
+  const tipPost = useCallback(() => {
+    if (!isOnlineNode) {
+      return;
+    }
+
+    dispatch(
+      openModal({
+        targetType: "tip",
+        ackInfo: id
+      })
+    );
+  }, [dispatch, id, isOnlineNode]);
+
+  useEffect(() => {
+    fetchPath({
+      path: `posts/${id}/tipsSet`,
+      gunPointer: gunUser(publicKey),
+      method: "load"
+    }).then(data => {
+      const tipSet = data ? Object.values(data) : [];
+      const lenSet = tipSet.length;
+      const tot =
+        lenSet > 0
+          ? tipSet.reduce((acc, val) => Number(val) + Number(acc), 0)
+          : 0;
+      dispatch(
+        updateWallPost({
+          postID: id,
+          data: {
+            tipValue: tot,
+            tipCounter: lenSet
+          }
+        })
+      );
+    });
+  }, [dispatch, id, publicKey]);
 
   //effect for liveStatus and viewers counter
   useEffect(() => {
@@ -72,156 +137,59 @@ const Post = ({
     }
   }, [contentItems, setLiveStatus]);
 
-  const getMediaContent = () => {
-    return Object.entries(contentItems).filter(
-      ([_, item]) => item.type !== "text/paragraph"
-    );
-  };
-
-  const getTextContent = () => {
-    return Object.entries(contentItems).filter(
-      ([_, item]) => item.type === "text/paragraph"
-    );
-  };
-
-  const parseContent = ([key, item], index) => {
-    if (item.type === "text/paragraph") {
-      return <p key={key}>{item.text}</p>;
-    }
-
-    if (item.type === "image/embedded") {
-      return (
-        <Image
-          id={key}
-          item={item}
-          index={index}
-          postId={id}
-          tipCounter={tipCounter}
-          tipValue={tipValue}
-          key={`${id}-${index}`}
-        />
-      );
-    }
-
-    if (item.type === "video/embedded") {
-      return (
-        <Video
-          item={item}
-          index={index}
-          tipCounter={tipCounter}
-          tipValue={tipValue}
-          key={`${id}-${index}`}
-        />
-      );
-    }
-
-    if (item.type === "stream/embedded") {
-      return (
-        <Stream
-          id={key}
-          item={item}
-          index={index}
-          postId={id}
-          tipCounter={tipCounter}
-          tipValue={tipValue}
-          key={`${id}-${index}`}
-        />
-      );
-    }
-
-    return null;
-  };
-
-  const nextSlide = useCallback(() => {
-    if (!carouselAPI) return;
-
-    if (carouselAPI.canScrollNext()) {
-      carouselAPI.scrollNext();
-    }
-  }, [carouselAPI]);
-
-  const prevSlide = useCallback(() => {
-    if (!carouselAPI) return;
-
-    if (carouselAPI.canScrollPrev()) {
-      carouselAPI.scrollPrev();
-    }
-  }, [carouselAPI]);
-
-  const handleUserKeyDown = useCallback(
-    e => {
-      if (sliderLength === 0) return;
-      const { key } = e;
-
-      if (key === "ArrowRight") {
-        nextSlide();
-      }
-
-      if (key === "ArrowLeft") {
-        prevSlide();
-      }
-    },
-    [sliderLength, prevSlide, nextSlide]
-  );
-
-  const updateActiveSlide = useCallback(() => {
-    setActiveSlide(carouselAPI.selectedScrollSnap());
-  }, [carouselAPI, setActiveSlide]);
-
-  useEffect(() => {
-    fetchPath({
-      path: `posts/${id}/tipsSet`,
-      gunPointer: gunUser(publicKey),
-      method: "load"
-    }).then(data => {
-      const tipSet = data ? Object.values(data) : [];
-      const lenSet = tipSet.length;
-      const tot =
-        lenSet > 0 ? tipSet.reduce((acc, val) => Number(val) + Number(acc)) : 0;
-      dispatch(
-        updateWallPost({
-          postID: id,
-          data: {
-            tipValue: tot,
-            tipCounter: lenSet
-          }
-        })
-      );
-    });
-  }, [dispatch, id, publicKey]);
-
-  useEffect(() => {
-    if (!carouselAPI) return;
-
-    carouselAPI.on("scroll", updateActiveSlide);
-    setSliderLength(carouselAPI.scrollSnapList().length);
-    window.addEventListener("keydown", handleUserKeyDown);
-
-    return () => {
-      window.removeEventListener("keydown", handleUserKeyDown);
-      carouselAPI.off("scroll", updateActiveSlide);
-    };
-  }, [carouselAPI, sliderLength, handleUserKeyDown, updateActiveSlide]);
-
-  const tipPost = useCallback(() => {
-    if (!isOnlineNode) {
-      return;
-    }
-
-    dispatch(
-      openModal({
-        targetType: "tip",
-        ackInfo: id
-      })
-    );
-  }, [dispatch, id, isOnlineNode]);
-
   useEffect(() => {
     Tooltip.rebuild();
   }, []);
 
+  useLayoutEffect(() => {
+    if (pinned) {
+      window.prerenderReady = true;
+    }
+  }, [pinned]);
+
   return (
     <div className="post">
+      {pinned && (
+        <Helmet>
+          <meta property="og:title" content={username} />
+          <meta property="twitter:title" content={username} />
+          <meta
+            property="og:description"
+            content={getPostDescription({
+              contentItems: Object.values(contentItems),
+              username
+            })}
+          />
+        </Helmet>
+      )}
+      {mediaMetadata.map(item => {
+        const type = getMediaType(item);
+        return (
+          <>
+            <Helmet>
+              <meta property={`og:${type}:width`} content="600" />
+              <meta property={`og:${type}:height`} content="314" />
+              <meta property={`og:${type}`} content={item.url} />
+            </Helmet>
+            {type === "video" && (
+              <Helmet>
+                <meta property="og:image:width" content="600" />
+                <meta property="og:image:height" content="314" />
+                <meta
+                  property="og:image"
+                  content={item.thumbnail ?? STATIC_THUMBNAIL}
+                />
+                <meta property="twitter:image:width" content="600" />
+                <meta property="twitter:image:height" content="314" />
+                <meta
+                  property="twitter:image"
+                  content={item.thumbnail ?? STATIC_THUMBNAIL}
+                />
+              </Helmet>
+            )}
+          </>
+        );
+      })}
       <div className="head">
         <div className="user">
           <Link
@@ -261,37 +229,17 @@ const Post = ({
       </div>
 
       <div className="content" ref={observe}>
-        {getTextContent().map(parseContent)}
-        <div className="media-content-carousel">
-          {sliderLength > 1 ? (
-            <div className="media-carousel-controls-container">
-              <div
-                className="media-carousel-arrow fas fa-angle-left"
-                onClick={prevSlide}
-              ></div>
-              <div className="media-carousel-pages">
-                {Array.from({ length: sliderLength }).map((_, key) => (
-                  <div
-                    className={classNames({
-                      "media-carousel-page": true,
-                      "active-carousel-page": activeSlide === key
-                    })}
-                    onClick={() => carouselAPI?.scrollTo(key)}
-                  ></div>
-                ))}
-              </div>
-              <div
-                className="media-carousel-arrow fas fa-angle-right"
-                onClick={nextSlide}
-              ></div>
-            </div>
-          ) : null}
-          <div className="media-content-root" ref={carouselRef}>
-            <div className="media-content-container">
-              {getMediaContent().map(parseContent)}
-            </div>
-          </div>
-        </div>
+        {textContent.map(([key, item]) => (
+          <p key={key}>{item.text}</p>
+        ))}
+        <MediaCarousel
+          contentItems={mediaContent}
+          id={id}
+          timestamp={timestamp}
+          avatar={avatar}
+          tipCounter={tipCounter}
+          tipValue={tipValue}
+        />
       </div>
 
       <div className="actions">
@@ -302,28 +250,6 @@ const Post = ({
         >
           <i className="tip-icon icon-thin-feed"></i>
         </div>
-        {/* <div
-          className="tip-btn-container"
-          onClick={tipPost}
-          data-tip={
-            isOnlineNode
-              ? tipCounter > 0
-                ? `${tipValue} Sats tipped so far`
-                : null
-              : "You can only tip online users"
-          }
-          style={{
-            opacity: isOnlineNode ? 1 : 0.5,
-            cursor: isOnlineNode ? "pointer" : "default"
-          }}
-        >
-          <div className="tip-btn-icon">
-            <img src={lightning} alt="Send Tip" />
-          </div>
-          <div className="tip-btn-text">
-            <Counter value={tipCounter} /> {tipCounter === 1 ? "Tip" : "Tips"}
-          </div>
-        </div> */}
         <Tooltip backgroundColor="#3a4d67" effect="solid" />
       </div>
     </div>

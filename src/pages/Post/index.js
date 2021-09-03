@@ -13,7 +13,6 @@ import {
   getUserProfile,
   resetUserData
 } from "../../actions/UserActions";
-import { attachMedia } from "../../utils/Torrents";
 import useOnlineStatus from "../../hooks/useOnlineStatus";
 import Loader from "../../common/Loader";
 import NavBar from "../../common/NavBar";

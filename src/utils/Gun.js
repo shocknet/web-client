@@ -1,6 +1,7 @@
 import GunDB from "gun/gun";
 import "gun/sea";
 import "gun/lib/load";
+import { isCrawler } from "./Prerender";
 
 const safeParse = data => {
   try {
@@ -14,10 +15,7 @@ const peersConfig = safeParse(process.env.PEERS);
 
 const peers = peersConfig
   ? peersConfig
-  : [
-      "https://gun.shock.network/gun",
-      "https://gun-eu.shock.network/gun"
-    ];
+  : ["https://gun.shock.network/gun", "https://gun-eu.shock.network/gun"];
 
 const wait = ms =>
   new Promise((resolve, reject) => {
@@ -94,7 +92,7 @@ const _isIncompleteGunResponse = data => {
 const parseGunPath = ({ path, gunPointer }) =>
   path.split("/").reduce((gun, path) => gun.get(path), gunPointer);
 
-export const Gun = GunDB({axe: false, peers: peers});
+export const Gun = GunDB({ axe: false, peers: peers });
 
 export const fetchPath = ({
   path = "",
@@ -108,23 +106,30 @@ export const fetchPath = ({
   _fallbackResult
 }) =>
   new Promise(resolve => {
-    if (_retryCount > retryLimit) {
+    const parsedRetryLimit = isCrawler() ? 1 : retryLimit;
+    const parsedRetryDelay = isCrawler() ? 200 : retryDelay;
+
+    if (_retryCount > parsedRetryLimit) {
       resolve(_fallbackResult);
       return;
     }
     if (_retryCount > 0) {
-      console.log("Retrying event:", path, `${_retryCount}/${retryLimit}`);
+      console.log(
+        "Retrying event:",
+        path,
+        `${_retryCount}/${parsedRetryLimit}`
+      );
     }
     const GunContext = parseGunPath({ path, gunPointer });
     console.log("Fetching Path:", path);
     GunContext[method](async event => {
       console.log(path + " Response:", event);
       if (retryCondition && retryCondition(event)) {
-        await wait(retryDelay);
+        await wait(parsedRetryDelay);
         const retryResult = await fetchPath({
           path,
-          retryDelay,
-          retryLimit,
+          retryDelay: parsedRetryDelay,
+          retryLimit: parsedRetryLimit,
           retryCondition,
           gunPointer,
 

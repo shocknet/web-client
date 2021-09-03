@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState } from "react";
+import React, { useRef, useEffect } from "react";
 import useInView from "react-cool-inview";
 import TipRibbon from "./TipRibbon";
 import videojs from "video.js";
@@ -6,29 +6,19 @@ import videojs from "video.js";
 const REACT_APP_SL_SEED_URI = "https://webtorrent.shock.network";
 const STREAM_STATUS_URI = `${REACT_APP_SL_SEED_URI}/rtmpapi/api/streams/live`;
 
-const Stream = ({
-  id,
-  item,
-  index,
-  postId,
-  tipValue,
-  tipCounter,
-  hideRibbon,
-  width
-}) => {
+const Stream = ({ item, tipValue, tipCounter, hideRibbon, width }) => {
   const playerDOM = useRef(null);
-  const { inView, observe } = useInView({
+  const { observe } = useInView({
     trackVisibility: true,
     delay: 100,
     unobserveOnEnter: true
   });
-  const [isLive, setIsLive] = useState(false);
   const videoStyle = { width: "100%" };
   if (width) {
     videoStyle.width = width;
   }
-  const {liveStatus} = item
-  useEffect(() =>{
+  const { liveStatus } = item;
+  useEffect(() => {
     const player = videojs(playerDOM.current, {
       autoplay: true,
       muted: true,
@@ -43,18 +33,20 @@ const Stream = ({
     //  console.log('retryplaylist');
     //});
     player.play();
-  },[item])
-  useEffect(()=>{
-    if(item.viewersSocketUrl){
-      const socket = new WebSocket(`${item.viewersSocketUrl}/stream/watch/${item.userToken}`);
+  }, [item]);
+  useEffect(() => {
+    if (item.viewersSocketUrl) {
+      const socket = new WebSocket(
+        `${item.viewersSocketUrl}/stream/watch/${item.userToken}`
+      );
       socket.addEventListener("open", () => {
-        console.log("viewer socket open")
+        console.log("viewer socket open");
       });
       return () => {
-        socket.close()
-      }
+        socket.close();
+      };
     }
-  },[item])
+  }, [item]);
   return (
     <div className="media-container w-100">
       <div
@@ -64,12 +56,14 @@ const Stream = ({
           width: "100%"
         }}
       >
-        {liveStatus === 'waiting' && <p>The stream did not start yet.</p>}
-        {liveStatus === 'wasLive' && <p>The stream is over</p>}
+        {liveStatus === "waiting" && <p>The stream did not start yet.</p>}
+        {liveStatus === "wasLive" && <p>The stream is over</p>}
         {!liveStatus && <p>The streamer has disconnected.</p>}
         <div
           style={
-            liveStatus === 'live' ? { width: "100%" } : { display: "none", width: "100%" }
+            liveStatus === "live"
+              ? { width: "100%" }
+              : { display: "none", width: "100%" }
           }
           ref={observe}
         >

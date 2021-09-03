@@ -1,70 +1,41 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import ReactTooltip from "react-tooltip";
 import CopyClipboard from "react-copy-to-clipboard";
-import { supportedFormats } from "../../../utils/Torrents";
+import { getMediaMetadata, getPostDescription } from "../../../utils/Post";
 
 const ShareBtn = ({ publicKey, id, username, pinned, contentItems = [] }) => {
   const [copiedLink, setCopiedLink] = useState(false);
+
   const url = useMemo(() => {
-    const media = contentItems
-      .filter(item => ["image/embedded", "video/embedded"].includes(item.type))
-      .map((item, index) => {
-        const file = item.magnetURI.replace(/.*(ws=)/gi, "");
-        const type = item.type.replace("/embedded", "");
-        const [compatibleURL] = supportedFormats.filter(format =>
-          file.toLowerCase().endsWith(`.${format.toLowerCase()}`)
-        );
-
-        if (compatibleURL) {
-          return {
-            url: compatibleURL,
-            type
-          };
-        }
-
-        const [, url] =
-          item.magnetURI.match(/(?:magnet:\?xs=)([\w\d].*torrent)/i) ?? [];
-        const sanitizedUrl = decodeURIComponent(url ?? "").replace(
-          /\/[\w\d]+.torrent/gi,
-          ""
-        );
-
-        console.log("Sanitized URL:", url, sanitizedUrl);
-
-        return {
-          url: `${sanitizedUrl}/${type}-${index}.mp4`,
-          thumbnail: `${sanitizedUrl}/${type}-${index}-thumb.png`,
-          type
-        };
-      });
-
-    const description =
-      contentItems
-        .filter(item => item.type === "text/paragraph")
-        .map(item => item.text)
-        .join("\n") || `View ${username}'s posts on Lightning.Page`;
+    const media = getMediaMetadata(contentItems);
+    const description = getPostDescription({
+      contentItems,
+      username
+    });
+    const link = `https://${window.location.host}/${publicKey}/post/${id}`;
 
     const metadata = {
       title: `Post by ${username}`,
-      url: `https://${window.location.host}/${publicKey}/post/${id}`,
+      url: link,
       type: `website`,
       media,
       description
     };
 
-    const metadataBase64 = btoa(unescape(encodeURIComponent(JSON.stringify(metadata))));
-    const shareLink = `https://${window.location.host}/${publicKey}/post/${id}?metadata=${metadataBase64}`;
+    const metadataBase64 = btoa(
+      unescape(encodeURIComponent(JSON.stringify(metadata)))
+    );
+    const shareLink = `${link}?metadata=${metadataBase64}`;
 
     return shareLink;
   }, [contentItems, username, publicKey, id]);
 
-  const sharePost = useCallback(async () => {
+  const sharePost = useCallback(() => {
     if (navigator.share) {
       navigator.share({
         text: `Check out ${username}'s post on Lightning.Page!`,
         url
       });
-      return;
     }
   }, [username, url]);
 

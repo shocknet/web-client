@@ -1,7 +1,14 @@
-import React, { useEffect, useState, useCallback, Suspense } from "react";
+import React, {
+  useEffect,
+  useState,
+  useCallback,
+  Suspense,
+  useMemo
+} from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { useParams } from "react-router-dom";
 import Tooltip from "react-tooltip";
+import Helmet from "react-helmet";
 
 import {
   getUserWall,
@@ -16,12 +23,12 @@ import {
 import { openModal } from "../../actions/TipActions";
 import useOnlineStatus from "../../hooks/useOnlineStatus";
 import { listenPath, gunUser } from "../../utils/Gun";
+import { crawlerAwait } from "../../utils/Promise";
 
 import Loader from "../../common/Loader";
 import Divider from "../../common/Divider";
 import TipModal from "../../common/TipModal";
 
-// Assets
 import defaultBanner from "../../images/banner-bg.jpg";
 import av1 from "../../images/av1.jpg";
 import shockLogo from "../../images/lightning-logo.svg";
@@ -36,21 +43,28 @@ const UserPage = () => {
   const { userId: publicKey } = params;
   const wall = useSelector(({ user }) => user.wall);
   const profile = useSelector(({ user }) => user.profile);
+
   const { isOnlineApp, isOnlineNode } = useOnlineStatus(publicKey);
-  // Reserved for future use
-  // eslint-disable-next-line no-unused-vars
   const [userLoading, setUserLoading] = useState(true);
   const [wallLoading, setWallLoading] = useState(true);
+
+  const username = useMemo(
+    () => profile.displayName ?? profile.alias,
+    [profile]
+  );
 
   const fetchUserData = useCallback(async () => {
     try {
       setUserLoading(true);
       dispatch(resetUserData());
       await dispatch(getUserProfile(publicKey));
+
+      // Wait for user avatar/header if crawler is visiting the site
+      await crawlerAwait(
+        dispatch(getUserHeader(publicKey)),
+        dispatch(getUserAvatar(publicKey))
+      );
       setUserLoading(false);
-      // Load user avatar in the background
-      dispatch(getUserHeader(publicKey));
-      dispatch(getUserAvatar(publicKey));
     } catch (err) {
       console.error(err);
       setUserLoading(false);
@@ -89,43 +103,6 @@ const UserPage = () => {
       })
     );
   }, [dispatch, fetchUserData, fetchUserWall, params]);
-
-  useEffect(() => {
-    initializeUserWall();
-
-    // Subscribe for updates
-    const displayNameListener = listenPath({
-      path: "Profile/displayName",
-      gunPointer: gunUser(publicKey),
-      callback: event => {
-        dispatch(updateUserProfile({ displayName: event }));
-      }
-    });
-
-    const bioListener = listenPath({
-      path: "Profile/bio",
-      gunPointer: gunUser(publicKey),
-      callback: event => {
-        dispatch(updateUserProfile({ bio: event }));
-      }
-    });
-
-    return () => {
-      displayNameListener.off();
-      bioListener.off();
-    };
-  }, [dispatch, initializeUserWall, publicKey]);
-
-  // useEffect(() => {
-  //   attachMedia(
-  //     wall.posts.filter(post => post.type === "post"),
-  //     false
-  //   );
-  // }, [wall.posts]);
-  useEffect(() => {
-    document.title = profile.displayName ?? profile.alias
-  }, [profile])
-  const username = profile.displayName ?? profile.alias;
 
   const renderPost = useCallback(
     post => {
@@ -193,8 +170,45 @@ const UserPage = () => {
     [isOnlineNode, profile.avatar, publicKey, username]
   );
 
+  useEffect(() => {
+    initializeUserWall();
+
+    // Subscribe for updates
+    const displayNameListener = listenPath({
+      path: "Profile/displayName",
+      gunPointer: gunUser(publicKey),
+      callback: event => {
+        dispatch(updateUserProfile({ displayName: event }));
+      }
+    });
+
+    const bioListener = listenPath({
+      path: "Profile/bio",
+      gunPointer: gunUser(publicKey),
+      callback: event => {
+        dispatch(updateUserProfile({ bio: event }));
+      }
+    });
+
+    return () => {
+      displayNameListener.off();
+      bioListener.off();
+    };
+  }, [dispatch, initializeUserWall, publicKey]);
+
+  useEffect(() => {
+    if (!userLoading) {
+      window.prerenderReady = true;
+    }
+  }, [userLoading]);
+
   return (
     <div className="user-page">
+      <Helmet>
+        <meta property="og:title" content={username} />
+        <meta property="twitter:title" content={username} />
+        <meta property="og:description" content={profile.bio} />
+      </Helmet>
       <div
         className="top-banner"
         style={{
@@ -204,7 +218,7 @@ const UserPage = () => {
               : defaultBanner
           })`
         }}
-      ></div>
+      />
       <div className="user-details">
         <div
           className="main-av"
@@ -213,7 +227,7 @@ const UserPage = () => {
               profile.avatar ? `data:image/png;base64,${profile.avatar}` : av1
             })`
           }}
-        ></div>
+        />
 
         <div className="details">
           <div className="user-info">

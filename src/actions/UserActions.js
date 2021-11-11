@@ -18,10 +18,8 @@ const GUN_POSTS_KEY = `posts`;
 const GUN_SHARED_POSTS_KEY = `sharedPosts`;
 
 export const getUserAvatar = (publicKey) => async (dispatch) => {
-  const gunUser = Gun.user(publicKey);
   const avatar = await fetchPath({
-    path: "profileBinary/avatar",
-    gunPointer: gunUser,
+    path: "~" + publicKey + "/" + "profileBinary/avatar",
   });
 
   dispatch({
@@ -35,8 +33,7 @@ export const getUserAvatar = (publicKey) => async (dispatch) => {
 export const getUserHeader = (publicKey) => async (dispatch) => {
   const gunUser = Gun.user(publicKey);
   const header = await fetchPath({
-    path: "profileBinary/header",
-    gunPointer: gunUser,
+    path: "~" + publicKey + "/" + "profileBinary/header",
   });
 
   dispatch({
@@ -51,33 +48,26 @@ export const fetchUserProfile = async ({
   publicKey,
   includeAvatar = false,
 }) => {
-  const gunUser = Gun.user(publicKey);
   const [bio, displayName, alias, lastSeenApp, lastSeenNode, avatar] =
     await Promise.all([
       fetchPath({
-        path: "Profile/bio",
-        gunPointer: gunUser,
+        path: "~" + publicKey + "/" + "Profile/bio",
       }),
       fetchPath({
-        path: "Profile/displayName",
-        gunPointer: gunUser,
+        path: "~" + publicKey + "/" + "Profile/displayName",
       }),
       fetchPath({
-        path: "alias",
-        gunPointer: gunUser,
+        path: "~" + publicKey + "/" + "alias",
       }),
       fetchPath({
-        path: "Profile/lastSeenApp",
-        gunPointer: gunUser,
+        path: "~" + publicKey + "/" + "Profile/lastSeenApp",
       }),
       fetchPath({
-        path: "Profile/lastSeenNode",
-        gunPointer: gunUser,
+        path: "~" + publicKey + "/" + "Profile/lastSeenNode",
       }),
       includeAvatar
         ? fetchPath({
-            path: "profileBinary/avatar",
-            gunPointer: gunUser,
+            path: "~" + publicKey + "/" + "profileBinary/avatar",
           })
         : undefined,
     ]);
@@ -108,164 +98,52 @@ export const getUserProfile = (publicKey) => async (dispatch) => {
   return user;
 };
 
-export const getWallTotalPages = (publicKey) => async (dispatch) => {
-  const totalPages = await fetchPath({
-    path: "wall/numOfPages",
-    gunPointer: Gun.user(publicKey),
-  });
-
-  if (!totalPages && totalPages !== 0) {
-    throw {
-      field: "publicKey",
-      message: "Wall was not found for the specified user",
-    };
-  }
-
-  dispatch({
-    type: ACTIONS.LOAD_USER_WALL_TOTAL_PAGES,
-    data: totalPages,
-  });
-
-  return totalPages;
-};
-
-export const getUserPost = async ({ id, gunPointer }) => {
+export const getUserPost = async ({ id, publicKey }) => {
   const wallPostKey = `${GUN_POSTS_KEY}/${id}`;
   const contentItemsKey = `${wallPostKey}/contentItems`;
 
-  const wallPost = await fetchPath({
-    path: wallPostKey,
-    gunPointer,
-    retryLimit: 5,
-    retryDelay: 1000,
-  });
-  const contentItems = await fetchPath({
-    path: contentItemsKey,
-    gunPointer,
-    retryLimit: 5,
-    retryDelay: 500,
-  });
-  const filteredContentItems =
-    Object.entries(contentItems).filter(_filterGunProps);
-  const fetchedContentItems = await Promise.all(
-    filteredContentItems.map(async ([id]) => {
-      const type = await fetchPath({
-        path: `${contentItemsKey}/${id}/type`,
-        gunPointer,
-      });
+  const loadedPost = await new Promise((res) =>
+    Gun.user(publicKey)
+      .get("posts")
+      .get(id)
+      .load((x) => res(x), { wait: 1000 })
+  );
 
-      if (type === "text/paragraph") {
-        const text = await fetchPath({
-          path: `${contentItemsKey}/${id}/text`,
-          gunPointer,
-        });
-        return {
-          text,
-          type,
-        };
-      }
-
-      if (type === "video/embedded") {
-        const [magnetURI, width, height] = await Promise.all([
-          fetchPath({
-            path: `${contentItemsKey}/${id}/magnetURI`,
-            gunPointer,
-          }),
-          fetchPath({
-            path: `${contentItemsKey}/${id}/width`,
-            gunPointer,
-          }),
-          fetchPath({
-            path: `${contentItemsKey}/${id}/height`,
-            gunPointer,
-          }),
-        ]);
-        return {
-          magnetURI,
-          width,
-          height,
-          type,
-        };
-      }
-
-      if (type === "image/embedded") {
-        const [magnetURI, width, height] = await Promise.all([
-          fetchPath({
-            path: `${contentItemsKey}/${id}/magnetURI`,
-            gunPointer,
-          }),
-          fetchPath({
-            path: `${contentItemsKey}/${id}/width`,
-            gunPointer,
-          }),
-          fetchPath({
-            path: `${contentItemsKey}/${id}/height`,
-            gunPointer,
-          }),
-        ]);
-        return {
-          magnetURI,
-          width,
-          height,
-          type,
-        };
-      }
-      if (type === "stream/embedded") {
-        const magnetURI = await fetchPath({
-          path: `${contentItemsKey}/${id}/magnetURI`,
-          gunPointer,
-        });
-        const liveStatus = await fetchPath({
-          path: `${contentItemsKey}/${id}/liveStatus`,
-          gunPointer,
-        });
-        const playbackMagnet = await fetchPath({
-          path: `${contentItemsKey}/${id}/playbackMagnet`,
-          gunPointer,
-        });
-        const viewersCounter = await fetchPath({
-          path: `${contentItemsKey}/${id}/viewersCounter`,
-          gunPointer,
-          retryLimit: 1,
-        });
-        let finalType = type;
-        let finalMagnet = magnetURI;
-        if (liveStatus === "wasLive" && playbackMagnet) {
-          finalMagnet = playbackMagnet;
-          finalType = "video/embedded";
-        }
-        return {
-          magnetURI: finalMagnet,
-          width: 0,
-          height: 0,
-          type: finalType,
-          liveStatus,
-          playbackMagnet,
-          viewersCounter,
-        };
+  loadedPost.contentItems = Object.entries(loadedPost.contentItems).map(
+    ([ciID, ci]) => {
+      if (ci.type !== "stream/embedded") {
+        return ci;
       }
 
       return {
-        text: "Unsupported media type",
-        type,
+        ...ci,
+        id: ciID,
+        magnetURI:
+          ci.liveStatus === "wasLive" && ci.playbackMagnet
+            ? ci.playbackMagnet
+            : ci.magnetURI,
+        type:
+          ci.liveStatus === "wasLive" && ci.playbackMagnet
+            ? "video/embedded"
+            : ci.type,
+        width: 0,
+        height: 0,
       };
-    })
+    }
   );
 
   return {
-    ...(wallPost ?? {}),
+    ...(loadedPost ?? {}),
     id,
-    contentItems: fetchedContentItems ?? [],
     type: "post",
   };
 };
 
-export const getSharedPost = async ({ id, sharedGunPointer }) => {
+export const getSharedPost = async ({ id, publicKey }) => {
   const sharedPostKey = `${GUN_SHARED_POSTS_KEY}/${id}`;
 
   const sharedPost = await fetchPath({
-    path: sharedPostKey,
-    gunPointer: sharedGunPointer,
+    path: "~" + publicKey + "/" + sharedPostKey,
     retryLimit: 5,
     retryDelay: 1000,
   });
@@ -280,17 +158,14 @@ export const getSharedPost = async ({ id, sharedGunPointer }) => {
 
 export const getUserWall = (publicKey) => async (dispatch) => {
   try {
-    const gunPointer = Gun.user(publicKey);
     const [rawPosts, rawSharedPosts] = await Promise.all([
       fetchPath({
-        path: GUN_POSTS_KEY,
-        gunPointer,
+        path: "~" + publicKey + "/" + GUN_POSTS_KEY,
         retryLimit: 5,
         retryDelay: 1000,
       }),
       fetchPath({
-        path: GUN_SHARED_POSTS_KEY,
-        gunPointer,
+        path: "~" + publicKey + "/" + GUN_SHARED_POSTS_KEY,
       }),
     ]);
     console.log("Posts:", rawPosts);
@@ -302,11 +177,11 @@ export const getUserWall = (publicKey) => async (dispatch) => {
       _filterGunProps
     );
     const fetchedPosts = await Promise.all([
-      ...filteredRawPosts.map(([id], key) => getUserPost({ id, gunPointer })),
+      ...filteredRawPosts.map(([id], key) => getUserPost({ id, publicKey })),
       ...filteredRawSharedPosts.map(([id], key) =>
         getSharedPost({
           id,
-          sharedGunPointer: gunPointer,
+          publicKey,
         })
       ),
     ]);
@@ -335,10 +210,8 @@ export const getPinnedPost =
       return;
     }
 
-    const gunPointer = Gun.user(publicKey);
-
     if (type === "post") {
-      const post = await getUserPost({ id: postId, gunPointer });
+      const post = await getUserPost({ id: postId, publicKey });
 
       if (post) {
         dispatch({
@@ -352,8 +225,7 @@ export const getPinnedPost =
 
     if (type === "sharedPost") {
       const post = await getSharedPost({
-        id: postId,
-        sharedGunPointer: gunPointer,
+        id: "~" + publicKey + "/" + postId,
       });
 
       if (post) {

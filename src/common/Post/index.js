@@ -3,7 +3,7 @@ import React, {
   useCallback,
   useState,
   useMemo,
-  useLayoutEffect
+  useLayoutEffect,
 } from "react";
 import moment from "moment";
 import Tooltip from "react-tooltip";
@@ -32,7 +32,7 @@ const Post = ({
   contentItems = {},
   username,
   isOnlineNode,
-  pinned
+  pinned,
 }) => {
   const dispatch = useDispatch();
   const { observe } = useInView({
@@ -41,7 +41,7 @@ const Post = ({
     onEnter: () => {
       const post = { contentItems, id };
       attachMedia([post], false);
-    }
+    },
   });
 
   const [liveStatus, setLiveStatus] = useState("");
@@ -68,7 +68,7 @@ const Post = ({
     [contentItems]
   );
 
-  const getMediaType = useCallback(mediaItem => {
+  const getMediaType = useCallback((mediaItem) => {
     if (mediaItem.type === "stream") {
       return "video";
     }
@@ -84,7 +84,7 @@ const Post = ({
     dispatch(
       openModal({
         targetType: "tip",
-        ackInfo: id
+        ackInfo: id,
       })
     );
   }, [dispatch, id, isOnlineNode]);
@@ -93,8 +93,8 @@ const Post = ({
     fetchPath({
       path: `posts/${id}/tipsSet`,
       gunPointer: gunUser(publicKey),
-      method: "load"
-    }).then(data => {
+      method: "load",
+    }).then((data) => {
       const tipSet = data ? Object.values(data) : [];
       const lenSet = tipSet.length;
       const tot =
@@ -106,8 +106,8 @@ const Post = ({
           postID: id,
           data: {
             tipValue: tot,
-            tipCounter: lenSet
-          }
+            tipCounter: lenSet,
+          },
         })
       );
     });
@@ -117,10 +117,10 @@ const Post = ({
   useEffect(() => {
     const values = Object.values(contentItems);
     const videoContent = values.find(
-      item => item.type === "video/embedded" && item.liveStatus === "wasLive"
+      (item) => item.type === "video/embedded" && item.liveStatus === "wasLive"
     );
     const streamContent = values.find(
-      item => item.type === "stream/embedded" && item.liveStatus === "live"
+      (item) => item.type === "stream/embedded" && item.liveStatus === "live"
     );
     let status = "";
     if (videoContent) {
@@ -157,15 +157,15 @@ const Post = ({
             property="og:description"
             content={getPostDescription({
               contentItems: Object.values(contentItems),
-              username
+              username,
             })}
           />
         </Helmet>
       )}
-      {mediaMetadata.map(item => {
+      {mediaMetadata.map((item) => {
         const type = getMediaType(item);
         return (
-          <>
+          <React.Fragment key={item.id}>
             <Helmet>
               <meta property={`og:${type}:width`} content="600" />
               <meta property={`og:${type}:height`} content="314" />
@@ -187,7 +187,7 @@ const Post = ({
                 />
               </Helmet>
             )}
-          </>
+          </React.Fragment>
         );
       })}
       <div className="head">
@@ -196,7 +196,7 @@ const Post = ({
             className="av"
             to={`/${publicKey}`}
             style={{
-              backgroundImage: `url(${avatar})`
+              backgroundImage: `url(${avatar})`,
             }}
           />
           <div className="details">

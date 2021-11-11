@@ -1,13 +1,13 @@
 import { supportedFormats } from "./Torrents";
 
 export const getPostDescription = ({ contentItems, username }) =>
-  contentItems
+  Object.values(contentItems)
     .filter((item) => item.type === "text/paragraph")
     .map((item) => item.text)
     .join("\n") || `View ${username}'s posts on Lightning.Page`;
 
 export const getMediaMetadata = (contentItems) => {
-  return contentItems
+  return Object.values(contentItems)
     .filter((item) => ["image/embedded", "video/embedded"].includes(item.type))
     .map((item, index) => {
       const file = item.magnetURI.replace(/.*(ws=)/gi, "");

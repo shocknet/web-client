@@ -1,3 +1,5 @@
+import mapValues from "lodash/mapValues";
+
 import { Gun, fetchPath } from "../utils/Gun";
 
 export const ACTIONS = {
@@ -99,9 +101,6 @@ export const getUserProfile = (publicKey) => async (dispatch) => {
 };
 
 export const getUserPost = async ({ id, publicKey }) => {
-  const wallPostKey = `${GUN_POSTS_KEY}/${id}`;
-  const contentItemsKey = `${wallPostKey}/contentItems`;
-
   const loadedPost = await new Promise((res) =>
     Gun.user(publicKey)
       .get("posts")
@@ -109,28 +108,25 @@ export const getUserPost = async ({ id, publicKey }) => {
       .load((x) => res(x), { wait: 1000 })
   );
 
-  loadedPost.contentItems = Object.entries(loadedPost.contentItems).map(
-    ([ciID, ci]) => {
-      if (ci.type !== "stream/embedded") {
-        return ci;
-      }
-
-      return {
-        ...ci,
-        id: ciID,
-        magnetURI:
-          ci.liveStatus === "wasLive" && ci.playbackMagnet
-            ? ci.playbackMagnet
-            : ci.magnetURI,
-        type:
-          ci.liveStatus === "wasLive" && ci.playbackMagnet
-            ? "video/embedded"
-            : ci.type,
-        width: 0,
-        height: 0,
-      };
+  loadedPost.contentItems = mapValues(loadedPost.contentItems, (ci) => {
+    if (ci.type !== "stream/embedded") {
+      return ci;
     }
-  );
+
+    return {
+      ...ci,
+      magnetURI:
+        ci.liveStatus === "wasLive" && ci.playbackMagnet
+          ? ci.playbackMagnet
+          : ci.magnetURI,
+      type:
+        ci.liveStatus === "wasLive" && ci.playbackMagnet
+          ? "video/embedded"
+          : ci.type,
+      width: 0,
+      height: 0,
+    };
+  });
 
   return {
     ...(loadedPost ?? {}),

@@ -166,15 +166,15 @@ export const getUserWall = (publicKey) => async (dispatch) => {
     ]);
     console.log("Posts:", rawPosts);
     console.log("Shared Posts:", rawSharedPosts);
-    const filteredRawPosts = Object.entries(rawPosts ?? {}).filter(
-      _filterGunProps
-    );
-    const filteredRawSharedPosts = Object.entries(rawSharedPosts ?? {}).filter(
-      _filterGunProps
-    );
+    const filteredRawPosts = Object.entries(rawPosts ?? {})
+      .filter(([, val]) => !!val)
+      .filter(_filterGunProps);
+    const filteredRawSharedPosts = Object.entries(rawSharedPosts ?? {})
+      .filter(([, val]) => !!val)
+      .filter(_filterGunProps);
     const fetchedPosts = await Promise.all([
-      ...filteredRawPosts.map(([id], key) => getUserPost({ id, publicKey })),
-      ...filteredRawSharedPosts.map(([id], key) =>
+      ...filteredRawPosts.map(([id]) => getUserPost({ id, publicKey })),
+      ...filteredRawSharedPosts.map(([id]) =>
         getSharedPost({
           id,
           publicKey,

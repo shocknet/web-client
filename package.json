@@ -15,6 +15,7 @@
     "express": "^4.17.1",
     "gun": "amark/gun#50af2d52ad6677fd5b95e5ed64fca7491c7877b5",
     "localforage": "^1.9.0",
+    "lodash": "^4.17.21",
     "moment": "^2.27.0",
     "prerender-node": "^3.2.5",
     "react": "^16.13.1",

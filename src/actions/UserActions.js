@@ -209,22 +209,25 @@ export const getUserPost = async ({ id, gunPointer }) => {
         };
       }
       if (type === "stream/embedded") {
-        const magnetURI = await fetchPath({
-          path: `${contentItemsKey}/${id}/magnetURI`,
-          gunPointer
-        });
-        const liveStatus = await fetchPath({
-          path: `${contentItemsKey}/${id}/liveStatus`,
-          gunPointer
-        });
-        const playbackMagnet = await fetchPath({
-          path: `${contentItemsKey}/${id}/playbackMagnet`,
-          gunPointer
-        });
-        const viewersCounter = await fetchPath({
-          path: `${contentItemsKey}/${id}/viewersCounter`,
-          gunPointer
-        });
+        const [magnetURI, liveStatus, playbackMagnet, viewersCounter] =
+          await Promise.all([
+            fetchPath({
+              path: `${contentItemsKey}/${id}/magnetURI`,
+              gunPointer
+            }),
+            fetchPath({
+              path: `${contentItemsKey}/${id}/liveStatus`,
+              gunPointer
+            }),
+            fetchPath({
+              path: `${contentItemsKey}/${id}/playbackMagnet`,
+              gunPointer
+            }),
+            fetchPath({
+              path: `${contentItemsKey}/${id}/viewersCounter`,
+              gunPointer
+            })
+          ]);
         let finalType = type;
         let finalMagnet = magnetURI;
         if (liveStatus === "wasLive" && playbackMagnet) {

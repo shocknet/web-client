@@ -96,7 +96,9 @@ const Post = ({
       method: "once"
     }).then(data => {
       console.log({ tipData: data });
-      const tipSet = data ? Object.values(data) : [];
+      const tipSet = data
+        ? Object.values(data).filter(item => typeof item === "string")
+        : [];
       const lenSet = tipSet.length;
       const tot =
         lenSet > 0

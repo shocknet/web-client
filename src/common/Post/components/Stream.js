@@ -3,9 +3,6 @@ import useInView from "react-cool-inview";
 import TipRibbon from "./TipRibbon";
 import videojs from "video.js";
 
-const REACT_APP_SL_SEED_URI = "https://webtorrent.shock.network";
-const STREAM_STATUS_URI = `${REACT_APP_SL_SEED_URI}/rtmpapi/api/streams/live`;
-
 const Stream = ({ item, tipValue, tipCounter, hideRibbon, width }) => {
   const playerDOM = useRef(null);
   const { observe } = useInView({

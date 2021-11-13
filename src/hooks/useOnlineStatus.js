@@ -9,17 +9,20 @@ const useOnlineStatus = publicKey => {
   const dispatch = useDispatch();
   const profile = useSelector(({ user }) => user.profile);
 
-  const [lastSeenApp, setLastSeenApp] = useState(false);
-  const [lastSeenNode, setLastSeenNode] = useState(false);
+  const [lastSeenApp, setLastSeenApp] = useState();
+  const [lastSeenNode, setLastSeenNode] = useState();
   const [isOnlineApp, setIsOnlineApp] = useState(false);
   const [isOnlineNode, setIsOnlineNode] = useState(false);
   const [onlineCheckTimer, setOnlineCheckTimer] = useState();
 
   const updateUserStatus = useCallback(() => {
     const onlineThreshold = Moment.utc().subtract(1, "minutes");
-    const isOnlineNode =
-      Moment.utc(lastSeenNode).isSameOrAfter(onlineThreshold);
-    const isOnlineApp = Moment.utc(lastSeenApp).isSameOrAfter(onlineThreshold);
+    const isOnlineNode = lastSeenNode
+      ? Moment.utc(lastSeenNode).isSameOrAfter(onlineThreshold)
+      : false;
+    const isOnlineApp = lastSeenApp
+      ? Moment.utc(lastSeenApp).isSameOrAfter(onlineThreshold)
+      : false;
 
     setIsOnlineNode(isOnlineNode);
     setIsOnlineApp(isOnlineApp);

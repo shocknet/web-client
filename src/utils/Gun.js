@@ -1,6 +1,5 @@
 import GunDB from "gun/gun";
 import "gun/sea";
-import "gun/lib/load";
 import { isCrawler } from "./Prerender";
 
 const safeParse = data => {
@@ -96,8 +95,8 @@ export const Gun = GunDB({ axe: false, peers: peers });
 
 export const fetchPath = ({
   path = "",
-  retryDelay = 500,
-  retryLimit = 3,
+  retryDelay = 250,
+  retryLimit = 1,
   retryCondition = _isIncompleteGunResponse,
   gunPointer = Gun,
   method = "once",

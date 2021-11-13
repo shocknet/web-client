@@ -155,7 +155,9 @@ export const getUserPost = async ({ id, gunPointer }) => {
       if (type === "text/paragraph") {
         const text = await fetchPath({
           path: `${contentItemsKey}/${id}/text`,
-          gunPointer
+          gunPointer,
+          retryLimit: 5,
+          retryDelay: 500
         });
         return {
           text,
@@ -167,15 +169,21 @@ export const getUserPost = async ({ id, gunPointer }) => {
         const [magnetURI, width, height] = await Promise.all([
           fetchPath({
             path: `${contentItemsKey}/${id}/magnetURI`,
-            gunPointer
+            gunPointer,
+            retryLimit: 5,
+            retryDelay: 500
           }),
           fetchPath({
             path: `${contentItemsKey}/${id}/width`,
-            gunPointer
+            gunPointer,
+            retryLimit: 5,
+            retryDelay: 500
           }),
           fetchPath({
             path: `${contentItemsKey}/${id}/height`,
-            gunPointer
+            gunPointer,
+            retryLimit: 5,
+            retryDelay: 500
           })
         ]);
         return {
@@ -190,15 +198,21 @@ export const getUserPost = async ({ id, gunPointer }) => {
         const [magnetURI, width, height] = await Promise.all([
           fetchPath({
             path: `${contentItemsKey}/${id}/magnetURI`,
-            gunPointer
+            gunPointer,
+            retryLimit: 5,
+            retryDelay: 500
           }),
           fetchPath({
             path: `${contentItemsKey}/${id}/width`,
-            gunPointer
+            gunPointer,
+            retryLimit: 5,
+            retryDelay: 500
           }),
           fetchPath({
             path: `${contentItemsKey}/${id}/height`,
-            gunPointer
+            gunPointer,
+            retryLimit: 5,
+            retryDelay: 500
           })
         ]);
         return {
@@ -213,19 +227,27 @@ export const getUserPost = async ({ id, gunPointer }) => {
           await Promise.all([
             fetchPath({
               path: `${contentItemsKey}/${id}/magnetURI`,
-              gunPointer
+              gunPointer,
+              retryLimit: 5,
+              retryDelay: 500
             }),
             fetchPath({
               path: `${contentItemsKey}/${id}/liveStatus`,
-              gunPointer
+              gunPointer,
+              retryLimit: 5,
+              retryDelay: 500
             }),
             fetchPath({
               path: `${contentItemsKey}/${id}/playbackMagnet`,
-              gunPointer
+              gunPointer,
+              retryLimit: 5,
+              retryDelay: 500
             }),
             fetchPath({
               path: `${contentItemsKey}/${id}/viewersCounter`,
-              gunPointer
+              gunPointer,
+              retryLimit: 5,
+              retryDelay: 500
             })
           ]);
         let finalType = type;

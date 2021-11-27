@@ -13,7 +13,7 @@
     "dotenv": "^10.0.0",
     "embla-carousel": "^4.0.6",
     "express": "^4.17.1",
-    "gun": "amark/gun#50af2d52ad6677fd5b95e5ed64fca7491c7877b5",
+    "gun": "Emad-salah/gun#7887c65c868be2900a9d23e52820b6cad48102e9",
     "localforage": "^1.9.0",
     "moment": "^2.27.0",
     "prerender-node": "^3.2.5",

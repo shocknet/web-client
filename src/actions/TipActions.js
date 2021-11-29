@@ -35,17 +35,18 @@ export const payUser =
   async dispatch => {
     const me = await authUser(senderPair.alias, senderPair.pass);
     const recipientUser = Gun.user(recipientPublicKey);
-    const recipientUserEPub = await fetchPath({
-      path: "epub",
-      gunPointer: recipientUser
-    });
+    const [recipientUserEPub, orderAddress] = await Promise.all([
+      fetchPath({
+        path: "epub",
+        gunPointer: recipientUser
+      }),
+      fetchPath({
+        path: "currentOrderAddress",
+        gunPointer: recipientUser
+      })
+    ]);
 
     const secret = await SEA.secret(recipientUserEPub, me.sea);
-
-    const orderAddress = await fetchPath({
-      path: "currentOrderAddress",
-      gunPointer: recipientUser
-    });
 
     console.log("Order Address:", orderAddress);
 
@@ -120,7 +121,13 @@ export const payUser =
       data: decryptedOrder.response.replace($$_SHOCKWALLET__ENCRYPTED__, "")
     });
 
-    return {paymentRequest:decryptedOrder.response.replace($$_SHOCKWALLET__ENCRYPTED__, ""), ackNode:encryptedOrder.ackNode};
+    return {
+      paymentRequest: decryptedOrder.response.replace(
+        $$_SHOCKWALLET__ENCRYPTED__,
+        ""
+      ),
+      ackNode: encryptedOrder.ackNode
+    };
   };
 
 export const resetPaymentRequest = () => dispatch => {

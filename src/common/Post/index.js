@@ -93,9 +93,12 @@ const Post = ({
     fetchPath({
       path: `posts/${id}/tipsSet`,
       gunPointer: gunUser(publicKey),
-      method: "load",
-    }).then((data) => {
-      const tipSet = data ? Object.values(data) : [];
+      method: "once"
+    }).then(data => {
+      console.log({ tipData: data });
+      const tipSet = data
+        ? Object.values(data).filter(item => typeof item === "string")
+        : [];
       const lenSet = tipSet.length;
       const tot =
         lenSet > 0

@@ -2,7 +2,7 @@ import GunDB from "gun/gun";
 import "gun/sea";
 import { isCrawler } from "./Prerender";
 
-const safeParse = data => {
+const safeParse = (data) => {
   try {
     return JSON.parse(data);
   } catch (err) {
@@ -16,14 +16,14 @@ const peers = peersConfig
   ? peersConfig
   : ["https://gun.shock.network/gun", "https://gun-eu.shock.network/gun"];
 
-const wait = ms =>
+const wait = (ms) =>
   new Promise((resolve, reject) => {
     setTimeout(() => {
       resolve(true);
     }, ms);
   });
 
-const _randomString = length => {
+const _randomString = (length) => {
   let randomString = "";
   const randomChar = function () {
     const n = Math.floor(Math.random() * 62);
@@ -37,7 +37,7 @@ const _randomString = length => {
 
 const _filterGunProps = ([key, item]) => item && key !== "_" && key !== "#";
 
-const _isIncompleteGunResponse = data => {
+const _isIncompleteGunResponse = (data) => {
   try {
     console.log("Incomplete Gun Response Check:", typeof data, data);
     if (data === null || data === undefined) {
@@ -88,10 +88,19 @@ const _isIncompleteGunResponse = data => {
   }
 };
 
-const parseGunPath = ({ path, gunPointer }) =>
-  path.split("/").reduce((gun, path) => gun.get(path), gunPointer);
+const parseGunPath = ({ path, gunPointer = Gun }) => {
+  let node = gunPointer;
+
+  for (const key of path.split("/")) {
+    node = node.get(key);
+  }
+
+  return node;
+};
 
 export const Gun = GunDB({ axe: false, peers: peers });
+
+window.gun = Gun;
 
 export const fetchPath = ({
   path = "",
@@ -102,9 +111,9 @@ export const fetchPath = ({
   method = "once",
 
   _retryCount = 0,
-  _fallbackResult
+  _fallbackResult,
 }) =>
-  new Promise(resolve => {
+  new Promise((resolve) => {
     const parsedRetryLimit = isCrawler() ? 1 : retryLimit;
     const parsedRetryDelay = isCrawler() ? 200 : retryDelay;
 
@@ -120,8 +129,9 @@ export const fetchPath = ({
       );
     }
     const GunContext = parseGunPath({ path, gunPointer });
-    console.log("Fetching Path:", path);
-    GunContext[method](async event => {
+    console.log("Fetching Path:", path, GunContext);
+
+    GunContext[method](async (event) => {
       console.log(path + " Response:", event);
       if (retryCondition && retryCondition(event)) {
         await wait(parsedRetryDelay);
@@ -133,7 +143,7 @@ export const fetchPath = ({
           gunPointer,
 
           _retryCount: _retryCount + 1,
-          _fallbackResult: event
+          _fallbackResult: event,
         });
         resolve(retryResult);
         return;
@@ -144,7 +154,7 @@ export const fetchPath = ({
   });
 
 // Wraps GunDB data callbacks to provide better error handling
-export const wrap = callback => event => {
+export const wrap = (callback) => (event) => {
   console.log("Event received!", event);
   if (event?.err) {
     console.error("[GunDB] Event error:", event?.err, event);
@@ -164,7 +174,7 @@ export const wrap = callback => event => {
             : !event.put
             ? "Key not found"
             : "Unknown",
-          gunErr: event.err
+          gunErr: event.err,
         }
       : null
   );
@@ -189,7 +199,7 @@ export const putPath = ({ path = "", data = {}, gunPointer = Gun }) =>
 export const setPath = ({ path = "", data = {}, gunPointer = Gun }) =>
   new Promise((resolve, reject) => {
     const GunContext = parseGunPath({ path, gunPointer });
-    const response = GunContext.set(data, event => {
+    const response = GunContext.set(data, (event) => {
       console.log(data);
       resolve(response);
     });
@@ -197,7 +207,7 @@ export const setPath = ({ path = "", data = {}, gunPointer = Gun }) =>
 
 export const listenPath = ({ path = "", gunPointer = Gun, callback }) => {
   const GunContext = parseGunPath({ path, gunPointer });
-  return GunContext.on(event => {
+  return GunContext.on((event) => {
     callback(event);
   });
 };
@@ -206,14 +216,14 @@ export const createRandomGunUser = () =>
   new Promise((resolve, reject) => {
     const randomAlias = _randomString(10);
     const randomPass = _randomString(10);
-    Gun.user().create(randomAlias, randomPass, event => {
+    Gun.user().create(randomAlias, randomPass, (event) => {
       if (event.err) {
         console.error("An error has occurred while initializing a new user");
         reject({
           field: "gundb",
           message: "An error has occurred while initializing a new user",
           _error: event.err,
-          _event: event
+          _event: event,
         });
         return;
       }
@@ -223,12 +233,12 @@ export const createRandomGunUser = () =>
 
 export const authUser = (alias, pass) =>
   new Promise((resolve, reject) => {
-    Gun.user().auth(alias, pass, user => {
+    Gun.user().auth(alias, pass, (user) => {
       resolve(user);
     });
   });
 
-export const gunUser = publicKey => {
+export const gunUser = (publicKey) => {
   console.log("Getting Gun User:", publicKey);
   if (!publicKey) {
     throw new Error("Undefined public key");

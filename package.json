@@ -15,6 +15,7 @@
     "express": "^4.17.1",
     "gun": "Emad-salah/gun#2e4fea7518fa8866d258d5b8803b4cb4cc4f62ea",
     "localforage": "^1.9.0",
+    "lodash": "^4.17.21",
     "moment": "^2.27.0",
     "prerender-node": "^3.2.5",
     "react": "^16.13.1",

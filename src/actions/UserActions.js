@@ -132,6 +132,9 @@ export const getWallTotalPages = publicKey => async dispatch => {
 export const getUserPost = async ({ id, gunPointer }) => {
   const wallPostKey = `${GUN_POSTS_KEY}/${id}`;
   const contentItemsKey = `${wallPostKey}/contentItems`;
+  const start = Date.now();
+
+  console.log(`Fetching Post (${id})...`);
 
   const [wallPost, contentItems] = await Promise.all([
     fetchPath({
@@ -145,20 +148,26 @@ export const getUserPost = async ({ id, gunPointer }) => {
   ]);
   const filteredContentItems =
     Object.entries(contentItems).filter(_filterGunProps);
+  console.log("Filtered Content Items:", filteredContentItems);
   const fetchedContentItems = await Promise.all(
-    filteredContentItems.map(async ([id]) => {
+    filteredContentItems.map(async ([id, item]) => {
+      console.log("Content Item:", { id, item });
       const type = await fetchPath({
         path: `${contentItemsKey}/${id}/type`,
         gunPointer
       });
 
       if (type === "text/paragraph") {
+        console.log(
+          `Loading Post (${id}) text: Started at ${Date.now() - start}ms`
+        );
         const text = await fetchPath({
           path: `${contentItemsKey}/${id}/text`,
-          gunPointer,
-          retryLimit: 5,
-          retryDelay: 500
+          gunPointer
         });
+
+        console.log(`Loaded Post (${id}) text in ${Date.now() - start}ms`);
+
         return {
           text,
           type
@@ -166,26 +175,24 @@ export const getUserPost = async ({ id, gunPointer }) => {
       }
 
       if (type === "video/embedded") {
+        console.log(
+          `Loading Post (${id}) video: Started at ${Date.now() - start}ms`
+        );
         const [magnetURI, width, height] = await Promise.all([
           fetchPath({
             path: `${contentItemsKey}/${id}/magnetURI`,
-            gunPointer,
-            retryLimit: 5,
-            retryDelay: 500
+            gunPointer
           }),
           fetchPath({
             path: `${contentItemsKey}/${id}/width`,
-            gunPointer,
-            retryLimit: 5,
-            retryDelay: 500
+            gunPointer
           }),
           fetchPath({
             path: `${contentItemsKey}/${id}/height`,
-            gunPointer,
-            retryLimit: 5,
-            retryDelay: 500
+            gunPointer
           })
         ]);
+        console.log(`Loaded Post (${id}) video in ${Date.now() - start}ms`);
         return {
           magnetURI,
           width,
@@ -195,26 +202,24 @@ export const getUserPost = async ({ id, gunPointer }) => {
       }
 
       if (type === "image/embedded") {
+        console.log(
+          `Loading Post (${id}) image: Started at ${Date.now() - start}ms`
+        );
         const [magnetURI, width, height] = await Promise.all([
           fetchPath({
             path: `${contentItemsKey}/${id}/magnetURI`,
-            gunPointer,
-            retryLimit: 5,
-            retryDelay: 500
+            gunPointer
           }),
           fetchPath({
             path: `${contentItemsKey}/${id}/width`,
-            gunPointer,
-            retryLimit: 5,
-            retryDelay: 500
+            gunPointer
           }),
           fetchPath({
             path: `${contentItemsKey}/${id}/height`,
-            gunPointer,
-            retryLimit: 5,
-            retryDelay: 500
+            gunPointer
           })
         ]);
+        console.log(`Loaded Post (${id}) image in ${Date.now() - start}ms`);
         return {
           magnetURI,
           width,
@@ -223,33 +228,29 @@ export const getUserPost = async ({ id, gunPointer }) => {
         };
       }
       if (type === "stream/embedded") {
+        console.log(
+          `Loading Post (${id}) stream: Started at ${Date.now() - start}ms`
+        );
         const [magnetURI, liveStatus, playbackMagnet, viewersCounter] =
           await Promise.all([
             fetchPath({
               path: `${contentItemsKey}/${id}/magnetURI`,
-              gunPointer,
-              retryLimit: 5,
-              retryDelay: 500
+              gunPointer
             }),
             fetchPath({
               path: `${contentItemsKey}/${id}/liveStatus`,
-              gunPointer,
-              retryLimit: 5,
-              retryDelay: 500
+              gunPointer
             }),
             fetchPath({
               path: `${contentItemsKey}/${id}/playbackMagnet`,
-              gunPointer,
-              retryLimit: 5,
-              retryDelay: 500
+              gunPointer
             }),
             fetchPath({
               path: `${contentItemsKey}/${id}/viewersCounter`,
-              gunPointer,
-              retryLimit: 5,
-              retryDelay: 500
+              gunPointer
             })
           ]);
+        console.log(`Loaded Post (${id}) stream in ${Date.now() - start}ms`);
         let finalType = type;
         let finalMagnet = magnetURI;
         if (liveStatus === "wasLive" && playbackMagnet) {
@@ -273,6 +274,8 @@ export const getUserPost = async ({ id, gunPointer }) => {
       };
     })
   );
+
+  console.log(`Post (${id}) took ${Date.now() - start}ms to load!`);
 
   return {
     ...(wallPost ?? {}),
@@ -301,16 +304,14 @@ export const getSharedPost = async ({ id, sharedGunPointer }) => {
 export const getUserWall = publicKey => async dispatch => {
   try {
     const gunPointer = Gun.user(publicKey);
-    const [rawPosts, rawSharedPosts] = await Promise.all([
-      fetchPath({
-        path: GUN_POSTS_KEY,
-        gunPointer
-      }),
-      fetchPath({
-        path: GUN_SHARED_POSTS_KEY,
-        gunPointer
-      })
-    ]);
+    const rawPosts = await fetchPath({
+      path: GUN_POSTS_KEY,
+      gunPointer
+    });
+    const rawSharedPosts = await fetchPath({
+      path: GUN_SHARED_POSTS_KEY,
+      gunPointer
+    });
     console.log("Posts:", rawPosts);
     console.log("Shared Posts:", rawSharedPosts);
     const filteredRawPosts = Object.entries(rawPosts ?? {}).filter(
@@ -320,11 +321,13 @@ export const getUserWall = publicKey => async dispatch => {
       _filterGunProps
     );
     const fetchedPosts = await Promise.all([
-      ...filteredRawPosts.map(([id], key) => getUserPost({ id, gunPointer })),
+      ...filteredRawPosts.map(([id], key) =>
+        getUserPost({ id, gunPointer: Gun.user(publicKey) })
+      ),
       ...filteredRawSharedPosts.map(([id], key) =>
         getSharedPost({
           id,
-          sharedGunPointer: gunPointer
+          sharedGunPointer: Gun.user(publicKey)
         })
       )
     ]);

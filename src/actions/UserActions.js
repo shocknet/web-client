@@ -6,6 +6,9 @@ export const ACTIONS = {
   RESET_USER_WALL: "wall/reset",
   PIN_WALL_POST: "wall/pin",
   UPDATE_WALL_POST: "wall/post/update",
+  LOAD_WALL_POST_INFO: "post/info/load",
+  LOAD_WALL_POST_CONTENT: "post/contentItems/load",
+  LOAD_WALL_POST_CONTENT_LENGTH: "post/contentItems/allocate",
   RESET_USER_DATA: "user/reset",
   LOAD_USER_DATA: "user/load",
   LOAD_USER_AVATAR: "avatar/load",
@@ -301,47 +304,295 @@ export const getSharedPost = async ({ id, sharedGunPointer }) => {
   };
 };
 
+export const getUserWallPostInfo =
+  ({ publicKey, id }) =>
+  async dispatch => {
+    const gunPointer = Gun.user(publicKey);
+    const wallPostKey = `${GUN_POSTS_KEY}/${id}`;
+    const postInfo = await fetchPath({
+      path: wallPostKey,
+      gunPointer
+    });
+
+    dispatch({
+      type: ACTIONS.LOAD_WALL_POST_INFO,
+      data: {
+        id,
+        postInfo
+      }
+    });
+  };
+
+export const getUserWallPostContent =
+  ({ publicKey, id }) =>
+  async dispatch => {
+    const gunPointer = Gun.user(publicKey);
+    const wallPostKey = `${GUN_POSTS_KEY}/${id}`;
+    const contentItemsKey = `${wallPostKey}/contentItems`;
+    const start = Date.now();
+
+    const contentItems = await fetchPath({
+      path: contentItemsKey,
+      gunPointer
+    });
+    const filteredContentItems =
+      Object.entries(contentItems).filter(_filterGunProps);
+
+    console.log("Filtered Content Items:", filteredContentItems);
+
+    dispatch({
+      type: ACTIONS.LOAD_WALL_POST_CONTENT_LENGTH,
+      data: { id, length: filteredContentItems.length }
+    });
+
+    await Promise.all(
+      filteredContentItems.map(async ([contentId, item], key) => {
+        console.log("Content Item:", { id: contentId, item });
+        const type = await fetchPath({
+          path: `${contentItemsKey}/${contentId}/type`,
+          gunPointer,
+          retryLimit: 8,
+          retryDelay: 1000
+        });
+
+        if (type === "text/paragraph") {
+          console.log(
+            `Loading Post (${contentId}) text: Started at ${
+              Date.now() - start
+            }ms`
+          );
+          const text = await fetchPath({
+            path: `${contentItemsKey}/${contentId}/text`,
+            gunPointer,
+            retryLimit: 8,
+            retryDelay: 1000
+          });
+
+          console.log(
+            `Loaded Post (${contentId}) text in ${Date.now() - start}ms`
+          );
+
+          const contentItem = {
+            text,
+            type
+          };
+
+          dispatch({
+            type: ACTIONS.LOAD_WALL_POST_CONTENT,
+            data: {
+              key,
+              id,
+              contentItem
+            }
+          });
+
+          return contentItem;
+        }
+
+        if (type === "video/embedded") {
+          console.log(
+            `Loading Post (${contentId}) video: Started at ${
+              Date.now() - start
+            }ms`
+          );
+          const magnetURI = await fetchPath({
+            path: `${contentItemsKey}/${contentId}/magnetURI`,
+            gunPointer,
+            retryLimit: 8,
+            retryDelay: 1000
+          });
+          console.log(
+            `Loaded Post (${contentId}) video in ${Date.now() - start}ms`
+          );
+          const contentItem = {
+            magnetURI,
+            type
+          };
+
+          dispatch({
+            type: ACTIONS.LOAD_WALL_POST_CONTENT,
+            data: {
+              key,
+              id,
+              contentItem
+            }
+          });
+
+          return contentItem;
+        }
+
+        if (type === "image/embedded") {
+          console.log(
+            `Loading Post (${contentId}) image: Started at ${
+              Date.now() - start
+            }ms`
+          );
+          const magnetURI = await fetchPath({
+            path: `${contentItemsKey}/${contentId}/magnetURI`,
+            gunPointer,
+            retryLimit: 8,
+            retryDelay: 1000
+          });
+          console.log(
+            `Loaded Post (${contentId}) image in ${Date.now() - start}ms`
+          );
+          const contentItem = {
+            magnetURI,
+            type
+          };
+
+          dispatch({
+            type: ACTIONS.LOAD_WALL_POST_CONTENT,
+            data: {
+              key,
+              id,
+              contentItem
+            }
+          });
+
+          return contentItem;
+        }
+
+        if (type === "stream/embedded") {
+          console.log(
+            `Loading Post (${contentId}) stream: Started at ${
+              Date.now() - start
+            }ms`
+          );
+          const [magnetURI, liveStatus, playbackMagnet, viewersCounter] =
+            await Promise.all([
+              fetchPath({
+                path: `${contentItemsKey}/${contentId}/magnetURI`,
+                gunPointer,
+                retryLimit: 8,
+                retryDelay: 1000
+              }),
+              fetchPath({
+                path: `${contentItemsKey}/${contentId}/liveStatus`,
+                gunPointer,
+                retryLimit: 8,
+                retryDelay: 1000
+              }),
+              fetchPath({
+                path: `${contentItemsKey}/${contentId}/playbackMagnet`,
+                gunPointer,
+                retryLimit: 8,
+                retryDelay: 1000
+              }),
+              fetchPath({
+                path: `${contentItemsKey}/${contentId}/viewersCounter`,
+                gunPointer,
+                retryLimit: 8,
+                retryDelay: 1000
+              })
+            ]);
+          console.log(
+            `Loaded Post (${contentId}) stream in ${Date.now() - start}ms`
+          );
+          let finalType = type;
+          let finalMagnet = magnetURI;
+          if (liveStatus === "wasLive" && playbackMagnet) {
+            finalMagnet = playbackMagnet;
+            finalType = "video/embedded";
+          }
+          const contentItem = {
+            magnetURI: finalMagnet,
+            width: 0,
+            height: 0,
+            type: finalType,
+            liveStatus,
+            playbackMagnet,
+            viewersCounter
+          };
+
+          dispatch({
+            type: ACTIONS.LOAD_WALL_POST_CONTENT,
+            data: {
+              key,
+              id,
+              contentItem
+            }
+          });
+
+          return contentItem;
+        }
+
+        return {
+          text: "Unsupported media type",
+          type
+        };
+      })
+    );
+  };
+
+const getUserPosts = async ({ gunPointer, publicKey, dispatch }) => {
+  const rawPosts = await fetchPath({
+    path: GUN_POSTS_KEY,
+    gunPointer
+  });
+  console.log("Posts:", rawPosts);
+  const filteredRawPosts = Object.entries(rawPosts ?? {}).filter(
+    _filterGunProps
+  );
+  const fetchedPosts = await Promise.all(
+    filteredRawPosts.map(([id, content]) => {
+      dispatch(getUserWallPostInfo({ publicKey, id }));
+      dispatch(getUserWallPostContent({ publicKey, id }));
+      return { id, ...content, type: "post" };
+    })
+  );
+
+  console.log(`User wall`, fetchedPosts);
+
+  dispatch({
+    type: ACTIONS.LOAD_USER_WALL,
+    data: { posts: fetchedPosts, page: 0 }
+  });
+
+  return fetchedPosts;
+};
+
+const getUserSharedPosts = async ({ gunPointer, publicKey, dispatch }) => {
+  const rawSharedPosts = await fetchPath({
+    path: GUN_SHARED_POSTS_KEY,
+    gunPointer
+  });
+  console.log("Shared Posts:", rawSharedPosts);
+  const filteredRawSharedPosts = Object.entries(rawSharedPosts ?? {}).filter(
+    _filterGunProps
+  );
+  const fetchedPosts = await Promise.all(
+    filteredRawSharedPosts.map(([id]) =>
+      getSharedPost({
+        id,
+        sharedGunPointer: Gun.user(publicKey)
+      })
+    )
+  );
+
+  dispatch({
+    type: ACTIONS.LOAD_USER_WALL,
+    data: { posts: fetchedPosts, page: 0 }
+  });
+
+  return fetchedPosts;
+};
+
 export const getUserWall = publicKey => async dispatch => {
   try {
     const gunPointer = Gun.user(publicKey);
-    const rawPosts = await fetchPath({
-      path: GUN_POSTS_KEY,
-      gunPointer
-    });
-    const rawSharedPosts = await fetchPath({
-      path: GUN_SHARED_POSTS_KEY,
-      gunPointer
-    });
-    console.log("Posts:", rawPosts);
-    console.log("Shared Posts:", rawSharedPosts);
-    const filteredRawPosts = Object.entries(rawPosts ?? {}).filter(
-      _filterGunProps
-    );
-    const filteredRawSharedPosts = Object.entries(rawSharedPosts ?? {}).filter(
-      _filterGunProps
-    );
-    const fetchedPosts = await Promise.all([
-      ...filteredRawPosts.map(([id], key) =>
-        getUserPost({ id, gunPointer: Gun.user(publicKey) })
-      ),
-      ...filteredRawSharedPosts.map(([id], key) =>
-        getSharedPost({
-          id,
-          sharedGunPointer: Gun.user(publicKey)
-        })
-      )
+    await Promise.any([
+      getUserPosts({
+        gunPointer,
+        publicKey,
+        dispatch
+      }),
+      getUserSharedPosts({
+        gunPointer,
+        dispatch,
+        publicKey
+      })
     ]);
-
-    console.log(`User wall`, fetchedPosts);
-
-    const sortedPosts = fetchedPosts.sort((a, b) => b.date - a.date);
-
-    dispatch({
-      type: ACTIONS.LOAD_USER_WALL,
-      data: { posts: sortedPosts, page: 0 }
-    });
-
-    return fetchedPosts;
   } catch (err) {
     console.error(err);
   }

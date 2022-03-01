@@ -12,21 +12,22 @@ const INITIAL_STATE = {
 };
 
 const user = (state = INITIAL_STATE, action) => {
+  const { data } = action;
+
   switch (action.type) {
     case ACTIONS.LOAD_USER_WALL: {
-      const { data } = action;
       return {
         ...state,
         wall: {
           ...state.wall,
-          posts: [...state.wall.posts, ...data.posts],
+          posts: [...state.wall.posts, ...data.posts].sort(
+            (a, b) => b.date - a.date
+          ),
           page: data.page
         }
       };
     }
     case ACTIONS.LOAD_USER_WALL_TOTAL_PAGES: {
-      const { data } = action;
-
       return {
         ...state,
         wall: {
@@ -35,15 +36,74 @@ const user = (state = INITIAL_STATE, action) => {
         }
       };
     }
+    case ACTIONS.LOAD_WALL_POST_CONTENT_LENGTH: {
+      return {
+        ...state,
+        wall: {
+          ...state.wall,
+          posts: state.wall.posts?.map(post =>
+            data.id === post.id
+              ? {
+                  ...post,
+                  contentItems: Array.from({ length: data.length })
+                }
+              : post
+          )
+        }
+      };
+    }
+    case ACTIONS.LOAD_WALL_POST_INFO: {
+      const loadedPosts = state.wall.posts?.map(post =>
+        data.id === post.id
+          ? {
+              ...post,
+              ...data.postInfo,
+              contentItems: post.contentItems ?? []
+            }
+          : post
+      );
+      const sortedPosts = loadedPosts.sort((a, b) => b.date - a.date);
+      return {
+        ...state,
+        wall: {
+          ...state.wall,
+          posts: sortedPosts
+        }
+      };
+    }
+    case ACTIONS.LOAD_WALL_POST_CONTENT: {
+      return {
+        ...state,
+        wall: {
+          ...state.wall,
+          posts: state.wall.posts?.map(post => {
+            const matched = data.id === post.id;
+
+            console.log({ post, data });
+
+            if (!matched) {
+              return post;
+            }
+
+            return {
+              ...post,
+              contentItems: post.contentItems?.map((item, key) =>
+                data.key === key
+                  ? { ...(item ?? {}), ...(data.contentItem ?? {}) }
+                  : item
+              )
+            };
+          })
+        }
+      };
+    }
     case ACTIONS.LOAD_USER_DATA: {
-      const { data } = action;
       return {
         ...state,
         profile: data
       };
     }
     case ACTIONS.LOAD_USER_AVATAR: {
-      const { data } = action;
       return {
         ...state,
         profile: {
@@ -53,7 +113,6 @@ const user = (state = INITIAL_STATE, action) => {
       };
     }
     case ACTIONS.UPDATE_USER_PROFILE: {
-      const { data } = action;
       return {
         ...state,
         profile: {
@@ -80,7 +139,6 @@ const user = (state = INITIAL_STATE, action) => {
       };
     }
     case ACTIONS.PIN_WALL_POST: {
-      const { data } = action;
       return {
         ...state,
         wall: {

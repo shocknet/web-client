@@ -4,8 +4,8 @@ import Tooltip from "react-tooltip";
 import { useDispatch } from "react-redux";
 import {
   updateWallPost,
-  getUserPost,
-  fetchUserProfile
+  getUserWallPostContent,
+  getUserWallPostInfo
 } from "../../actions/UserActions";
 import { listenPath, gunUser } from "../../utils/Gun";
 
@@ -64,21 +64,28 @@ const SharedPost = ({
     });
   }, [dispatch, sharedPostId, sharerPublicKey]);
 
-  const loadPost = useCallback(async () => {
-    setPostLoading(true);
-    if (!postPublicKey) return;
-    const [userProfile, userPost] = await Promise.all([
-      fetchUserProfile({ publicKey: postPublicKey, includeAvatar: true }),
-      getUserPost({
-        id: postID,
-        gunPointer: gunUser(postPublicKey)
-      })
-    ]);
-    setPostUser(userProfile);
+  const loadPostUser = useCallback(async () => {
+    const userInfo = await dispatch(
+      getUserWallPostInfo({ publicKey: postPublicKey, id: postID })
+    );
+    setPostUser(userInfo);
+  }, [dispatch, postID, postPublicKey]);
+
+  const loadPostContent = useCallback(async () => {
+    const userPost = await dispatch(
+      getUserWallPostContent({ publicKey: postPublicKey, id: postID })
+    );
     setPostContent(userPost);
     setPostLoading(false);
     attachMedia([userPost], false);
-  }, [postID, postPublicKey]);
+  }, [dispatch, postID, postPublicKey]);
+
+  const loadPost = useCallback(async () => {
+    setPostLoading(true);
+    if (!postPublicKey) return;
+    loadPostUser();
+    loadPostContent();
+  }, [loadPostContent, loadPostUser, postPublicKey]);
 
   useEffect(() => {
     Tooltip.rebuild();

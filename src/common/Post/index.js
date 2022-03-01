@@ -4,6 +4,7 @@ import React, {
   useState,
   useMemo,
   useLayoutEffect,
+  Fragment
 } from "react";
 import moment from "moment";
 import Tooltip from "react-tooltip";
@@ -19,6 +20,7 @@ import MediaCarousel from "./components/Media";
 import ShareBtn from "./components/ShareBtn";
 import "./css/index.css";
 import { getMediaMetadata, getPostDescription } from "../../utils/Post";
+import Loader from "../Loader";
 
 const STATIC_THUMBNAIL = `${window.location.origin}/link-static.jpg`;
 
@@ -29,19 +31,23 @@ const Post = ({
   tipCounter,
   tipValue,
   publicKey,
-  contentItems = {},
+  contentItems,
   username,
   isOnlineNode,
-  pinned,
+  pinned
 }) => {
   const dispatch = useDispatch();
+  const filteredContentItems = useMemo(() => {
+    console.log({ contentItems });
+    return contentItems?.filter(item => item) ?? [];
+  }, [contentItems]);
   const { observe } = useInView({
     trackVisibility: false,
     unobserveOnEnter: true,
     onEnter: () => {
-      const post = { contentItems, id };
+      const post = { contentItems: filteredContentItems, id };
       attachMedia([post], false);
-    },
+    }
   });
 
   const [liveStatus, setLiveStatus] = useState("");
@@ -49,26 +55,26 @@ const Post = ({
 
   const mediaContent = useMemo(
     () =>
-      Object.entries(contentItems).filter(
+      Object.entries(filteredContentItems).filter(
         ([_, item]) => item.type !== "text/paragraph"
       ),
-    [contentItems]
+    [filteredContentItems]
   );
 
   const mediaMetadata = useMemo(
-    () => getMediaMetadata(Object.values(contentItems)),
-    [contentItems]
+    () => getMediaMetadata(Object.values(filteredContentItems)),
+    [filteredContentItems]
   );
 
   const textContent = useMemo(
     () =>
-      Object.entries(contentItems).filter(
+      Object.entries(filteredContentItems).filter(
         ([_, item]) => item.type === "text/paragraph"
       ),
-    [contentItems]
+    [filteredContentItems]
   );
 
-  const getMediaType = useCallback((mediaItem) => {
+  const getMediaType = useCallback(mediaItem => {
     if (mediaItem.type === "stream") {
       return "video";
     }
@@ -84,7 +90,7 @@ const Post = ({
     dispatch(
       openModal({
         targetType: "tip",
-        ackInfo: id,
+        ackInfo: id
       })
     );
   }, [dispatch, id, isOnlineNode]);
@@ -92,10 +98,8 @@ const Post = ({
   useEffect(() => {
     fetchPath({
       path: `posts/${id}/tipsSet`,
-      gunPointer: gunUser(publicKey),
-      method: "once"
+      gunPointer: gunUser(publicKey)
     }).then(data => {
-      console.log({ tipData: data });
       const tipSet = data
         ? Object.values(data).filter(item => typeof item === "string")
         : [];
@@ -109,8 +113,8 @@ const Post = ({
           postID: id,
           data: {
             tipValue: tot,
-            tipCounter: lenSet,
-          },
+            tipCounter: lenSet
+          }
         })
       );
     });
@@ -118,12 +122,12 @@ const Post = ({
 
   //effect for liveStatus and viewers counter
   useEffect(() => {
-    const values = Object.values(contentItems);
+    const values = Object.values(filteredContentItems);
     const videoContent = values.find(
-      (item) => item.type === "video/embedded" && item.liveStatus === "wasLive"
+      item => item.type === "video/embedded" && item.liveStatus === "wasLive"
     );
     const streamContent = values.find(
-      (item) => item.type === "stream/embedded" && item.liveStatus === "live"
+      item => item.type === "stream/embedded" && item.liveStatus === "live"
     );
     let status = "";
     if (videoContent) {
@@ -138,7 +142,7 @@ const Post = ({
     if (status) {
       setLiveStatus(status);
     }
-  }, [contentItems, setLiveStatus]);
+  }, [filteredContentItems, setLiveStatus]);
 
   useEffect(() => {
     Tooltip.rebuild();
@@ -159,16 +163,16 @@ const Post = ({
           <meta
             property="og:description"
             content={getPostDescription({
-              contentItems: Object.values(contentItems),
-              username,
+              contentItems: Object.values(filteredContentItems),
+              username
             })}
           />
         </Helmet>
       )}
-      {mediaMetadata.map((item) => {
+      {mediaMetadata.map(item => {
         const type = getMediaType(item);
         return (
-          <React.Fragment key={item.id}>
+          <Fragment key={`${item.url}-${type}`}>
             <Helmet>
               <meta property={`og:${type}:width`} content="600" />
               <meta property={`og:${type}:height`} content="314" />
@@ -190,7 +194,7 @@ const Post = ({
                 />
               </Helmet>
             )}
-          </React.Fragment>
+          </Fragment>
         );
       })}
       <div className="head">
@@ -199,7 +203,7 @@ const Post = ({
             className="av"
             to={`/${publicKey}`}
             style={{
-              backgroundImage: `url(${avatar})`,
+              backgroundImage: `url(${avatar})`
             }}
           />
           <div className="details">
@@ -227,23 +231,27 @@ const Post = ({
           id={id}
           username={username}
           pinned={pinned}
-          contentItems={contentItems}
+          contentItems={filteredContentItems}
         />
       </div>
 
-      <div className="content" ref={observe}>
-        {textContent.map(([key, item]) => (
-          <p key={key}>{item.text}</p>
-        ))}
-        <MediaCarousel
-          contentItems={mediaContent}
-          id={id}
-          timestamp={timestamp}
-          avatar={avatar}
-          tipCounter={tipCounter}
-          tipValue={tipValue}
-        />
-      </div>
+      {filteredContentItems.length ? (
+        <div className="content" ref={observe}>
+          {textContent.map(([key, item]) => (
+            <p key={key}>{item.text}</p>
+          ))}
+          <MediaCarousel
+            contentItems={mediaContent}
+            id={id}
+            timestamp={timestamp}
+            avatar={avatar}
+            tipCounter={tipCounter}
+            tipValue={tipValue}
+          />
+        </div>
+      ) : (
+        <Loader text="Loading Post..." />
+      )}
 
       <div className="actions">
         <div
